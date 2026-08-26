@@ -1,0 +1,314 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-display: 'Chakra Petch', 'Barlow', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+    /* Safe-area insets, defaulted to 0 on devices without a notch. */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* Stop iOS rubber-band scrolling from revealing white behind the app. */
+    background-color: #04060d;
+  }
+
+  body {
+    @apply bg-ink-950 text-fg antialiased;
+    font-family: var(--font-sans);
+    /* Prevent the pull-to-refresh gesture from firing mid-round. */
+    overscroll-behavior-y: none;
+    position: relative;
+  }
+
+  /**
+   * Atmosphere. Two low-opacity radial glows break the flat black and give the
+   * canvas depth, so the glass planes above have something to float over.
+   * Fixed rather than scrolled — the light source stays put as content moves.
+   */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(60rem 40rem at 82% 12%, rgba(61, 155, 255, 0.1), transparent 62%),
+      radial-gradient(48rem 36rem at 12% 82%, rgba(0, 232, 150, 0.055), transparent 62%);
+  }
+
+  /* Tap targets should never flash a grey box on iOS. */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    background: rgba(61, 155, 255, 0.35);
+  }
+
+  /* Numbers that change constantly must not reflow as digits change width. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+
+  /* Focus rings: visible for keyboards, invisible for taps. */
+  :focus-visible {
+    outline: 2px solid theme('colors.accent.DEFAULT');
+    outline-offset: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(180, 210, 255, 0.14);
+    border-radius: 99px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(180, 210, 255, 0.26);
+    background-clip: padding-box;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /**
+   * The primary structural unit: a plane of glass.
+   *
+   * Three things together sell it — the backdrop blur, a 1px border light
+   * enough to catch the light, and a top-edge highlight simulating a light
+   * source above.
+   */
+  .panel {
+    @apply relative rounded-xl shadow-panel;
+    background: rgba(15, 20, 32, 0.65);
+    border: 1px solid rgba(180, 210, 255, 0.12);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  /* Light hitting the top edge of the pane. */
+  .panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.08), transparent 42%);
+  }
+
+  /* Elevated glass: sticky bars and anything sitting above a panel. */
+  .glass-elevated {
+    @apply shadow-elevated;
+    background: rgba(25, 30, 45, 0.75);
+    border: 1px solid rgba(180, 210, 255, 0.14);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+  }
+
+  /* Nested surfaces sit *inside* glass, so they are recessed, not raised. */
+  .panel-tight {
+    @apply relative rounded-md;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(180, 210, 255, 0.1);
+  }
+
+  /**
+   * `.hud` predates the glass system and is still applied across the app.
+   * Rather than touch every call site, it now reads as a faint corner light on
+   * the glass — the same intent (this plane matters) in the new language.
+   */
+  .hud::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      24rem 12rem at 100% 0%,
+      rgba(61, 155, 255, 0.12),
+      transparent 70%
+    );
+  }
+
+  .label {
+    @apply font-display text-technical-sm uppercase text-fg-faint;
+  }
+
+  .field {
+    @apply w-full rounded border px-4 py-3 text-base text-fg
+           placeholder:text-fg-faint
+           focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent;
+    /* Recessed, per the concept: inputs are cut into the glass. */
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(180, 210, 255, 0.12);
+    /* 16px minimum stops iOS Safari zooming the page on focus. */
+    font-size: 16px;
+  }
+
+  .btn {
+    @apply relative inline-flex items-center justify-center gap-2 rounded px-5 font-semibold
+           tracking-wide transition-all disabled:cursor-not-allowed disabled:opacity-45;
+    /* 44px floor — Apple HIG and Material both land here. */
+    min-height: 44px;
+  }
+
+  /* Primary is glass tinted with the accent rather than a flat fill. */
+  .btn-primary {
+    @apply btn text-white;
+    background: rgba(61, 155, 255, 0.9);
+    border: 1px solid rgba(163, 201, 255, 0.5);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: rgb(61, 155, 255);
+    box-shadow: 0 0 28px -6px rgba(61, 155, 255, 0.7);
+  }
+
+  .btn-secondary {
+    @apply btn text-fg;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(180, 210, 255, 0.14);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(180, 210, 255, 0.28);
+  }
+
+  .btn-ghost {
+    @apply btn text-fg-muted;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    @apply text-fg;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .btn-danger {
+    @apply btn text-no;
+    background: rgba(255, 61, 100, 0.1);
+    border: 1px solid rgba(255, 61, 100, 0.4);
+  }
+  .btn-danger:hover:not(:disabled) {
+    background: rgba(255, 61, 100, 0.2);
+  }
+
+  /* Respect the notch and the home indicator. */
+  .safe-top {
+    padding-top: max(var(--safe-top), 0px);
+  }
+  .safe-bottom {
+    padding-bottom: max(var(--safe-bottom), 0px);
+  }
+  .safe-x {
+    padding-left: max(var(--safe-left), 0px);
+    padding-right: max(var(--safe-right), 0px);
+  }
+
+  /* A precision grid, for chart backdrops and hero atmosphere. */
+  .grid-field {
+    background-image:
+      linear-gradient(rgba(180, 210, 255, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(180, 210, 255, 0.045) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  /* Radial bloom behind hero numbers and headlines. */
+  .bloom {
+    background: radial-gradient(
+      ellipse at center,
+      rgba(61, 155, 255, 0.18) 0%,
+      rgba(61, 155, 255, 0.05) 35%,
+      transparent 70%
+    );
+  }
+
+  /**
+   * Fine grain, ~2.5% opacity per the concept — enough to give glass a tactile
+   * surface, not enough to read as noise. Inline SVG so it costs no request.
+   */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Retained so existing call sites keep working; the glass carries the depth. */
+  .scanlines::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(180, 210, 255, 0.02),
+      rgba(180, 210, 255, 0.02) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Hide scrollbars on horizontally scrolling strips without losing scroll. */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Luminous text, for the handful of numbers that should look emitted. */
+  .glow-accent {
+    text-shadow: 0 0 24px rgba(61, 155, 255, 0.6);
+  }
+  .glow-yes {
+    text-shadow: 0 0 24px rgba(0, 232, 150, 0.55);
+  }
+  .glow-no {
+    text-shadow: 0 0 24px rgba(255, 61, 100, 0.55);
+  }
+}

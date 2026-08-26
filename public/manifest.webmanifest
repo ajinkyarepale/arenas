@@ -1,0 +1,44 @@
+{
+  "name": "Arenas — live prediction markets",
+  "short_name": "Arenas",
+  "description": "Trade live Yes/No prediction markets at your college FinTech event.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#05070a",
+  "theme_color": "#05070a",
+  "categories": ["education", "finance"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "My arenas",
+      "short_name": "Arenas",
+      "url": "/dashboard"
+    },
+    {
+      "name": "Upcoming markets",
+      "short_name": "Markets",
+      "url": "/markets"
+    }
+  ]
+}

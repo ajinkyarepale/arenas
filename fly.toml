@@ -1,0 +1,47 @@
+# Arenas — Fly.io configuration
+#
+# IMPORTANT: run exactly ONE machine. The round scheduler, the per-arena trade
+# mutex and the rate limiter all live in-process, so a second machine would run
+# a duplicate scheduler and split the rate limits. Scaling out would need a
+# database advisory lock per arena and Redis-backed limits.
+#
+#   fly scale count 1
+
+app = "arenas"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+# Applied on every deploy, before the new machine takes traffic.
+[deploy]
+  release_command = "npx prisma migrate deploy"
+  strategy = "immediate"
+
+[env]
+  PORT = "3000"
+  HOSTNAME = "0.0.0.0"
+  NODE_ENV = "production"
+  BINANCE_REST_BASE = "https://api.binance.com"
+  PRICE_POLL_INTERVAL_MS = "1000"
+  TWAP_SAMPLES = "6"
+  TWAP_INTERVAL_MS = "1000"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  # Never sleep: the scheduler has to keep advancing rounds even when nobody
+  # has the page open, or an arena would stall mid-event.
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "connections"
+    soft_limit = 200
+    hard_limit = 250
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+build
+.env
+.env.local
+*.log
+.DS_Store
+next-env.d.ts
+coverage
+.postgres
+tsconfig.tsbuildinfo
+
+# Local agent tooling state
+.claude/

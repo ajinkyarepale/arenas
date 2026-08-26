@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.gitignore
+.postgres
+.env
+.env.local
+*.log
+coverage
+out
+build
+tsconfig.tsbuildinfo
+next-env.d.ts
+docker-compose.yml
+README.md
+DEPLOY.md
+.DS_Store
