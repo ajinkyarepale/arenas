@@ -1,0 +1,443 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Arenas - Tournament Recap</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary": "#2f3131",
+                        "on-primary-fixed-variant": "#454747",
+                        "on-background": "#e5e2e1",
+                        "error-coral": "#EF4444",
+                        "on-tertiary": "#33302d",
+                        "tertiary-fixed-dim": "#cbc5c1",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#c6c5cf",
+                        "tertiary-container": "#e8e1dc",
+                        "on-secondary-fixed-variant": "#46464e",
+                        "surface-tint": "#c6c6c7",
+                        "primary-fixed": "#e2e2e2",
+                        "primary-fixed-dim": "#c6c6c7",
+                        "secondary-container": "#4a4b53",
+                        "on-error": "#690005",
+                        "border-neutral": "#27272A",
+                        "on-surface": "#e5e2e1",
+                        "primary-container": "#e2e2e2",
+                        "surface-container": "#201f1f",
+                        "outline": "#8e9192",
+                        "surface-container-high": "#2a2a2a",
+                        "on-secondary": "#2f3038",
+                        "on-secondary-fixed": "#1a1b22",
+                        "background": "#131313",
+                        "tertiary-fixed": "#e8e1dc",
+                        "error": "#ffb4ab",
+                        "on-surface-variant": "#c4c7c8",
+                        "surface-glass": "rgba(20, 20, 20, 0.7)",
+                        "inverse-on-surface": "#313030",
+                        "surface-container-highest": "#353534",
+                        "on-primary-container": "#636565",
+                        "tertiary": "#ffffff",
+                        "outline-variant": "#444748",
+                        "on-tertiary-fixed-variant": "#494643",
+                        "on-tertiary-fixed": "#1d1b18",
+                        "primary": "#ffffff",
+                        "success-neon": "#22C55E",
+                        "inverse-primary": "#5d5f5f",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-variant": "#353534",
+                        "error-container": "#93000a",
+                        "surface": "#131313",
+                        "surface-bright": "#3a3939",
+                        "secondary-fixed-dim": "#c6c5cf",
+                        "on-primary-fixed": "#1a1c1c",
+                        "on-secondary-container": "#bcbbc5",
+                        "surface-dim": "#131313",
+                        "surface-container-low": "#1c1b1b",
+                        "secondary-fixed": "#e3e1ec",
+                        "on-tertiary-container": "#686460",
+                        "inverse-surface": "#e5e2e1"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "container-max": "1280px",
+                        "stack-md": "16px",
+                        "margin-mobile": "20px",
+                        "base": "4px",
+                        "stack-lg": "32px",
+                        "gutter": "24px",
+                        "stack-sm": "8px",
+                        "margin-desktop": "48px"
+                    },
+                    fontFamily: {
+                        "body-sm": ["Geist", "sans-serif"],
+                        "headline-md": ["Geist", "sans-serif"],
+                        "label-caps": ["Epilogue", "sans-serif"],
+                        "data-mono-sm": ["Epilogue", "monospace"],
+                        "body-lg": ["Geist", "sans-serif"],
+                        "headline-lg": ["Geist", "sans-serif"],
+                        "nav-item": ["Epilogue", "sans-serif"],
+                        "data-mono-lg": ["Epilogue", "monospace"]
+                    },
+                    fontSize: {
+                        "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "500" }],
+                        "label-caps": ["11px", { lineHeight: "16px", letterSpacing: "0.08em", fontWeight: "700" }],
+                        "data-mono-sm": ["13px", { lineHeight: "18px", letterSpacing: "0.05em", fontWeight: "500" }],
+                        "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "headline-lg": ["40px", { lineHeight: "48px", letterSpacing: "-0.03em", fontWeight: "600" }],
+                        "nav-item": ["14px", { lineHeight: "20px", fontWeight: "500" }],
+                        "data-mono-lg": ["18px", { lineHeight: "24px", letterSpacing: "0.02em", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Base styles */
+        body {
+            background-color: #131313;
+            color: #e5e2e1;
+            font-family: 'Geist', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Glassmorphism utilities */
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid #27272A;
+        }
+        
+        .glass-card {
+            background: rgba(20, 20, 20, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid #27272A;
+            transition: all 0.2s ease;
+        }
+        
+        .glass-card:hover {
+            border-color: #3F3F46;
+            background: rgba(30, 30, 30, 0.6);
+        }
+
+        /* Ambient Glow */
+        .ambient-glow {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, rgba(19,19,19,0) 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="flex bg-background min-h-screen text-on-surface overflow-x-hidden selection:bg-primary-container selection:text-on-primary">
+<!-- Shared Component: SideNavBar -->
+<nav class="h-screen w-64 fixed left-0 top-0 border-r border-border-neutral backdrop-blur-xl bg-surface-glass flex flex-col h-full py-gutter px-stack-md z-40 hidden md:flex">
+<!-- Header -->
+<div class="mb-stack-lg pl-2">
+<h1 class="font-headline-md text-headline-md font-bold text-primary mb-1">Arenas</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Campus Prediction Market</p>
+</div>
+<!-- Main Tabs -->
+<div class="flex-1 flex flex-col gap-base mt-4">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">show_chart</span>
+<span>Markets</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">sensors</span>
+<span>Live</span>
+</a>
+<!-- Active State Logic Applied to Leaderboard -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-primary font-bold border-r-2 border-primary bg-surface-container transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">leaderboard</span>
+<span>Leaderboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span>Guide</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">info</span>
+<span>About</span>
+</a>
+</div>
+<!-- Footer Tabs -->
+<div class="flex flex-col gap-base mt-auto pt-4 border-t border-border-neutral">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span>Profile</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<div class="flex-1 ml-0 md:ml-64 flex flex-col min-h-screen relative">
+<div class="ambient-glow"></div>
+<!-- Shared Component: TopNavBar -->
+<header class="docked full-width top-0 sticky border-b border-border-neutral backdrop-blur-xl bg-surface-glass flex justify-between items-center h-16 px-gutter z-30">
+<!-- Mobile Brand (Hidden on Desktop) -->
+<div class="md:hidden">
+<h1 class="font-headline-md text-headline-md font-black text-primary">Arenas</h1>
+</div>
+<div class="hidden md:block">
+<!-- Breadcrumb or Context -->
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Season 1 Finale</span>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-4">
+<div class="relative scale-95 active:scale-90 transition-transform cursor-pointer text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 rounded-full bg-primary"></span>
+</div>
+<div class="scale-95 active:scale-90 transition-transform cursor-pointer text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+</div>
+</header>
+<!-- Main Scrolling Content -->
+<main class="flex-1 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg md:py-margin-desktop">
+<!-- Page Header -->
+<div class="mb-16 text-center max-w-2xl mx-auto">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-[0.2em] mb-4">Official Results</h2>
+<h1 class="font-headline-lg text-headline-lg text-primary mb-6">Inaugural Tournament Wrap-Up</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">The dust has settled. After 14 days of intense forecasting, market making, and volatile swings, the final hierarchy is established.</p>
+</div>
+<!-- Editorial Layout: Podium & Personal Summary -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-24">
+<!-- Winners Podium (Left 8 cols) -->
+<div class="lg:col-span-8 flex flex-col justify-end">
+<h3 class="font-headline-md text-headline-md text-primary mb-8 px-4">Top Forecasters</h3>
+<div class="grid grid-cols-3 gap-base md:gap-4 items-end h-[300px]">
+<!-- 2nd Place -->
+<div class="glass-card rounded-xl p-4 flex flex-col items-center justify-end h-[70%] relative group">
+<div class="absolute -top-12 opacity-50 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant">military_tech</span>
+</div>
+<div class="w-12 h-12 rounded-full border border-border-neutral mb-3 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A sophisticated black and white portrait of a young male financial analyst, minimalist studio lighting, high contrast, solid dark background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGUJY10dwVXKyjwl-fv9nDtVUS3CQXBK9fBxN0kMx4VvrvyD1tYIfdV9-NtkLsmcSMy6ih4sa1NOn4bi9OGCRCFpgrcmC7p5j9RZ4srAslXOkiLjfPntBMrXUNYS4eUssjJym7PTJ2TPu7UXrEAUMY2Z5WAjRW3HwXj4BAdEORr4LfCIPb61A-kRS2claFBKhYAW4vCSLpynQsO0TiCZOoILTYb6whIc86HGsIOuxKf4AKoAJKlKBUfg">
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-1">Silver</span>
+<span class="font-nav-item text-nav-item text-primary whitespace-nowrap mb-2">Marcus V.</span>
+<span class="font-data-mono-lg text-data-mono-lg text-primary">+980</span>
+</div>
+<!-- 1st Place -->
+<div class="glass-card rounded-t-2xl rounded-b-xl p-4 flex flex-col items-center justify-end h-[100%] border-t-primary/30 relative group shadow-[0_0_40px_rgba(255,255,255,0.05)]">
+<div class="absolute -top-16">
+<span class="material-symbols-outlined text-5xl text-primary drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+<div class="w-16 h-16 rounded-full border-2 border-primary mb-4 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A sophisticated high-contrast portrait of a young female tech executive, intense gaze, futuristic rim lighting, solid dark background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC46aJ3NiujasZzcM72H87i_SSrkRdowZ-xq89I1B1MUx82LPU7ICMiqyuWFg5qR0SkpsW3kDy6dWH7xp08wrhYGTCzyeCrgDzRPE5X9mNuRzKoAohXuEPhg7fTVT-bN-DYrc2IZNL4Qp6MCi-uWNoJGW7A5WJqHj02TijYmMNW9_A6-IVGJsfy7u04dkw_knFqo3ZLN58lO5uuvAAhIPLzn0xam61qrRFB4kav5KQn5oAkCwq6O77b4A">
+</div>
+<span class="font-label-caps text-label-caps text-primary uppercase mb-1 tracking-widest">Champion</span>
+<span class="font-headline-md text-headline-md text-primary mb-2">Ada Chen</span>
+<span class="font-data-mono-lg text-data-mono-lg text-primary text-xl">+1,450</span>
+</div>
+<!-- 3rd Place -->
+<div class="glass-card rounded-xl p-4 flex flex-col items-center justify-end h-[60%] relative group">
+<div class="absolute -top-12 opacity-30 group-hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant">military_tech</span>
+</div>
+<div class="w-10 h-10 rounded-full border border-border-neutral mb-3 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A moody, low-key portrait of a young female data scientist, subtle backlighting, minimalist aesthetic, solid dark background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPKLN7mRjQyIqvlPUpXxM2BNOaWrr4WzEnpjFUhYKErAPuHKYcHXmaxhRnSXH_O37YMoHKKJ7S3fnR9dNoVGqxSqZIzr3mxi0YHu3YPi2EX70Ydc0SVlDUvYIeo6eRFnPkSZaEfIosjBQa9DxDX1FYXnkB6875VtxQVIlkY2UvW4xcOddfLi1ZyfUa_s4w-H3KthkL4xlaXJEmNzVx_QLtkeLU_On4SfGWBAspPCwm28xfvpnDlJVUew">
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-1">Bronze</span>
+<span class="font-nav-item text-nav-item text-primary whitespace-nowrap mb-2">Elena R.</span>
+<span class="font-data-mono-sm text-data-mono-sm text-primary">+720</span>
+</div>
+</div>
+</div>
+<!-- Personal Summary Card (Right 4 cols) -->
+<div class="lg:col-span-4 flex flex-col">
+<h3 class="font-headline-md text-headline-md text-primary mb-8 px-4 opacity-0 lg:opacity-100">Your Stats</h3>
+<div class="glass-panel rounded-2xl p-stack-lg flex-1 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-6">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Final Placement</span>
+<span class="px-2 py-1 bg-surface-container-high rounded-full font-label-caps text-label-caps text-primary border border-border-neutral">Top 10%</span>
+</div>
+<div class="flex items-baseline gap-2 mb-10">
+<span class="font-headline-lg text-headline-lg text-primary">4th</span>
+<span class="font-body-lg text-body-lg text-on-surface-variant">Place</span>
+</div>
+</div>
+<div class="space-y-6">
+<div class="flex justify-between items-end border-b border-border-neutral pb-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Net Return</span>
+<span class="font-data-mono-lg text-data-mono-lg text-success-neon">+480 pts</span>
+</div>
+<div class="flex justify-between items-end border-b border-border-neutral pb-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Trade Accuracy</span>
+<span class="font-data-mono-lg text-data-mono-lg text-primary">75.0%</span>
+</div>
+<div class="flex justify-between items-end border-b border-border-neutral pb-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Markets Resolved</span>
+<span class="font-data-mono-lg text-data-mono-lg text-primary">42</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Full Standings Table -->
+<div class="mb-24">
+<div class="flex items-center justify-between mb-8">
+<h3 class="font-headline-md text-headline-md text-primary">Final Standings</h3>
+<button class="px-4 py-2 rounded-full border border-border-neutral font-label-caps text-label-caps text-primary hover:bg-surface-container-high transition-colors">Export CSV</button>
+</div>
+<div class="glass-panel rounded-xl overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[800px]">
+<thead>
+<tr class="border-b border-border-neutral">
+<th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase w-16">Rank</th>
+<th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase">Trader</th>
+<th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase text-right">Total Trades</th>
+<th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase text-right">Win Rate</th>
+<th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase text-right">Final Balance</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm">
+<tr class="border-b border-border-neutral hover:bg-surface-container-high/50 transition-colors">
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-on-surface-variant">01</td>
+<td class="py-4 px-6 font-nav-item text-nav-item text-primary flex items-center gap-3">
+<div class="w-6 h-6 rounded-full bg-surface-bright overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Minimalist abstract avatar image, subtle geometric patterns, dark monochrome." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCptJWFiS2Kd3-0AD5ZD2rk2GSeg1Db5E-r04wMO6gZyQAqiX12qUhDlMy-NggNNN--dvVYHsJrcbO4PInKxD461YrwWpWCKC4ATmPE1sicg--EdtZeZhxUvftq8rup2dBUyG5k3uOGRFVmttoaTyBekWK1mvHyS5dSAOkCu3dKmw7DPnChWfc8Cs3gtZzQydPN8y5GFhRZ8XDKYSzEjMOMu9Zts1KtzRZaejVr7tTP2OoNUTM4ugrbJw">
+</div>
+                                    Ada Chen
+                                </td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-on-surface-variant">142</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-success-neon">82.4%</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-primary font-bold">+1,450</td>
+</tr>
+<tr class="border-b border-border-neutral hover:bg-surface-container-high/50 transition-colors">
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-on-surface-variant">02</td>
+<td class="py-4 px-6 font-nav-item text-nav-item text-primary flex items-center gap-3">
+<div class="w-6 h-6 rounded-full bg-surface-bright overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Minimalist abstract avatar image, subtle geometric patterns, dark monochrome." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaJSFKpfDCA0k8SS3jgT8QFuFuLSnQLEhot1fR7YkP-454JGOJi8jqrSPIW8de4KkfiZxF1qMBTicFUop0YTFYLSERqkWulFnL0j1YImn1M5lAY9h2ywTCAZRIgfaBpcxetvyyy2YCcN902EWsndXJeluugpR0l-39CKSgPA7P2btxjqssPYCSeor64fPFbAoL_pAjldL5DwmO5Wl_O8SQjHMj697GkRE9Z5bPfHevivu0QPVsPnNFaw">
+</div>
+                                    Marcus Vance
+                                </td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-on-surface-variant">98</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-success-neon">78.1%</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-primary font-bold">+980</td>
+</tr>
+<tr class="border-b border-border-neutral hover:bg-surface-container-high/50 transition-colors">
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-on-surface-variant">03</td>
+<td class="py-4 px-6 font-nav-item text-nav-item text-primary flex items-center gap-3">
+<div class="w-6 h-6 rounded-full bg-surface-bright overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Minimalist abstract avatar image, subtle geometric patterns, dark monochrome." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPiluFS4Q40_OQ5PoS4EP8cMT6y7_LrMEV8Awa0VA80HHOkfqCramWZ4NB39WxnpJ_LLpUfizx5bjr-6nJxTb6nimdL06d2xLzkefad3zdIGu3QbZXFLRhSxabKQmRl8X-RI1KyZmHsckxVnWoODyubhIwShWV6SP9YxMqrFaOHDutAiKawZ5jFi0mlQc6FbOibTDZ01xXXYkWnSCDPApJ9UzSRihC29HDfYYnjQANt3svfG2ySVthJA">
+</div>
+                                    Elena Rostova
+                                </td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-on-surface-variant">215</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-primary">64.5%</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-primary font-bold">+720</td>
+</tr>
+<tr class="border-b border-border-neutral bg-surface-container-highest/20 hover:bg-surface-container-highest/40 transition-colors">
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-primary font-bold">04</td>
+<td class="py-4 px-6 font-nav-item text-nav-item text-primary flex items-center gap-3">
+<div class="w-6 h-6 rounded-full border border-primary flex items-center justify-center text-[10px]">You</div>
+<span class="opacity-50">Anonymous_4X</span>
+</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-on-surface-variant">42</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-success-neon">75.0%</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-primary font-bold">+480</td>
+</tr>
+<tr class="border-b border-border-neutral hover:bg-surface-container-high/50 transition-colors opacity-60">
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-on-surface-variant">05</td>
+<td class="py-4 px-6 font-nav-item text-nav-item text-primary">J. Doe</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-on-surface-variant">112</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-primary">59.2%</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-primary">+410</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Round-by-Round History -->
+<div>
+<h3 class="font-headline-md text-headline-md text-primary mb-8">Your Resolution History</h3>
+<div class="glass-panel rounded-xl overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[800px]">
+<thead>
+<tr class="border-b border-border-neutral">
+<th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase w-24">Round</th>
+<th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase">Market Subject</th>
+<th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase text-right">Strike Price</th>
+<th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase text-right">Close Price</th>
+<th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase text-center w-32">Outcome</th>
+<th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase text-right">Total Vol.</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm">
+<tr class="border-b border-border-neutral hover:bg-surface-container-high/50 transition-colors">
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-on-surface-variant">R-14</td>
+<td class="py-4 px-6 text-primary">Will CS101 final average exceed 82%?</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-on-surface-variant">0.45</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-primary">1.00</td>
+<td class="py-4 px-6 text-center">
+<span class="inline-block px-3 py-1 rounded-full bg-success-neon/10 border border-success-neon/30 text-success-neon font-label-caps text-[10px]">YES</span>
+</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-on-surface-variant">12.4k</td>
+</tr>
+<tr class="border-b border-border-neutral hover:bg-surface-container-high/50 transition-colors">
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-on-surface-variant">R-13</td>
+<td class="py-4 px-6 text-primary">Cafeteria menu features pizza on Friday?</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-on-surface-variant">0.82</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-primary">0.00</td>
+<td class="py-4 px-6 text-center">
+<span class="inline-block px-3 py-1 rounded-full bg-error-coral/10 border border-error-coral/30 text-error-coral font-label-caps text-[10px]">NO</span>
+</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-on-surface-variant">8.9k</td>
+</tr>
+<tr class="border-b border-border-neutral hover:bg-surface-container-high/50 transition-colors">
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-on-surface-variant">R-12</td>
+<td class="py-4 px-6 text-primary">Library study room booking full by 10 AM?</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-on-surface-variant">0.60</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-primary">1.00</td>
+<td class="py-4 px-6 text-center">
+<span class="inline-block px-3 py-1 rounded-full bg-success-neon/10 border border-success-neon/30 text-success-neon font-label-caps text-[10px]">YES</span>
+</td>
+<td class="py-4 px-6 font-data-mono-sm text-data-mono-sm text-right text-on-surface-variant">15.2k</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+<!-- Shared Component: Footer -->
+<footer class="w-full mt-auto border-t border-border-neutral flex justify-between items-center py-stack-lg px-gutter bg-surface z-30">
+<div class="font-label-caps text-label-caps text-on-surface-variant">
+                © 2024 Arenas Markets. All rights reserved.
+            </div>
+<div class="flex gap-6">
+<a class="font-body-sm text-body-sm text-on-surface-variant opacity-80 hover:opacity-100 hover:text-primary underline transition-all" href="#">Legal</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant opacity-80 hover:opacity-100 hover:text-primary underline transition-all" href="#">Privacy</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant opacity-80 hover:opacity-100 hover:text-primary underline transition-all" href="#">Terms</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant opacity-80 hover:opacity-100 hover:text-primary underline transition-all" href="#">Docs</a>
+</div>
+</footer>
+</div>
+</body></html>

@@ -1,20 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
-import { ErrorNote, Panel, Spinner } from '@/components/ui';
-import { quoteByBudget, maxSubsidy } from '@/lib/lmsr';
-import { cx, formatProbability } from '@/lib/format';
-
-/**
- * Arena setup.
- *
- * The liquidity parameter is the one setting organizers have no intuition for,
- * so instead of explaining it we show it: the preview says what a 50-point trade
- * would do to the price at the chosen `b`. That is the number that decides
- * whether the big screen is exciting or inert.
- */
+import { ErrorNote, Spinner } from '@/components/ui';
 
 interface FormState {
   name: string;
@@ -28,7 +17,6 @@ interface FormState {
   liquidityParamB: number;
   maxStakePerTrade: number;
   code: string;
-  scheduledFor: string;
 }
 
 const DEFAULTS: FormState = {
@@ -43,46 +31,21 @@ const DEFAULTS: FormState = {
   liquidityParamB: 40,
   maxStakePerTrade: 250,
   code: '',
-  scheduledFor: '',
 };
-
-const ROUND_PRESETS = [
-  { label: '1 min', seconds: 60 },
-  { label: '3 min', seconds: 180 },
-  { label: '5 min', seconds: 300 },
-  { label: '15 min', seconds: 900 },
-];
 
 export function CreateArenaForm() {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(DEFAULTS);
   const [error, setError] = useState<string | null>(null);
-  const [fields, setFields] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
 
-  // What a 50-point trade does to a fresh book at this liquidity.
-  const impact = useMemo(() => {
-    try {
-      const quote = quoteByBudget({ qYes: 0, qNo: 0 }, 'YES', 50, form.liquidityParamB);
-      return {
-        from: quote.priceBefore,
-        to: quote.priceAfter,
-        delta: quote.priceAfter - quote.priceBefore,
-        subsidy: maxSubsidy(form.liquidityParamB),
-      };
-    } catch {
-      return null;
-    }
-  }, [form.liquidityParamB]);
-
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     setPending(true);
     setError(null);
-    setFields({});
 
     try {
       const res = await fetch('/api/admin/arenas', {
@@ -93,282 +56,144 @@ export function CreateArenaForm() {
           description: form.description || undefined,
           hostName: form.hostName || undefined,
           code: form.code ? form.code.toUpperCase() : undefined,
-          scheduledFor: form.scheduledFor
-            ? new Date(form.scheduledFor).toISOString()
-            : undefined,
         }),
       });
-      const body = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setError(body.error ?? 'Could not create that arena.');
-        setFields(body.fields ?? {});
-        return;
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? 'Could not create arena');
       }
 
-      router.push(`/admin/arenas/${body.arena.id}`);
+      const data: { arena: { id: string; code: string } } = await res.json();
+      router.push(`/admin`);
       router.refresh();
-    } catch {
-      setError('Network problem — please try again.');
-    } finally {
+    } catch (err: unknown) {
       setPending(false);
+      setError(err instanceof Error ? err.message : 'Could not create arena');
     }
   };
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-5">
-      <Panel className="flex flex-col gap-4 p-5">
-        <h2 className="text-sm font-semibold">The event</h2>
+    <form onSubmit={submit} className="flex flex-col gap-6 font-['Geist'] text-xs">
+      <div>
+        <h1 className="font-['Geist'] text-3xl font-bold text-white mb-1">Create an Arena</h1>
+        <p className="font-['Geist'] text-sm text-[#c4c7c8]">
+          Configure tournament settings, asset pair, and liquidity parameters.
+        </p>
+      </div>
 
-        <Field label="Arena name" error={fields.name}>
+      <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl flex flex-col gap-5">
+        <div>
+          <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-1">
+            Arena Name *
+          </label>
           <input
+            type="text"
             required
             value={form.name}
             onChange={(e) => set('name', e.target.value)}
-            className="field"
-            placeholder="FinTech Society Trading Night"
+            placeholder="e.g. Fall '24 Tech Symposium Predictions"
+            className="w-full bg-[#201f1f] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Geist'] text-sm focus:border-white focus:outline-none transition-colors placeholder-[#8e9192]"
           />
-        </Field>
+        </div>
 
-        <Field label="Host" hint="Shown on the public calendar and the big screen.">
-          <input
-            value={form.hostName}
-            onChange={(e) => set('hostName', e.target.value)}
-            className="field"
-            placeholder="Your college or club"
-          />
-        </Field>
-
-        <Field label="Description" hint="Optional. One or two lines.">
+        <div>
+          <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-1">
+            Description
+          </label>
           <textarea
+            rows={3}
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
-            className="field min-h-[80px] resize-y"
-            maxLength={400}
-            placeholder="Open to all years. Prizes for the top three."
+            placeholder="Brief overview for participants..."
+            className="w-full bg-[#201f1f] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Geist'] text-sm focus:border-white focus:outline-none transition-colors placeholder-[#8e9192]"
           />
-        </Field>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Scheduled start" hint="Optional — you still start it manually.">
-            <input
-              type="datetime-local"
-              value={form.scheduledFor}
-              onChange={(e) => set('scheduledFor', e.target.value)}
-              className="field"
-            />
-          </Field>
-
-          <Field
-            label="Join code"
-            hint="Leave blank and we generate an unambiguous one."
-            error={fields.code}
-          >
-            <input
-              value={form.code}
-              onChange={(e) => set('code', e.target.value.toUpperCase())}
-              className="field font-mono tracking-widest"
-              maxLength={12}
-              placeholder="Auto"
-            />
-          </Field>
         </div>
-      </Panel>
 
-      <Panel className="flex flex-col gap-4 p-5">
-        <h2 className="text-sm font-semibold">Format</h2>
-
-        <Field
-          label="Asset"
-          hint="Any Binance spot symbol. Checked when you create the arena."
-          error={fields.asset}
-        >
-          <input
-            required
-            value={form.asset}
-            onChange={(e) => set('asset', e.target.value.toUpperCase())}
-            className="field font-mono"
-            placeholder="BTCUSDT"
-          />
-        </Field>
-
-        <Field label="Round length" error={fields.roundDurationSec}>
-          <div className="flex flex-wrap gap-2">
-            {ROUND_PRESETS.map((preset) => (
-              <button
-                key={preset.seconds}
-                type="button"
-                onClick={() => set('roundDurationSec', preset.seconds)}
-                className={cx(
-                  'btn !min-h-[40px] border px-4 text-sm',
-                  form.roundDurationSec === preset.seconds
-                    ? 'border-accent bg-accent/15 text-accent'
-                    : 'border-line-strong bg-ink-800 text-fg-muted',
-                )}
-              >
-                {preset.label}
-              </button>
-            ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-1">
+              Host / Club Name
+            </label>
             <input
-              type="number"
-              min={60}
-              max={3600}
-              value={form.roundDurationSec}
-              onChange={(e) => set('roundDurationSec', Number(e.target.value))}
-              className="field tnum w-28"
-              aria-label="Round length in seconds"
+              type="text"
+              value={form.hostName}
+              onChange={(e) => set('hostName', e.target.value)}
+              placeholder="e.g. Quant Club"
+              className="w-full bg-[#201f1f] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Geist'] text-sm focus:border-white focus:outline-none transition-colors placeholder-[#8e9192]"
             />
           </div>
-        </Field>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            label="Lock buffer (seconds)"
-            hint="Trading stops this long before the close, so the closing price cannot be traded against."
-            error={fields.lockBufferSec}
-          >
+          <div>
+            <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-1">
+              Custom Access Code (Optional)
+            </label>
             <input
-              type="number"
-              min={5}
-              max={600}
-              required
-              value={form.lockBufferSec}
-              onChange={(e) => set('lockBufferSec', Number(e.target.value))}
-              className="field tnum"
+              type="text"
+              value={form.code}
+              onChange={(e) => set('code', e.target.value.toUpperCase())}
+              placeholder="e.g. DEMO24"
+              className="w-full bg-[#201f1f] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Epilogue'] text-sm font-bold uppercase tracking-widest focus:border-white focus:outline-none transition-colors placeholder-[#8e9192]"
             />
-          </Field>
+          </div>
+        </div>
 
-          <Field label="Total rounds" error={fields.totalRounds}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-1">
+              Target Asset
+            </label>
+            <select
+              value={form.asset}
+              onChange={(e) => set('asset', e.target.value)}
+              className="w-full bg-[#201f1f] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Epilogue'] text-xs font-bold focus:border-white focus:outline-none transition-colors"
+            >
+              <option value="BTCUSDT">BTC/USDT</option>
+              <option value="ETHUSDT">ETH/USDT</option>
+              <option value="SOLUSDT">SOL/USDT</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-1">
+              Total Rounds
+            </label>
             <input
               type="number"
               min={1}
               max={100}
-              required
               value={form.totalRounds}
               onChange={(e) => set('totalRounds', Number(e.target.value))}
-              className="field tnum"
+              className="w-full bg-[#201f1f] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Epilogue'] text-xs font-bold focus:border-white focus:outline-none transition-colors"
             />
-          </Field>
-        </div>
+          </div>
 
-        <p className="text-xs text-fg-faint">
-          Estimated event length:{' '}
-          <span className="tnum font-semibold text-fg-muted">
-            {Math.round((form.roundDurationSec * form.totalRounds) / 60)} minutes
-          </span>{' '}
-          of continuous play.
-        </p>
-      </Panel>
-
-      <Panel className="flex flex-col gap-4 p-5">
-        <h2 className="text-sm font-semibold">Points and pricing</h2>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Starting balance" error={fields.startingBalance}>
+          <div>
+            <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-1">
+              Starting Points
+            </label>
             <input
               type="number"
-              min={1}
-              required
+              min={100}
+              max={100000}
               value={form.startingBalance}
               onChange={(e) => set('startingBalance', Number(e.target.value))}
-              className="field tnum"
+              className="w-full bg-[#201f1f] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Epilogue'] text-xs font-bold focus:border-white focus:outline-none transition-colors"
             />
-          </Field>
-
-          <Field
-            label="Max stake per trade"
-            hint="Stops one person moving the whole book in a single tap."
-            error={fields.maxStakePerTrade}
-          >
-            <input
-              type="number"
-              min={1}
-              required
-              value={form.maxStakePerTrade}
-              onChange={(e) => set('maxStakePerTrade', Number(e.target.value))}
-              className="field tnum"
-            />
-          </Field>
+          </div>
         </div>
 
-        <Field
-          label={`Liquidity parameter b = ${form.liquidityParamB}`}
-          error={fields.liquidityParamB}
-        >
-          <input
-            type="range"
-            min={10}
-            max={200}
-            step={5}
-            value={form.liquidityParamB}
-            onChange={(e) => set('liquidityParamB', Number(e.target.value))}
-            className="h-11 w-full accent-accent"
-          />
-        </Field>
+        <ErrorNote>{error}</ErrorNote>
 
-        {impact ? (
-          <div className="rounded border border-line bg-ink-900 p-4">
-            <p className="text-sm text-fg-muted">
-              At <span className="tnum font-semibold text-fg">b = {form.liquidityParamB}</span>,
-              a 50-point YES trade on a fresh market moves the price from{' '}
-              <span className="tnum font-semibold text-fg">
-                {formatProbability(impact.from)}
-              </span>{' '}
-              to{' '}
-              <span className="tnum font-semibold text-yes">
-                {formatProbability(impact.to)}
-              </span>
-              .
-            </p>
-            <p className="mt-2 text-xs text-fg-faint">
-              {impact.delta > 0.18
-                ? 'Very reactive — great for a room watching a projector, but the price will swing hard.'
-                : impact.delta > 0.07
-                  ? 'A good live-event setting: trades visibly move the market without whipsawing it.'
-                  : 'Deep and stable — the price will barely move, which reads as boring on a big screen.'}{' '}
-              The house subsidises at most{' '}
-              <span className="tnum">{impact.subsidy.toFixed(0)} points</span> per round.
-            </p>
-          </div>
-        ) : null}
-      </Panel>
-
-      <ErrorNote>{error}</ErrorNote>
-
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <button type="submit" disabled={pending} className="btn-primary flex-1">
-          {pending ? <Spinner /> : null}
-          {pending ? 'Creating…' : 'Create arena'}
-        </button>
         <button
-          type="button"
-          onClick={() => router.back()}
-          className="btn-secondary sm:w-40"
+          type="submit"
+          disabled={pending}
+          className="mt-4 w-full bg-white text-[#2f3131] rounded-full py-3.5 font-['Epilogue'] text-sm font-bold hover:bg-[#c6c6c7] transition-all flex items-center justify-center gap-2 shadow-lg"
         >
-          Cancel
+          {pending ? <Spinner className="border-[#2f3131] border-t-transparent" /> : null}
+          <span>{pending ? 'Creating Arena…' : 'Create & Launch Arena'}</span>
         </button>
       </div>
     </form>
-  );
-}
-
-function Field({
-  label,
-  hint,
-  error,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="label">{label}</span>
-      {children}
-      {hint ? <span className="text-xs text-fg-faint">{hint}</span> : null}
-      {error ? <span className="text-xs text-no">{error}</span> : null}
-    </label>
   );
 }

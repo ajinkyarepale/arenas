@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
-import { EmptyState, Panel, StatusPill } from '@/components/ui';
-import { cx, formatDateTime, formatDuration, formatPoints, formatRelative } from '@/lib/format';
+import { formatDuration, formatPoints } from '@/lib/format';
 
 export interface DirectoryArena {
   id: string;
@@ -34,12 +33,7 @@ const FILTERS: Array<{ value: Filter; label: string }> = [
   { value: 'ENDED', label: 'Finished' },
 ];
 
-/**
- * The public arena directory. Browsing needs no account and no code — the code
- * is only the door into a specific room, and hiding the calendar behind it would
- * make the platform look empty to anyone considering running an event.
- */
-export function ArenaDirectory({ showJoinActions = false }: { showJoinActions?: boolean }) {
+export function ArenaDirectory({ showJoinActions }: { showJoinActions?: boolean } = {}) {
   const [arenas, setArenas] = useState<DirectoryArena[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -63,8 +57,6 @@ export function ArenaDirectory({ showJoinActions = false }: { showJoinActions?: 
     };
 
     void load();
-    // Live arenas change state during an event; a slow refresh keeps the list
-    // honest without polling hard.
     const timer = setInterval(() => {
       if (document.visibilityState === 'visible') void load();
     }, 20_000);
@@ -91,167 +83,148 @@ export function ArenaDirectory({ showJoinActions = false }: { showJoinActions?: 
   }, [arenas, query, filter]);
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <label className="relative flex-1">
-          <span className="sr-only">Search markets</span>
+    <div className="flex flex-col gap-6 w-full font-['Geist']">
+      {/* Search & Filters Controls */}
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+        {/* Search Bar */}
+        <div className="relative w-full md:max-w-md">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c4c7c8] text-sm">
+            search
+          </span>
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search by event, college, or asset"
-            className="field"
+            className="w-full bg-[#201f1f] border border-[#27272A] rounded-lg py-2 pl-10 pr-4 font-['Geist'] text-sm text-[#e5e2e1] placeholder-[#c4c7c8]/50 focus:outline-none focus:border-white transition-colors"
+            placeholder="Search by title, host, asset, code..."
+            type="text"
           />
-        </label>
+        </div>
 
-        <div className="no-scrollbar flex gap-1 overflow-x-auto rounded border border-line bg-ink-900 p-1">
-          {FILTERS.map((option) => (
+        {/* Filter Tabs */}
+        <div className="flex items-center gap-2 p-1 bg-[#201f1f] border border-[#27272A] rounded-lg overflow-x-auto w-full md:w-auto">
+          {FILTERS.map((tab) => (
             <button
-              key={option.value}
-              type="button"
-              onClick={() => setFilter(option.value)}
-              className={cx(
-                'btn !min-h-[38px] shrink-0 px-3 text-sm',
-                filter === option.value
-                  ? 'bg-ink-750 text-fg'
-                  : 'text-fg-muted hover:text-fg',
-              )}
+              key={tab.value}
+              onClick={() => setFilter(tab.value)}
+              className={`px-4 py-1.5 rounded font-['Epilogue'] text-xs whitespace-nowrap transition-colors ${
+                filter === tab.value
+                  ? 'bg-[#3a3939] text-white font-medium'
+                  : 'text-[#c4c7c8] hover:text-white'
+              }`}
             >
-              {option.label}
+              {tab.label}
             </button>
           ))}
         </div>
       </div>
 
       {error ? (
-        <Panel className="p-6 text-sm text-no">{error}</Panel>
-      ) : visible === null ? (
-        <div className="flex flex-col gap-3">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-32 animate-pulse rounded-md bg-ink-850" />
+        <div className="p-4 rounded-xl border border-red-500/30 bg-red-950/20 text-red-400 text-sm">
+          {error}
+        </div>
+      ) : null}
+
+      {/* Arena Card Grid */}
+      {visible === null ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((n) => (
+            <div
+              key={n}
+              className="h-64 animate-pulse rounded-xl border border-[#27272A] bg-[#201f1f]/50"
+            />
           ))}
         </div>
       ) : visible.length === 0 ? (
-        <EmptyState
-          title="Nothing here yet"
-          body={
-            query || filter !== 'all'
-              ? 'No markets match that filter. Try clearing the search.'
-              : 'No arenas have been scheduled yet. If you are running an event, you can create the first one.'
-          }
-          action={{ href: '/signup', label: 'Run an event' }}
-        />
+        <div className="rounded-xl border border-[#27272A] bg-[#201f1f]/40 p-12 text-center flex flex-col items-center">
+          <h3 className="font-['Geist'] text-lg font-bold text-white">No arenas found</h3>
+          <p className="text-sm text-[#c4c7c8] mt-1 max-w-sm">
+            Try adjusting your search query or switching filters to see available prediction markets.
+          </p>
+        </div>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {visible.map((arena) => (
-            <ArenaCard key={arena.id} arena={arena} showJoinActions={showJoinActions} />
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
+            <div
+              key={arena.id}
+              className={`border border-[#27272A] rounded-xl p-5 flex flex-col gap-4 transition-colors group ${
+                arena.status === 'ENDED'
+                  ? 'bg-[#1c1b1b] opacity-75'
+                  : 'bg-[rgba(20,20,20,0.7)] backdrop-blur-xl hover:border-[#444748]'
+              }`}
+            >
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  {arena.status === 'LIVE' ? (
+                    <span className="px-2 py-0.5 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 font-['Epilogue'] text-[11px] font-bold text-[#22C55E] flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" /> LIVE
+                    </span>
+                  ) : arena.status === 'LOBBY' ? (
+                    <span className="px-2 py-0.5 rounded-full bg-[#EAB308]/10 border border-[#EAB308]/20 font-['Epilogue'] text-[11px] font-bold text-[#EAB308]">
+                      LOBBY
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8]">
+                      ENDED
+                    </span>
+                  )}
+                </div>
+                <span className="px-2 py-0.5 rounded bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-xs font-medium text-[#c4c7c8]">
+                  {arena.code}
+                </span>
+              </div>
 
-function ArenaCard({
-  arena,
-  showJoinActions,
-}: {
-  arena: DirectoryArena;
-  showJoinActions: boolean;
-}) {
-  const when =
-    arena.status === 'LIVE'
-      ? `Round ${arena.currentRound} of ${arena.totalRounds} in play`
-      : arena.status === 'ENDED'
-        ? `Finished ${formatRelative(arena.endsAt)}`
-        : arena.scheduledFor
-          ? `${formatDateTime(arena.scheduledFor)} · ${formatRelative(arena.scheduledFor)}`
-          : 'Open for joining';
+              <div>
+                <h3 className="font-['Geist'] text-xl font-medium text-white mb-1 group-hover:text-white transition-colors">
+                  {arena.name}
+                </h3>
+                <p className="font-['Geist'] text-xs text-[#c4c7c8] flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[16px]">person</span> Hosted by {arena.host}
+                </p>
+              </div>
 
-  return (
-    <li>
-      <Panel
-        className={cx(
-          'group relative overflow-hidden p-5 transition-all hover:border-accent/40',
-          arena.status === 'LIVE' && 'border-yes/30',
-        )}
-      >
-        {/* A live arena gets a travelling light bar along its top edge. */}
-        {arena.status === 'LIVE' ? (
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-px overflow-hidden"
-            aria-hidden
-          >
-            <div className="h-full w-24 animate-sweep bg-gradient-to-r from-transparent via-yes to-transparent" />
-          </div>
-        ) : null}
+              <div className="grid grid-cols-2 gap-y-3 gap-x-2 py-3 border-y border-[#27272A]">
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8]">ASSET</span>
+                  <span className="font-['Epilogue'] text-xs font-medium text-white">{arena.asset}</span>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8]">FORMAT</span>
+                  <span className="font-['Epilogue'] text-xs font-medium text-white">
+                    {arena.totalRounds} × {formatDuration(arena.roundDurationSec)}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8]">PARTICIPANTS</span>
+                  <span className="font-['Epilogue'] text-xs font-medium text-white">
+                    {arena.participantCount} joined
+                  </span>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8]">START BAL</span>
+                  <span className="font-['Epilogue'] text-xs font-medium text-white">
+                    {formatPoints(arena.startingBalance, 0)} pts
+                  </span>
+                </div>
+              </div>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusPill status={arena.status} />
-              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-fg-faint">
-                {arena.host}
-              </span>
-            </div>
-
-            <h3 className="font-display mt-2 text-xl font-bold uppercase tracking-tight transition-colors group-hover:text-accent">
-              {arena.name}
-            </h3>
-
-            {arena.description ? (
-              <p className="mt-1 line-clamp-2 text-sm text-fg-muted">{arena.description}</p>
-            ) : null}
-
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-fg-faint">
-              <span>5-Min Candle</span>
-              <span aria-hidden>·</span>
-              <span>{arena.asset}</span>
-              <span aria-hidden>·</span>
-              <span>
-                {arena.totalRounds} × {formatDuration(arena.roundDurationSec)}
-              </span>
-              <span aria-hidden>·</span>
-              <span>{formatPoints(arena.startingBalance, 0)} starting pts</span>
-              <span aria-hidden>·</span>
-              <span>{arena.participantCount} joined</span>
-            </div>
-
-            <div className="mt-2 text-sm font-medium text-fg-muted">{when}</div>
-          </div>
-
-          <div className="flex shrink-0 flex-col gap-2 sm:w-40">
-            {showJoinActions && arena.joined ? (
               <Link
                 href={
                   arena.status === 'ENDED'
                     ? `/arenas/${arena.code}/results`
-                    : `/arenas/${arena.code}/live`
+                    : `/arenas/${arena.code}`
                 }
-                className="btn-primary w-full text-sm"
+                className={`mt-auto w-full py-2 rounded-full font-['Epilogue'] text-xs text-center font-medium transition-colors ${
+                  arena.status === 'ENDED'
+                    ? 'border border-[#27272A] text-white hover:bg-[#201f1f]'
+                    : 'bg-white text-[#2f3131] hover:bg-[#c6c6c7]'
+                }`}
               >
-                {arena.status === 'ENDED' ? 'Results' : 'Enter'}
+                {arena.status === 'ENDED' ? 'View Results' : 'Join Arena'}
               </Link>
-            ) : arena.status === 'ENDED' ? (
-              <Link href={`/arenas/${arena.code}/results`} className="btn-secondary w-full text-sm">
-                Results
-              </Link>
-            ) : (
-              <Link href={`/arenas/${arena.code}`} className="btn-primary w-full text-sm">
-                Join with code
-              </Link>
-            )}
-
-            <Link
-              href={`/arenas/${arena.code}/screen`}
-              className="btn-ghost w-full text-xs"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Big screen ↗
-            </Link>
-          </div>
+            </div>
+          ))}
         </div>
-      </Panel>
-    </li>
+      )}
+    </div>
   );
 }

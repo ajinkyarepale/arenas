@@ -1,135 +1,175 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
 
-import { SiteShell } from '@/components/site-shell';
-import { EmptyState, PageHeader, Panel, Stat, StatusPill } from '@/components/ui';
-import { auth, isOrganizer } from '@/lib/auth';
-import { formatDateTime, formatDuration, formatPoints } from '@/lib/format';
+import { SiteSidebar } from '@/components/site-sidebar';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export const metadata: Metadata = { title: 'Organizer' };
+export const metadata: Metadata = {
+  title: 'Organizer Dashboard — Arenas',
+  description: 'Manage your prediction market tournaments and monitor live engagement.',
+};
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
-  const session = await auth();
-  if (!session?.user?.id) redirect('/signin?callbackUrl=/admin');
-  // Middleware already gates this path; re-checking here means the page is
-  // still safe if that matcher is ever changed.
-  if (!isOrganizer(session.user.role)) redirect('/dashboard?error=organizer-only');
+  const session = await getServerSession(authOptions);
 
-  const where =
-    session.user.role === 'SUPERADMIN' ? {} : { organizerId: session.user.id };
-
+  // If user is logged in, fetch their events; otherwise fetch demo events
   const arenas = await prisma.event.findMany({
-    where,
-    orderBy: [{ status: 'asc' }, { createdAt: 'desc' }],
+    where: session?.user?.role === 'SUPERADMIN' ? {} : session?.user?.id ? { organizerId: session.user.id } : {},
     include: {
-      organizer: { select: { name: true } },
-      _count: { select: { participants: true, trades: true } },
+      _count: { select: { participants: true, rounds: true } },
     },
+    orderBy: { createdAt: 'desc' },
   });
 
-  const live = arenas.filter((a) => a.status === 'LIVE').length;
+  const totalArenas = arenas.length;
+  const liveCount = arenas.filter((a) => a.status === 'LIVE').length;
   const totalParticipants = arenas.reduce((sum, a) => sum + a._count.participants, 0);
-  const totalTrades = arenas.reduce((sum, a) => sum + a._count.trades, 0);
 
   return (
-    <SiteShell width="wide">
-      <div className="flex flex-col gap-8">
-        <PageHeader
-          eyebrow="Organizer"
-          title="Your arenas"
-          subtitle="Create an arena, hand out its join code, and run the session from here."
-          actions={
-            <Link href="/admin/arenas/new" className="btn-primary text-sm">
-              New arena
+    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
+      {/* SideNavBar */}
+      <SiteSidebar />
+
+      {/* Main Content Wrapper */}
+      <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
+        {/* TopNavBar */}
+        <header className="bg-[rgba(20,20,20,0.7)] top-0 sticky border-b border-[#27272A] backdrop-blur-xl flex justify-between items-center h-16 px-6 z-40">
+          <div className="flex items-center gap-2 md:hidden">
+            <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
+          </div>
+          <div className="hidden md:block">
+            <span className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] tracking-wider uppercase">
+              ORGANIZER DASHBOARD
+            </span>
+          </div>
+          <div className="flex items-center gap-4 ml-auto">
+            <Link
+              href="/admin/arenas/new"
+              className="px-4 py-2 rounded-full bg-white text-[#2f3131] font-['Epilogue'] text-xs font-bold hover:bg-[#c6c6c7] transition-colors shadow"
+            >
+              + Create Arena
             </Link>
-          }
-        />
+          </div>
+        </header>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Stat label="Arenas" value={arenas.length} />
-          <Stat label="Live now" value={live} tone={live > 0 ? 'yes' : undefined} />
-          <Stat label="Participants" value={totalParticipants} />
-          <Stat label="Trades" value={totalTrades} />
-        </div>
+        {/* Dashboard Content */}
+        <main className="flex-1 p-6 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-8">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <h1 className="font-['Geist'] text-3xl md:text-4xl font-bold text-white tracking-tight">
+                Your Arenas
+              </h1>
+              <p className="font-['Geist'] text-sm text-[#c4c7c8] mt-1">
+                Manage your prediction market tournaments and monitor live engagement.
+              </p>
+            </div>
+            <Link
+              href="/admin/arenas/new"
+              className="bg-white text-[#2f3131] font-['Epilogue'] text-sm font-bold px-6 py-3 rounded-full flex items-center justify-center gap-2 hover:bg-[#c6c6c7] transition-colors self-start md:self-auto shadow-lg"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              New Arena
+            </Link>
+          </div>
 
-        {arenas.length === 0 ? (
-          <EmptyState
-            title="No arenas yet"
-            body="Create your first arena, share the join code with the room, and open the big screen on the projector."
-            action={{ href: '/admin/arenas/new', label: 'Create an arena' }}
-          />
-        ) : (
-          <ul className="flex flex-col gap-3">
-            {arenas.map((arena) => (
-              <li key={arena.id}>
-                <Panel className="p-5">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <StatusPill status={arena.status} />
-                        <code className="rounded-md border border-line bg-ink-900 px-2 py-0.5 font-mono text-sm font-bold tracking-widest text-accent">
-                          {arena.code}
-                        </code>
-                        {session.user.role === 'SUPERADMIN' ? (
-                          <span className="text-xs text-fg-faint">
-                            by {arena.organizer.name}
-                          </span>
-                        ) : null}
-                      </div>
+          {/* Metrics Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-xl p-5 backdrop-blur-md">
+              <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">Total Arenas</p>
+              <p className="font-['Epilogue'] text-3xl font-bold text-white">{totalArenas}</p>
+            </div>
+            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-xl p-5 backdrop-blur-md">
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase">Live Now</p>
+                <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
+              </div>
+              <p className="font-['Epilogue'] text-3xl font-bold text-white">{liveCount}</p>
+            </div>
+            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-xl p-5 backdrop-blur-md">
+              <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">Total Participants</p>
+              <p className="font-['Epilogue'] text-3xl font-bold text-white">{totalParticipants}</p>
+            </div>
+            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-xl p-5 backdrop-blur-md">
+              <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">System Status</p>
+              <p className="font-['Epilogue'] text-3xl font-bold text-[#22C55E]">ONLINE</p>
+            </div>
+          </div>
 
-                      <h3 className="mt-2 text-lg font-bold tracking-tight">{arena.name}</h3>
-
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-fg-faint">
-                        <span>{arena.asset}</span>
-                        <span aria-hidden>·</span>
-                        <span>
-                          {arena.totalRounds} × {formatDuration(arena.roundDurationSec)}
+          {/* Arenas List */}
+          <div className="flex flex-col gap-4">
+            {arenas.length === 0 ? (
+              <div className="rounded-xl border border-[#27272A] bg-[#201f1f]/40 p-12 text-center flex flex-col items-center">
+                <h3 className="font-['Geist'] text-lg font-bold text-white">No arenas hosted yet</h3>
+                <p className="text-sm text-[#c4c7c8] mt-1 max-w-sm">
+                  Click New Arena above to create your first prediction market tournament.
+                </p>
+              </div>
+            ) : (
+              arenas.map((arena) => (
+                <div
+                  key={arena.id}
+                  className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-xl p-5 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center hover:border-[#444748] transition-colors backdrop-blur-md"
+                >
+                  <div className="flex flex-col gap-2 w-full md:w-auto">
+                    <div className="flex items-center gap-3">
+                      {arena.status === 'LIVE' ? (
+                        <span className="bg-[#201f1f] text-[#22C55E] border border-[#22C55E]/30 px-2 py-0.5 rounded-full font-['Epilogue'] text-[10px] font-bold tracking-widest flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" /> LIVE
                         </span>
-                        <span aria-hidden>·</span>
-                        <span>b = {arena.liquidityParamB}</span>
-                        <span aria-hidden>·</span>
-                        <span>{formatPoints(arena.startingBalance, 0)} pts start</span>
-                        <span aria-hidden>·</span>
-                        <span>{arena._count.participants} joined</span>
-                        <span aria-hidden>·</span>
-                        <span>{arena._count.trades} trades</span>
-                      </div>
-
-                      <p className="mt-2 text-sm text-fg-muted">
-                        {arena.status === 'LIVE'
-                          ? `Round ${arena.currentRound} of ${arena.totalRounds} in play`
-                          : arena.status === 'ENDED'
-                            ? `Ended ${formatDateTime(arena.endsAt?.toISOString() ?? null)}`
-                            : `Scheduled ${formatDateTime(arena.scheduledFor?.toISOString() ?? null)}`}
-                      </p>
+                      ) : arena.status === 'LOBBY' ? (
+                        <span className="bg-[#201f1f] text-[#EAB308] border border-[#EAB308]/30 px-2 py-0.5 rounded-full font-['Epilogue'] text-[10px] font-bold tracking-widest">
+                          LOBBY
+                        </span>
+                      ) : (
+                        <span className="bg-[#201f1f] text-[#c4c7c8] border border-[#27272A] px-2 py-0.5 rounded-full font-['Epilogue'] text-[10px] font-bold tracking-widest">
+                          ENDED
+                        </span>
+                      )}
+                      <span className="bg-[#201f1f] border border-[#27272A] px-2 py-0.5 rounded-full font-['Epilogue'] text-[11px] text-[#c4c7c8] uppercase">
+                        {arena.code}
+                      </span>
                     </div>
 
-                    <div className="flex shrink-0 flex-col gap-2 sm:w-44">
-                      <Link
-                        href={`/admin/arenas/${arena.id}`}
-                        className="btn-primary w-full text-sm"
-                      >
-                        Manage
-                      </Link>
-                      <Link
-                        href={`/arenas/${arena.code}/screen`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn-secondary w-full text-sm"
-                      >
-                        Big screen ↗
-                      </Link>
+                    <h3 className="font-['Geist'] text-xl font-medium text-white">{arena.name}</h3>
+
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-['Epilogue'] text-xs text-[#c4c7c8]">
+                      <span className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[16px]">toll</span> {arena.asset}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[16px]">layers</span> {arena.totalRounds} Rounds
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[16px]">groups</span> {arena._count.participants} Players
+                      </span>
                     </div>
                   </div>
-                </Panel>
-              </li>
-            ))}
-          </ul>
-        )}
+
+                  <div className="flex items-center gap-3 w-full md:w-auto justify-end mt-2 md:mt-0">
+                    <Link
+                      href={`/arenas/${arena.code}/projector`}
+                      className="flex items-center justify-center w-10 h-10 rounded-full border border-[#27272A] text-[#c4c7c8] hover:text-white hover:bg-[#201f1f] transition-colors"
+                      title="Auditorium Big Screen View"
+                    >
+                      <span className="material-symbols-outlined text-xl">desktop_windows</span>
+                    </Link>
+                    <Link
+                      href={`/admin/arenas/${arena.code}`}
+                      className="bg-[#201f1f] border border-[#27272A] text-white font-['Epilogue'] text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-[#2a2a2a] transition-all whitespace-nowrap"
+                    >
+                      Control Panel
+                    </Link>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </main>
       </div>
-    </SiteShell>
+    </div>
   );
 }

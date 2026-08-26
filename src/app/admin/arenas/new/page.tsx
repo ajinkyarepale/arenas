@@ -1,33 +1,49 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
 
 import { CreateArenaForm } from '@/components/admin/create-arena-form';
-import { SiteShell } from '@/components/site-shell';
-import { PageHeader } from '@/components/ui';
-import { auth, isOrganizer } from '@/lib/auth';
+import { SiteSidebar } from '@/components/site-sidebar';
+import { authOptions, isOrganizer } from '@/lib/auth';
 
-export const metadata: Metadata = { title: 'New arena' };
+export const metadata: Metadata = { title: 'Create Arena — Arenas' };
 export const dynamic = 'force-dynamic';
 
 export default async function NewArenaPage() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect('/signin?callbackUrl=/admin/arenas/new');
   if (!isOrganizer(session.user.role)) redirect('/dashboard?error=organizer-only');
 
   return (
-    <SiteShell>
-      <div className="flex flex-col gap-6">
-        <Link href="/admin" className="text-sm text-fg-muted hover:text-fg">
-          &larr; Your arenas
-        </Link>
-        <PageHeader
-          eyebrow="Organizer"
-          title="Create an arena"
-          subtitle="Set the format once. You start, pause and end the session from the control panel."
-        />
-        <CreateArenaForm />
+    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
+      {/* SideNavBar */}
+      <SiteSidebar />
+
+      {/* Main Content Wrapper */}
+      <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
+        {/* TopNavBar */}
+        <header className="bg-[rgba(20,20,20,0.7)] top-0 sticky border-b border-[#27272A] backdrop-blur-xl flex justify-between items-center h-16 px-6 z-40">
+          <div className="flex items-center gap-2 md:hidden">
+            <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
+          </div>
+          <div className="hidden md:block">
+            <span className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] tracking-wider uppercase">
+              CREATE NEW ARENA
+            </span>
+          </div>
+          <div className="flex items-center gap-4 ml-auto">
+            <Link href="/admin" className="text-sm font-semibold text-[#c4c7c8] hover:text-white transition-colors">
+              Cancel
+            </Link>
+          </div>
+        </header>
+
+        {/* Form Container */}
+        <main className="flex-1 p-6 md:p-12 max-w-[800px] mx-auto w-full flex flex-col gap-6">
+          <CreateArenaForm />
+        </main>
       </div>
-    </SiteShell>
+    </div>
   );
 }

@@ -10,8 +10,6 @@ import { ErrorNote, Spinner } from '@/components/ui';
 function useCallbackUrl(fallback = '/dashboard'): string {
   const params = useSearchParams();
   const raw = params.get('callbackUrl');
-  // Only ever redirect to a path on this origin — an absolute URL here would be
-  // an open redirect.
   if (raw && raw.startsWith('/') && !raw.startsWith('//')) return raw;
   return fallback;
 }
@@ -39,9 +37,7 @@ export function SignInForm() {
     setPending(false);
 
     if (!result || result.error) {
-      // Deliberately vague: confirming which half was wrong would let someone
-      // enumerate registered emails.
-      setError('That email and password do not match an account.');
+      setError('Invalid email or password. Please try again.');
       return;
     }
 
@@ -49,83 +45,122 @@ export function SignInForm() {
     router.refresh();
   };
 
+  const fillDemo = (demoEmail: string) => {
+    setEmail(demoEmail);
+    setPassword('arenas-demo-2024');
+  };
+
   return (
-    <form onSubmit={submit} className="flex flex-col gap-4">
-      <label className="flex flex-col gap-1.5">
-        <span className="label">Email</span>
-        <input
-          type="email"
-          autoComplete="email"
-          required
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          className="field"
-          placeholder="you@college.edu"
-        />
-      </label>
+    <div className="w-full font-['Geist'] text-sm">
+      <h2 className="font-['Geist'] text-2xl font-bold mb-4 text-white">Sign in to Arena</h2>
 
-      <label className="flex flex-col gap-1.5">
-        <span className="label">Password</span>
-        <input
-          type="password"
-          autoComplete="current-password"
-          required
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className="field"
-          placeholder="••••••••"
-        />
-      </label>
+      <form onSubmit={submit} className="flex flex-col gap-4">
+        <div>
+          <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-1">
+            Email
+          </label>
+          <input
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            className="w-full bg-[#201f1f] border border-[#27272A] rounded-[12px] px-4 py-3 font-['Epilogue'] text-xs focus:outline-none focus:border-white transition-colors text-white placeholder-[#8e9192]"
+            placeholder="you@college.edu"
+          />
+        </div>
 
-      <ErrorNote>{error}</ErrorNote>
+        <div>
+          <div className="flex justify-between items-center mb-1">
+            <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase">
+              Password
+            </label>
+            <span className="font-['Epilogue'] text-[11px] text-[#c4c7c8] hover:text-white cursor-pointer transition-colors">
+              Forgot?
+            </span>
+          </div>
+          <input
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            className="w-full bg-[#201f1f] border border-[#27272A] rounded-[12px] px-4 py-3 font-['Epilogue'] text-xs focus:outline-none focus:border-white transition-colors text-white placeholder-[#8e9192]"
+            placeholder="••••••••"
+          />
+        </div>
 
-      <button type="submit" disabled={pending} className="btn-primary w-full">
-        {pending ? <Spinner /> : null}
-        {pending ? 'Signing in…' : 'Sign in'}
-      </button>
+        <ErrorNote>{error}</ErrorNote>
 
-      <p className="text-center text-sm text-fg-muted">
-        No account?{' '}
-        <Link
-          href={`/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}
-          className="font-semibold text-accent hover:underline"
+        <button
+          type="submit"
+          disabled={pending}
+          className="w-full bg-white text-[#2f3131] font-['Epilogue'] font-bold rounded-full py-3 mt-2 hover:bg-[#c6c6c7] transition-colors flex items-center justify-center gap-2"
         >
-          Create one
-        </Link>
-      </p>
-    </form>
+          {pending ? <Spinner className="border-[#2f3131] border-t-transparent" /> : null}
+          {pending ? 'Signing in…' : 'Sign in'}
+        </button>
+
+        {/* Quick Fill Demo */}
+        <div className="mt-6 border-t border-[#27272A] pt-4">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => fillDemo('organizer@arenas.dev')}
+              className="flex-1 border border-[#27272A] bg-[#201f1f] hover:bg-[#2a2a2a] rounded-full py-2 font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] transition-colors"
+            >
+              Organizer
+            </button>
+            <button
+              type="button"
+              onClick={() => fillDemo('ada.chen@arenas.dev')}
+              className="flex-1 border border-[#27272A] bg-[#201f1f] hover:bg-[#2a2a2a] rounded-full py-2 font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] transition-colors"
+            >
+              Participant
+            </button>
+          </div>
+        </div>
+
+        <p className="text-center text-xs text-[#c4c7c8] mt-2">
+          Don&apos;t have an account?{' '}
+          <Link
+            href={`/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+            className="font-bold text-white hover:underline ml-1"
+          >
+            Sign up
+          </Link>
+        </p>
+      </form>
+    </div>
   );
 }
 
 export function SignUpForm() {
   const router = useRouter();
   const callbackUrl = useCallbackUrl();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [wantsOrganizer, setWantsOrganizer] = useState(false);
+  const [role, setRole] = useState<'PARTICIPANT' | 'ORGANIZER'>('PARTICIPANT');
   const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     setPending(true);
     setError(null);
-    setFieldErrors({});
 
     try {
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ name, email, password, wantsOrganizer }),
+        body: JSON.stringify({ name, email, password, role }),
       });
-      const body = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setError(body.error ?? 'Could not create that account.');
-        setFieldErrors(body.fields ?? {});
-        return;
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? 'Could not create account');
       }
 
       const result = await signIn('credentials', {
@@ -135,105 +170,139 @@ export function SignUpForm() {
         callbackUrl,
       });
 
+      setPending(false);
+
       if (!result || result.error) {
-        setError('Account created, but sign-in failed. Try signing in.');
+        router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`);
         return;
       }
 
-      router.push(wantsOrganizer ? '/admin' : callbackUrl);
+      router.push(callbackUrl);
       router.refresh();
-    } catch {
-      setError('Network problem — please try again.');
-    } finally {
+    } catch (err: unknown) {
       setPending(false);
+      setError(err instanceof Error ? err.message : 'Could not create account');
     }
   };
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-4">
-      <label className="flex flex-col gap-1.5">
-        <span className="label">Name</span>
-        <input
-          required
-          autoComplete="name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          className="field"
-          placeholder="How you appear on the leaderboard"
-        />
-        <FieldError message={fieldErrors.name} />
-      </label>
+    <div className="w-full font-['Geist'] text-sm">
+      <h2 className="font-['Geist'] text-2xl font-bold mb-4 text-white">Create an account</h2>
 
-      <label className="flex flex-col gap-1.5">
-        <span className="label">Email</span>
-        <input
-          type="email"
-          required
-          autoComplete="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          className="field"
-          placeholder="you@college.edu"
-        />
-        <FieldError message={fieldErrors.email} />
-      </label>
+      <form onSubmit={submit} className="flex flex-col gap-4">
+        <div>
+          <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-1">
+            Display Name
+          </label>
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            className="w-full bg-[#201f1f] border border-[#27272A] rounded-[12px] px-4 py-3 font-['Epilogue'] text-xs focus:outline-none focus:border-white transition-colors text-white placeholder-[#8e9192]"
+            placeholder="Campus Trader"
+          />
+        </div>
 
-      <label className="flex flex-col gap-1.5">
-        <span className="label">Password</span>
-        <input
-          type="password"
-          required
-          minLength={8}
-          autoComplete="new-password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className="field"
-          placeholder="At least 8 characters"
-        />
-        <FieldError message={fieldErrors.password} />
-      </label>
+        <div>
+          <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-1">
+            Email
+          </label>
+          <input
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            className="w-full bg-[#201f1f] border border-[#27272A] rounded-[12px] px-4 py-3 font-['Epilogue'] text-xs focus:outline-none focus:border-white transition-colors text-[#e5e2e1] placeholder-[#8e9192]"
+            placeholder="you@college.edu"
+          />
+        </div>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded border border-line bg-ink-900 p-4">
-        <input
-          type="checkbox"
-          checked={wantsOrganizer}
-          onChange={(event) => setWantsOrganizer(event.target.checked)}
-          className="mt-0.5 h-5 w-5 accent-accent"
-        />
-        <span>
-          <span className="block text-sm font-semibold">I am running an event</span>
-          <span className="mt-0.5 block text-xs text-fg-muted">
-            Gives you the organizer tools: create arenas, hand out a join code, and run the
-            session from a control panel.
-          </span>
-        </span>
-      </label>
+        <div>
+          <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-1">
+            Password
+          </label>
+          <input
+            type="password"
+            autoComplete="new-password"
+            required
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            className="w-full bg-[#201f1f] border border-[#27272A] rounded-[12px] px-4 py-3 font-['Epilogue'] text-xs focus:outline-none focus:border-white transition-colors text-[#e5e2e1] placeholder-[#8e9192]"
+            placeholder="••••••••"
+          />
+        </div>
 
-      <ErrorNote>{error}</ErrorNote>
+        {/* Role Selector */}
+        <div className="mt-2">
+          <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">
+            Select Role
+          </label>
+          <div className="flex flex-col gap-2">
+            {/* Participant Option */}
+            <label
+              onClick={() => setRole('PARTICIPANT')}
+              className={`relative flex cursor-pointer p-4 border rounded-lg bg-[#201f1f] hover:bg-[#2a2a2a] transition-colors group ${
+                role === 'PARTICIPANT' ? 'border-[#22C55E]' : 'border-[#27272A]'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                    role === 'PARTICIPANT' ? 'border-[#22C55E] border-[6px]' : 'border-[#8e9192]'
+                  }`}
+                />
+                <div>
+                  <p className="font-['Epilogue'] text-sm font-medium text-white mb-0.5">Participant</p>
+                  <p className="font-['Geist'] text-xs text-[#c4c7c8]">Join markets &amp; trade positions</p>
+                </div>
+              </div>
+            </label>
 
-      <button type="submit" disabled={pending} className="btn-primary w-full">
-        {pending ? <Spinner /> : null}
-        {pending ? 'Creating account…' : 'Create account'}
-      </button>
+            {/* Organizer Option */}
+            <label
+              onClick={() => setRole('ORGANIZER')}
+              className={`relative flex cursor-pointer p-4 border rounded-lg bg-[#201f1f] hover:bg-[#2a2a2a] transition-colors group ${
+                role === 'ORGANIZER' ? 'border-white' : 'border-[#27272A]'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                    role === 'ORGANIZER' ? 'border-white border-[6px]' : 'border-[#8e9192]'
+                  }`}
+                />
+                <div>
+                  <p className="font-['Epilogue'] text-sm font-medium text-white mb-0.5">Organizer</p>
+                  <p className="font-['Geist'] text-xs text-[#c4c7c8]">Host events &amp; manage liquidity</p>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
 
-      <p className="text-center text-sm text-fg-muted">
-        Already have one?{' '}
-        <Link
-          href={`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`}
-          className="font-semibold text-accent hover:underline"
+        <ErrorNote>{error}</ErrorNote>
+
+        <button
+          type="submit"
+          disabled={pending}
+          className="w-full bg-white text-[#2f3131] font-['Epilogue'] font-bold rounded-full py-3 mt-2 hover:bg-[#c6c6c7] transition-colors flex items-center justify-center gap-2"
         >
-          Sign in
-        </Link>
-      </p>
+          {pending ? <Spinner className="border-[#2f3131] border-t-transparent" /> : null}
+          {pending ? 'Creating account…' : 'Create account'}
+        </button>
 
-      <p className="text-center text-xs text-fg-faint">
-        Arenas is educational. Markets settle in virtual points with no cash value.
-      </p>
-    </form>
+        <p className="text-center text-xs text-[#c4c7c8] mt-2">
+          Already have an account?{' '}
+          <Link
+            href={`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+            className="font-bold text-white hover:underline ml-1"
+          >
+            Sign in
+          </Link>
+        </p>
+      </form>
+    </div>
   );
-}
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <span className="text-xs text-no">{message}</span>;
 }

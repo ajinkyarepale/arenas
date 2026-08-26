@@ -51,6 +51,14 @@ const config: Config = {
         },
         plasma: '#ffb875',
         warn: '#ffb875',
+        // Stitch Arena Precision System Colors
+        'surface-container': '#201f1f',
+        'surface-container-high': '#2a2a2a',
+        'surface-container-low': '#1c1b1b',
+        'border-neutral': '#27272A',
+        'market-yes': '#22C55E',
+        'market-no': '#EF4444',
+        'accent-amber': '#F59E0B',
       },
       fontFamily: {
         sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],

@@ -1,0 +1,368 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Arenas - Campus Prediction Market</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&amp;family=Geist:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#2f3131",
+                        "on-primary-fixed-variant": "#454747",
+                        "on-background": "#e5e2e1",
+                        "error-coral": "#EF4444",
+                        "on-tertiary": "#33302d",
+                        "tertiary-fixed-dim": "#cbc5c1",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#c6c5cf",
+                        "tertiary-container": "#e8e1dc",
+                        "on-secondary-fixed-variant": "#46464e",
+                        "surface-tint": "#c6c6c7",
+                        "primary-fixed": "#e2e2e2",
+                        "primary-fixed-dim": "#c6c6c7",
+                        "secondary-container": "#4a4b53",
+                        "on-error": "#690005",
+                        "border-neutral": "#27272A",
+                        "on-surface": "#e5e2e1",
+                        "primary-container": "#e2e2e2",
+                        "surface-container": "#201f1f",
+                        "outline": "#8e9192",
+                        "surface-container-high": "#2a2a2a",
+                        "on-secondary": "#2f3038",
+                        "on-secondary-fixed": "#1a1b22",
+                        "background": "#131313",
+                        "tertiary-fixed": "#e8e1dc",
+                        "error": "#ffb4ab",
+                        "on-surface-variant": "#c4c7c8",
+                        "surface-glass": "rgba(20, 20, 20, 0.7)",
+                        "inverse-on-surface": "#313030",
+                        "surface-container-highest": "#353534",
+                        "on-primary-container": "#636565",
+                        "tertiary": "#ffffff",
+                        "outline-variant": "#444748",
+                        "on-tertiary-fixed-variant": "#494643",
+                        "on-tertiary-fixed": "#1d1b18",
+                        "primary": "#ffffff",
+                        "success-neon": "#22C55E",
+                        "inverse-primary": "#5d5f5f",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-variant": "#353534",
+                        "error-container": "#93000a",
+                        "surface": "#131313",
+                        "surface-bright": "#3a3939",
+                        "secondary-fixed-dim": "#c6c5cf",
+                        "on-primary-fixed": "#1a1c1c",
+                        "on-secondary-container": "#bcbbc5",
+                        "surface-dim": "#131313",
+                        "surface-container-low": "#1c1b1b",
+                        "secondary-fixed": "#e3e1ec",
+                        "on-tertiary-container": "#686460",
+                        "inverse-surface": "#e5e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "stack-md": "16px",
+                        "margin-mobile": "20px",
+                        "base": "4px",
+                        "stack-lg": "32px",
+                        "gutter": "24px",
+                        "stack-sm": "8px",
+                        "margin-desktop": "48px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "label-caps": ["Epilogue"],
+                        "data-mono-sm": ["Epilogue"],
+                        "body-lg": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "nav-item": ["Epilogue"],
+                        "data-mono-lg": ["Epilogue"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "700" }],
+                        "data-mono-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+                        "nav-item": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "data-mono-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0.02em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid #27272A;
+        }
+        
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .ticker-track {
+            animation: marquee 20s linear infinite;
+        }
+        .ticker-track:hover {
+            animation-play-state: paused;
+        }
+
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-sm min-h-screen flex flex-col antialiased selection:bg-surface-variant selection:text-primary">
+<!-- TopNavBar (Shared Component) -->
+<!-- Suppressed active state logic as this is a landing page without a matching tab intent -->
+<nav class="bg-surface-glass dark:bg-surface-glass docked full-width top-0 sticky border-b border-border-neutral backdrop-blur-xl flat no shadows flex justify-between items-center h-16 px-gutter z-50">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-black text-primary">Arenas</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">account_balance_wallet</span>
+</button>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="relative pt-stack-lg pb-stack-lg md:pt-margin-desktop md:pb-margin-desktop px-margin-mobile md:px-margin-desktop flex flex-col items-center text-center overflow-hidden min-h-[716px] justify-center">
+<!-- Abstract Tech Background -->
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle at 50% 50%, #2a2a2a 1px, transparent 1px); background-size: 24px 24px;"></div>
+<div class="relative z-10 max-w-3xl mx-auto flex flex-col items-center gap-stack-md">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border-neutral bg-surface-container-low text-success-neon font-label-caps text-label-caps">
+<div class="w-2 h-2 rounded-full bg-success-neon pulse-dot"></div>
+                LIVE ROOMS · NOT HOMEWORK
+            </div>
+<h1 class="font-headline-lg text-headline-lg text-primary max-w-4xl tracking-tight leading-tight">
+                A TRADING FLOOR IN AN AFTERNOON
+            </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                Experience the intensity of live 5-minute candle trading in a zero-risk campus environment. Compete, analyze, and predict real-time market movements.
+            </p>
+<div class="flex flex-col sm:flex-row gap-stack-md mt-stack-md items-center w-full sm:w-auto">
+<button class="w-full sm:w-auto px-6 py-3 rounded-full bg-primary text-on-primary font-nav-item text-nav-item font-semibold hover:bg-primary-fixed-dim transition-colors">
+                    Get started
+                </button>
+<button class="w-full sm:w-auto px-6 py-3 rounded-full border border-border-neutral bg-transparent text-primary font-nav-item text-nav-item hover:bg-surface-container transition-colors">
+                    See upcoming events
+                </button>
+</div>
+<p class="font-label-caps text-label-caps text-outline mt-stack-sm uppercase">
+                Free · virtual points only · no deposits
+            </p>
+</div>
+</section>
+<!-- Live Ticker -->
+<div class="w-full bg-surface-container-lowest border-y border-border-neutral overflow-hidden flex h-12 items-center relative z-20">
+<div class="ticker-track flex whitespace-nowrap gap-gutter w-[200%] items-center px-4">
+<!-- Ticker Item 1 -->
+<div class="inline-flex items-center gap-3 font-data-mono-sm text-data-mono-sm">
+<span class="text-on-surface-variant uppercase">CS101 Crypto Lab</span>
+<span class="text-primary">BTCUSDT</span>
+<span class="text-success-neon">OPEN</span>
+<span class="text-outline flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">group</span>42</span>
+</div>
+<span class="text-border-neutral">/</span>
+<!-- Ticker Item 2 -->
+<div class="inline-flex items-center gap-3 font-data-mono-sm text-data-mono-sm">
+<span class="text-on-surface-variant uppercase">Econ Society Clash</span>
+<span class="text-primary">ETHUSDT</span>
+<span class="text-error-coral">LOCKED</span>
+<span class="text-outline flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">group</span>128</span>
+</div>
+<span class="text-border-neutral">/</span>
+<!-- Ticker Item 3 -->
+<div class="inline-flex items-center gap-3 font-data-mono-sm text-data-mono-sm">
+<span class="text-on-surface-variant uppercase">Dorm 4 Battle</span>
+<span class="text-primary">SOLUSDT</span>
+<span class="text-success-neon">OPEN</span>
+<span class="text-outline flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">group</span>15</span>
+</div>
+<span class="text-border-neutral">/</span>
+<!-- Duplicate for infinite scroll -->
+<!-- Ticker Item 1 -->
+<div class="inline-flex items-center gap-3 font-data-mono-sm text-data-mono-sm">
+<span class="text-on-surface-variant uppercase">CS101 Crypto Lab</span>
+<span class="text-primary">BTCUSDT</span>
+<span class="text-success-neon">OPEN</span>
+<span class="text-outline flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">group</span>42</span>
+</div>
+<span class="text-border-neutral">/</span>
+<!-- Ticker Item 2 -->
+<div class="inline-flex items-center gap-3 font-data-mono-sm text-data-mono-sm">
+<span class="text-on-surface-variant uppercase">Econ Society Clash</span>
+<span class="text-primary">ETHUSDT</span>
+<span class="text-error-coral">LOCKED</span>
+<span class="text-outline flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">group</span>128</span>
+</div>
+<span class="text-border-neutral">/</span>
+<!-- Ticker Item 3 -->
+<div class="inline-flex items-center gap-3 font-data-mono-sm text-data-mono-sm">
+<span class="text-on-surface-variant uppercase">Dorm 4 Battle</span>
+<span class="text-primary">SOLUSDT</span>
+<span class="text-success-neon">OPEN</span>
+<span class="text-outline flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">group</span>15</span>
+</div>
+</div>
+</div>
+<!-- Main Content Area -->
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg md:py-margin-desktop flex flex-col gap-margin-desktop">
+<!-- How a Round Works -->
+<section class="flex flex-col gap-stack-lg">
+<h2 class="font-headline-md text-headline-md text-primary">How a Round Works</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-stack-md">
+<!-- Card 1 -->
+<div class="glass-panel p-stack-md rounded-xl flex flex-col gap-stack-sm hover:border-outline-variant transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant group-hover:text-primary transition-colors">Step 01</span>
+<span class="material-symbols-outlined text-outline">notifications_active</span>
+</div>
+<h3 class="font-nav-item text-nav-item text-primary">The bell</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">The strike price is set and the 5-minute countdown begins.</p>
+</div>
+<!-- Card 2 -->
+<div class="glass-panel p-stack-md rounded-xl flex flex-col gap-stack-sm hover:border-outline-variant transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant group-hover:text-primary transition-colors">Step 02</span>
+<span class="material-symbols-outlined text-outline">sync_alt</span>
+</div>
+<h3 class="font-nav-item text-nav-item text-primary">The room trades</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Participants buy YES or NO shares based on market direction.</p>
+</div>
+<!-- Card 3 -->
+<div class="glass-panel p-stack-md rounded-xl flex flex-col gap-stack-sm hover:border-outline-variant transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant group-hover:text-primary transition-colors">Step 03</span>
+<span class="material-symbols-outlined text-outline">lock</span>
+</div>
+<h3 class="font-nav-item text-nav-item text-primary">Lock</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Trading freezes shortly before the candle closes. No more entries.</p>
+</div>
+<!-- Card 4 -->
+<div class="glass-panel p-stack-md rounded-xl flex flex-col gap-stack-sm hover:border-outline-variant transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant group-hover:text-primary transition-colors">Step 04</span>
+<span class="material-symbols-outlined text-outline">account_balance</span>
+</div>
+<h3 class="font-nav-item text-nav-item text-primary">Settle</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Payouts are distributed and the live leaderboard updates instantly.</p>
+</div>
+</div>
+</section>
+<!-- Audiences Panels (Bento Grid Style) -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-stack-md">
+<!-- Participants Panel -->
+<div class="glass-panel p-stack-lg rounded-xl flex flex-col justify-between min-h-[400px]">
+<div class="flex flex-col gap-stack-md">
+<div class="inline-flex items-center gap-2 border border-border-neutral rounded-full px-3 py-1 w-fit bg-surface-container-low">
+<span class="material-symbols-outlined text-primary text-[16px]">person</span>
+<span class="font-label-caps text-label-caps text-primary">FOR PARTICIPANTS</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mt-2">Built for Speed</h3>
+<ul class="flex flex-col gap-3 mt-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-success-neon mt-0.5 text-[18px]">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Mobile-first 2-button UI (YES / NO)</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-success-neon mt-0.5 text-[18px]">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Intuitive stake slider for fast execution</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-success-neon mt-0.5 text-[18px]">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Live probability engine &amp; tracking</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-success-neon mt-0.5 text-[18px]">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Add to home screen capability</span>
+</li>
+</ul>
+</div>
+<div class="mt-stack-lg">
+<button class="w-full sm:w-auto px-6 py-2 rounded-full border border-border-neutral bg-transparent text-primary font-nav-item text-nav-item hover:bg-surface-container transition-colors">
+                        Read guide
+                    </button>
+</div>
+</div>
+<!-- Organizers Panel -->
+<div class="glass-panel p-stack-lg rounded-xl flex flex-col justify-between min-h-[400px] bg-surface-container-low/30">
+<div class="flex flex-col gap-stack-md">
+<div class="inline-flex items-center gap-2 border border-border-neutral rounded-full px-3 py-1 w-fit bg-surface-container-low">
+<span class="material-symbols-outlined text-primary text-[16px]">admin_panel_settings</span>
+<span class="font-label-caps text-label-caps text-primary">FOR ORGANIZERS</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mt-2">Absolute Control</h3>
+<ul class="flex flex-col gap-3 mt-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline mt-0.5 text-[18px]">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">1-minute event setup &amp; configuration</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline mt-0.5 text-[18px]">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Secure join code gating for exclusive rooms</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline mt-0.5 text-[18px]">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Dedicated projector view for live audiences</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline mt-0.5 text-[18px]">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Manual round overrides &amp; safety limits</span>
+</li>
+</ul>
+</div>
+<div class="mt-stack-lg">
+<button class="w-full sm:w-auto px-6 py-2 rounded-full bg-primary text-on-primary font-nav-item text-nav-item font-semibold hover:bg-primary-fixed-dim transition-colors">
+                        Run an event
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Banner -->
+<div class="w-full border-t border-border-neutral bg-surface-container py-stack-lg px-margin-mobile md:px-margin-desktop mt-auto text-center flex flex-col items-center gap-stack-md">
+<h2 class="font-headline-md text-headline-md text-primary">Anyone can host. Every arena is independent.</h2>
+<div class="flex flex-col sm:flex-row gap-stack-md mt-2">
+<button class="px-6 py-2 rounded-full bg-primary text-on-primary font-nav-item text-nav-item font-semibold hover:bg-primary-fixed-dim transition-colors">
+                Start Hosting
+            </button>
+</div>
+</div>
+<!-- Footer (Shared Component translated to intent) -->
+<!-- Note: Footer structurally adapted since TopNav is full width, Sidebar is absent -->
+<footer class="bg-surface dark:bg-surface w-full border-t border-border-neutral flat no shadows flex flex-col sm:flex-row justify-between items-center py-stack-lg px-gutter gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">© 2024 Arenas Markets. All rights reserved.</span>
+<div class="flex gap-4">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-all opacity-80 hover:opacity-100" href="#">Legal</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-all opacity-80 hover:opacity-100" href="#">Privacy</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-all opacity-80 hover:opacity-100" href="#">Terms</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-all opacity-80 hover:opacity-100" href="#">Docs</a>
+</div>
+</footer>
+</body></html>

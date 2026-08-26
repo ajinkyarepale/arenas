@@ -3,61 +3,114 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useState } from 'react';
 
-import { Logo } from '@/components/site-header';
-import { cx } from '@/lib/format';
-
-const PUBLIC_LINKS = [
-  { href: '/markets', label: 'Markets' },
-  { href: '/guide', label: 'Guide' },
-  { href: '/info', label: 'About' },
-];
-
-/**
- * The persistent left rail from the refit — replaces the old top-nav links.
- * Hidden below `md`; the mobile menu in `SiteHeader` covers narrow viewports.
- */
 export function SiteSidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const [collapsed, setCollapsed] = useState(false);
 
   const isOrganizer =
     session?.user?.role === 'ORGANIZER' || session?.user?.role === 'SUPERADMIN';
 
-  const links = [
-    ...PUBLIC_LINKS,
-    ...(session ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
-    ...(isOrganizer ? [{ href: '/admin', label: 'Organize' }] : []),
+  const navItems = [
+    { href: '/markets', label: 'Markets', icon: 'show_chart' },
+    { href: '/arenas', label: 'Live', icon: 'sensors' },
+    { href: '/guide', label: 'Guide', icon: 'menu_book' },
+    { href: '/info', label: 'About', icon: 'info' },
+    ...(session ? [{ href: '/dashboard', label: 'Profile', icon: 'account_circle' }] : []),
+    ...(isOrganizer ? [{ href: '/admin', label: 'Organize', icon: 'admin_panel_settings' }] : []),
   ];
 
   return (
-    <aside className="hidden w-[220px] shrink-0 flex-col gap-6 glass-elevated border-r border-line py-6 md:flex">
-      <Link href="/" className="flex items-center gap-2.5 px-6">
-        <Logo />
-        <span className="font-display text-lg font-bold tracking-tight">Arenas</span>
-      </Link>
-
-      <nav className="flex flex-col gap-0.5 px-3">
-        {links.map((link) => {
-          const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cx(
-                'rounded-lg px-3 py-2.5 font-display text-[13px] font-semibold tracking-tight transition-colors',
-                active ? 'bg-ink-800 text-accent' : 'text-fg-muted hover:bg-ink-850 hover:text-fg',
-              )}
-            >
-              {link.label}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="mt-auto px-6 font-display text-[11px] tracking-wide text-fg-faint">
-        Virtual points only
+    <>
+      {/* Mobile Top Navigation Bar Toggle */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[rgba(20,20,20,0.9)] border-b border-[#27272A] backdrop-blur-xl z-50 flex items-center justify-between px-4">
+        <Link href="/" className="font-['Geist'] text-xl font-bold text-white">
+          Arenas
+        </Link>
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="p-2 text-[#c4c7c8] hover:text-white transition-colors"
+          aria-label="Toggle Navigation"
+        >
+          <span className="material-symbols-outlined text-2xl">
+            {collapsed ? 'close' : 'menu'}
+          </span>
+        </button>
       </div>
-    </aside>
+
+      {/* Main Sidebar (Desktop + Mobile Slide Overlay) */}
+      <aside
+        className={`fixed left-0 top-0 h-screen bg-[rgba(20,20,20,0.85)] border-r border-[#27272A] backdrop-blur-xl flex flex-col py-6 px-4 z-50 transition-all duration-300 ease-in-out ${
+          collapsed
+            ? 'w-16 md:w-16'
+            : 'w-64 md:w-64'
+        }`}
+      >
+        <div className="flex items-center justify-between mb-6 px-2">
+          <Link href="/" className={`flex flex-col gap-0.5 ${collapsed ? 'hidden' : 'flex'}`}>
+            <h1 className="font-['Geist'] text-2xl font-bold text-white tracking-tight">Arenas</h1>
+            <p className="font-['Geist'] text-xs text-[#c4c7c8]">Campus Prediction Market</p>
+          </Link>
+
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="hidden md:flex items-center justify-center p-1.5 rounded-lg text-[#c4c7c8] hover:text-white hover:bg-[#2a2a2a] transition-colors ml-auto"
+            title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          >
+            <span className="material-symbols-outlined text-[20px]">
+              {collapsed ? 'chevron_right' : 'chevron_left'}
+            </span>
+          </button>
+        </div>
+
+        <nav className="flex-1 space-y-1">
+          {navItems.map((item) => {
+            const active =
+              pathname === item.href ||
+              (item.href !== '/' && pathname.startsWith(`${item.href}/`));
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                title={collapsed ? item.label : undefined}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-['Epilogue'] text-sm transition-colors ${
+                  active
+                    ? 'text-white font-bold border-r-2 border-white bg-[#2a2a2a]'
+                    : 'text-[#c4c7c8] hover:bg-[#2a2a2a] hover:text-white'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[20px] shrink-0">{item.icon}</span>
+                <span className={collapsed ? 'hidden' : 'block'}>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="mt-auto border-t border-[#27272A] pt-4 space-y-1">
+          {session ? (
+            <Link
+              href="/dashboard"
+              title={collapsed ? 'Profile' : undefined}
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-[#c4c7c8] font-['Epilogue'] text-sm hover:bg-[#2a2a2a] hover:text-white transition-colors"
+            >
+              <span className="material-symbols-outlined text-[20px] shrink-0">account_circle</span>
+              <span className={collapsed ? 'hidden' : 'block'}>Profile</span>
+            </Link>
+          ) : (
+            <Link
+              href="/signin"
+              title={collapsed ? 'Sign In' : undefined}
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-[#c4c7c8] font-['Epilogue'] text-sm hover:bg-[#2a2a2a] hover:text-white transition-colors"
+            >
+              <span className="material-symbols-outlined text-[20px] shrink-0">login</span>
+              <span className={collapsed ? 'hidden' : 'block'}>Sign In</span>
+            </Link>
+          )}
+        </div>
+      </aside>
+    </>
   );
 }

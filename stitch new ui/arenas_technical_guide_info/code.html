@@ -1,0 +1,310 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Arenas - Documentation &amp; Math Overview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&amp;family=Geist:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary": "#2f3131",
+                        "on-primary-fixed-variant": "#454747",
+                        "on-background": "#e5e2e1",
+                        "error-coral": "#EF4444",
+                        "on-tertiary": "#33302d",
+                        "tertiary-fixed-dim": "#cbc5c1",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#c6c5cf",
+                        "tertiary-container": "#e8e1dc",
+                        "on-secondary-fixed-variant": "#46464e",
+                        "surface-tint": "#c6c6c7",
+                        "primary-fixed": "#e2e2e2",
+                        "primary-fixed-dim": "#c6c6c7",
+                        "secondary-container": "#4a4b53",
+                        "on-error": "#690005",
+                        "border-neutral": "#27272A",
+                        "on-surface": "#e5e2e1",
+                        "primary-container": "#e2e2e2",
+                        "surface-container": "#201f1f",
+                        "outline": "#8e9192",
+                        "surface-container-high": "#2a2a2a",
+                        "on-secondary": "#2f3038",
+                        "on-secondary-fixed": "#1a1b22",
+                        "background": "#131313",
+                        "tertiary-fixed": "#e8e1dc",
+                        "error": "#ffb4ab",
+                        "on-surface-variant": "#c4c7c8",
+                        "surface-glass": "rgba(20, 20, 20, 0.7)",
+                        "inverse-on-surface": "#313030",
+                        "surface-container-highest": "#353534",
+                        "on-primary-container": "#636565",
+                        "tertiary": "#ffffff",
+                        "outline-variant": "#444748",
+                        "on-tertiary-fixed-variant": "#494643",
+                        "on-tertiary-fixed": "#1d1b18",
+                        "primary": "#ffffff",
+                        "success-neon": "#22C55E",
+                        "inverse-primary": "#5d5f5f",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-variant": "#353534",
+                        "error-container": "#93000a",
+                        "surface": "#131313",
+                        "surface-bright": "#3a3939",
+                        "secondary-fixed-dim": "#c6c5cf",
+                        "on-primary-fixed": "#1a1c1c",
+                        "on-secondary-container": "#bcbbc5",
+                        "surface-dim": "#131313",
+                        "surface-container-low": "#1c1b1b",
+                        "secondary-fixed": "#e3e1ec",
+                        "on-tertiary-container": "#686460",
+                        "inverse-surface": "#e5e2e1"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "container-max": "1280px",
+                        "stack-md": "16px",
+                        "margin-mobile": "20px",
+                        "base": "4px",
+                        "stack-lg": "32px",
+                        "gutter": "24px",
+                        "stack-sm": "8px",
+                        "margin-desktop": "48px"
+                    },
+                    fontFamily: {
+                        "body-sm": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "label-caps": ["Epilogue"],
+                        "data-mono-sm": ["Epilogue"],
+                        "body-lg": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "nav-item": ["Epilogue"],
+                        "data-mono-lg": ["Epilogue"]
+                    },
+                    fontSize: {
+                        "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "500" }],
+                        "label-caps": ["11px", { lineHeight: "16px", letterSpacing: "0.08em", fontWeight: "700" }],
+                        "data-mono-sm": ["13px", { lineHeight: "18px", letterSpacing: "0.05em", fontWeight: "500" }],
+                        "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "headline-lg": ["40px", { lineHeight: "48px", letterSpacing: "-0.03em", fontWeight: "600" }],
+                        "nav-item": ["14px", { lineHeight: "20px", fontWeight: "500" }],
+                        "data-mono-lg": ["18px", { lineHeight: "24px", letterSpacing: "0.02em", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Smooth scrolling for anchor links */
+        html { scroll-behavior: smooth; }
+        /* Custom scrollbar for technical code blocks */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3F3F46; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #52525B; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-sm antialiased flex min-h-screen">
+<!-- JSON: SideNavBar -->
+<aside class="bg-surface-glass dark:bg-surface-glass h-screen w-64 fixed left-0 top-0 border-r border-border-neutral backdrop-blur-xl flex flex-col py-gutter px-stack-md transition-all duration-200 ease-in-out z-50">
+<div class="mb-8 px-3">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary">Arenas</span>
+<div class="font-body-sm text-body-sm text-on-surface-variant mt-1">Campus Prediction Market</div>
+</div>
+<nav class="flex-1 flex flex-col gap-2">
+<!-- Inactive -->
+<a class="flex items-center gap-3 py-2 px-3 text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">show_chart</span>
+<span>Markets</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 py-2 px-3 text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">sensors</span>
+<span>Live</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 py-2 px-3 text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span>Leaderboard</span>
+</a>
+<!-- Active (Semantic match: Guide/Info page) -->
+<a class="flex items-center gap-3 py-2 px-3 text-primary font-bold border-r-2 border-primary bg-surface-container hover:bg-surface-container-high transition-colors rounded-l-lg -mr-stack-md pr-[calc(16px+1px)]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span>Guide</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 py-2 px-3 text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">info</span>
+<span>About</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-2 pt-4 border-t border-border-neutral">
+<a class="flex items-center gap-3 py-2 px-3 text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 py-2 px-3 text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span>Profile</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col ml-64 min-w-0">
+<!-- JSON: TopNavBar -->
+<header class="bg-surface-glass dark:bg-surface-glass docked full-width top-0 sticky border-b border-border-neutral backdrop-blur-xl flex justify-between items-center h-16 px-gutter z-40">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-black text-primary md:hidden">Arenas</span>
+</div>
+<div class="flex items-center gap-4">
+<!-- Search Mock -->
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="bg-surface-container border border-border-neutral rounded-full py-1.5 pl-10 pr-4 text-body-sm font-body-sm text-on-surface focus:outline-none focus:border-primary transition-colors w-64" placeholder="Search documentation..." type="text">
+</div>
+<!-- Trailing Actions -->
+<button class="text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</button>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 w-full max-w-container-max mx-auto px-margin-desktop py-stack-lg flex flex-col gap-stack-lg">
+<!-- Page Header & Anchors -->
+<section class="flex flex-col gap-stack-md border-b border-border-neutral pb-stack-md">
+<h1 class="font-headline-lg text-headline-lg text-primary">Documentation Hub</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                    Comprehensive guides and technical specifications for the Arenas prediction market engine.
+                </p>
+<div class="flex flex-wrap gap-2 mt-4">
+<a class="px-4 py-1.5 rounded-full border border-border-neutral bg-surface-container font-label-caps text-label-caps text-on-surface hover:bg-surface-container-high transition-colors" href="#trading">#TRADING</a>
+<a class="px-4 py-1.5 rounded-full border border-border-neutral bg-surface-container font-label-caps text-label-caps text-on-surface hover:bg-surface-container-high transition-colors" href="#hosting">#HOSTING</a>
+<a class="px-4 py-1.5 rounded-full border border-border-neutral bg-surface-container font-label-caps text-label-caps text-on-surface hover:bg-surface-container-high transition-colors" href="#lmsr">#LMSR_MATH</a>
+<a class="px-4 py-1.5 rounded-full border border-border-neutral bg-surface-container font-label-caps text-label-caps text-on-surface hover:bg-surface-container-high transition-colors" href="#faq">#FAQ</a>
+</div>
+</section>
+<!-- LEGAL BANNER -->
+<section class="bg-surface-container border border-error-coral/30 rounded-xl p-stack-md flex items-start gap-4">
+<span class="material-symbols-outlined text-error-coral mt-0.5" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div>
+<h3 class="font-headline-md text-headline-md text-error-coral text-base mb-1">Zero Cash Value Notice</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Arenas operates on a strictly play-money basis using synthetic campus tokens. Markets hold zero real-world cash value and are designed purely for educational and predictive modeling purposes. No fiat currency can be deposited or withdrawn.
+                    </p>
+</div>
+</section>
+<!-- GUIDE: 4-Step Tutorial -->
+<section class="flex flex-col gap-stack-md scroll-mt-24" id="trading">
+<h2 class="font-headline-md text-headline-md text-primary">Trading Basics</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Step 1 -->
+<div class="bg-surface-container border border-border-neutral rounded-xl p-stack-md flex flex-col gap-4 hover:border-outline-variant transition-colors group">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-border-neutral flex items-center justify-center font-data-mono-lg text-data-mono-lg text-primary group-hover:bg-primary group-hover:text-surface-container-lowest transition-colors">1</div>
+<h4 class="font-headline-md text-headline-md text-lg">Find a Market</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Browse active campus events or utilize the search function to find specific predictions.</p>
+</div>
+<!-- Step 2 -->
+<div class="bg-surface-container border border-border-neutral rounded-xl p-stack-md flex flex-col gap-4 hover:border-outline-variant transition-colors group">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-border-neutral flex items-center justify-center font-data-mono-lg text-data-mono-lg text-primary group-hover:bg-primary group-hover:text-surface-container-lowest transition-colors">2</div>
+<h4 class="font-headline-md text-headline-md text-lg">Analyze Odds</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Review current implied probabilities. The LMSR AMM dynamically adjusts prices based on total volume.</p>
+</div>
+<!-- Step 3 -->
+<div class="bg-surface-container border border-border-neutral rounded-xl p-stack-md flex flex-col gap-4 hover:border-outline-variant transition-colors group">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-border-neutral flex items-center justify-center font-data-mono-lg text-data-mono-lg text-primary group-hover:bg-primary group-hover:text-surface-container-lowest transition-colors">3</div>
+<h4 class="font-headline-md text-headline-md text-lg">Execute Trade</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Purchase YES or NO shares. Your campus token balance will be deducted based on the computed cost.</p>
+</div>
+<!-- Step 4 -->
+<div class="bg-surface-container border border-border-neutral rounded-xl p-stack-md flex flex-col gap-4 hover:border-outline-variant transition-colors group">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-border-neutral flex items-center justify-center font-data-mono-lg text-data-mono-lg text-primary group-hover:bg-primary group-hover:text-surface-container-lowest transition-colors">4</div>
+<h4 class="font-headline-md text-headline-md text-lg">Claim Payouts</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Once an event resolves, winning shares automatically convert to tokens at 1.00 per share.</p>
+</div>
+</div>
+</section>
+<div class="h-px w-full bg-border-neutral my-4"></div>
+<!-- INFO: Math Overview -->
+<section class="flex flex-col gap-stack-md scroll-mt-24" id="lmsr">
+<h2 class="font-headline-md text-headline-md text-primary">LMSR Mathematical Model</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-3xl">
+                    Arenas utilizes a Logarithmic Market Scoring Rule (LMSR) Automated Market Maker (AMM) to ensure continuous liquidity and bound maximum loss for market creators.
+                </p>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-stack-md mt-2">
+<!-- Cost Function -->
+<div class="bg-surface-container border border-border-neutral rounded-xl overflow-hidden flex flex-col">
+<div class="bg-surface-container-high px-4 py-2 border-b border-border-neutral flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">functions</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Cost Function C(q)</span>
+</div>
+<div class="p-stack-md flex-1">
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">
+                                The total cost of outstanding shares is calculated using the standard LMSR cost function. 
+                            </p>
+<div class="bg-surface-container-highest border border-border-neutral rounded p-4 overflow-x-auto">
+<code class="font-data-mono-lg text-data-mono-lg text-primary whitespace-nowrap">
+                                    C(q) = b * ln( Σ e^(q_i / b) )
+                                </code>
+</div>
+</div>
+</div>
+<!-- Implied Odds -->
+<div class="bg-surface-container border border-border-neutral rounded-xl overflow-hidden flex flex-col">
+<div class="bg-surface-container-high px-4 py-2 border-b border-border-neutral flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">percent</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Implied Probability</span>
+</div>
+<div class="p-stack-md flex-1">
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">
+                                The instantaneous marginal price (or implied probability) of a specific outcome <i>i</i>.
+                            </p>
+<div class="bg-surface-container-highest border border-border-neutral rounded p-4 overflow-x-auto">
+<code class="font-data-mono-lg text-data-mono-lg text-primary whitespace-nowrap">
+                                    p(i) = e^(q_i / b) / Σ e^(q_j / b)
+                                </code>
+</div>
+</div>
+</div>
+</div>
+<!-- Liquidity Parameter -->
+<div class="bg-surface-container border border-border-neutral rounded-xl p-stack-md flex items-start gap-4 mt-4">
+<span class="material-symbols-outlined text-primary mt-0.5">tune</span>
+<div>
+<h4 class="font-headline-md text-headline-md text-base mb-2">The Liquidity Parameter (b)</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                            The parameter <code class="font-data-mono-sm text-data-mono-sm bg-surface-container-highest px-1 py-0.5 rounded border border-border-neutral text-primary">b</code> dictates market depth. A larger <code class="font-data-mono-sm text-data-mono-sm bg-surface-container-highest px-1 py-0.5 rounded border border-border-neutral text-primary">b</code> requires more volume to shift prices, simulating deep liquidity, but increases the maximum possible loss (subsidy) for the market creator, bound at <code class="font-data-mono-sm text-data-mono-sm bg-surface-container-highest px-1 py-0.5 rounded border border-border-neutral text-primary">b * ln(N)</code> where N is the number of outcomes.
+                        </p>
+</div>
+</div>
+</section>
+</main>
+<!-- JSON: Footer -->
+<footer class="bg-surface dark:bg-surface w-full mt-auto border-t border-border-neutral flex justify-between items-center py-stack-lg px-gutter max-w-container-max mx-auto w-full">
+<div class="font-label-caps text-label-caps text-on-surface-variant">
+                © 2024 Arenas Markets. All rights reserved.
+            </div>
+<div class="flex gap-6">
+<!-- Links list -->
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary hover:underline transition-all opacity-80 hover:opacity-100" href="#">Legal</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary hover:underline transition-all opacity-80 hover:opacity-100" href="#">Privacy</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary hover:underline transition-all opacity-80 hover:opacity-100" href="#">Terms</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant text-primary hover:underline transition-all opacity-80 hover:opacity-100" href="#">Docs</a>
+</div>
+</footer>
+</div>
+</body></html>

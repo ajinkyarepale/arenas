@@ -1,0 +1,400 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Arenas - Organizer Dashboard</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary": "#2f3131",
+                    "on-primary-fixed-variant": "#454747",
+                    "on-background": "#e5e2e1",
+                    "error-coral": "#EF4444",
+                    "on-tertiary": "#33302d",
+                    "tertiary-fixed-dim": "#cbc5c1",
+                    "on-error-container": "#ffdad6",
+                    "secondary": "#c6c5cf",
+                    "tertiary-container": "#e8e1dc",
+                    "on-secondary-fixed-variant": "#46464e",
+                    "surface-tint": "#c6c6c7",
+                    "primary-fixed": "#e2e2e2",
+                    "primary-fixed-dim": "#c6c6c7",
+                    "secondary-container": "#4a4b53",
+                    "on-error": "#690005",
+                    "border-neutral": "#27272A",
+                    "on-surface": "#e5e2e1",
+                    "primary-container": "#e2e2e2",
+                    "surface-container": "#201f1f",
+                    "outline": "#8e9192",
+                    "surface-container-high": "#2a2a2a",
+                    "on-secondary": "#2f3038",
+                    "on-secondary-fixed": "#1a1b22",
+                    "background": "#131313",
+                    "tertiary-fixed": "#e8e1dc",
+                    "error": "#ffb4ab",
+                    "on-surface-variant": "#c4c7c8",
+                    "surface-glass": "rgba(20, 20, 20, 0.7)",
+                    "inverse-on-surface": "#313030",
+                    "surface-container-highest": "#353534",
+                    "on-primary-container": "#636565",
+                    "tertiary": "#ffffff",
+                    "outline-variant": "#444748",
+                    "on-tertiary-fixed-variant": "#494643",
+                    "on-tertiary-fixed": "#1d1b18",
+                    "primary": "#ffffff",
+                    "success-neon": "#22C55E",
+                    "inverse-primary": "#5d5f5f",
+                    "surface-container-lowest": "#0e0e0e",
+                    "surface-variant": "#353534",
+                    "error-container": "#93000a",
+                    "surface": "#131313",
+                    "surface-bright": "#3a3939",
+                    "secondary-fixed-dim": "#c6c5cf",
+                    "on-primary-fixed": "#1a1c1c",
+                    "on-secondary-container": "#bcbbc5",
+                    "surface-dim": "#131313",
+                    "surface-container-low": "#1c1b1b",
+                    "secondary-fixed": "#e3e1ec",
+                    "on-tertiary-container": "#686460",
+                    "inverse-surface": "#e5e2e1"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-max": "1280px",
+                    "stack-md": "16px",
+                    "margin-mobile": "20px",
+                    "base": "4px",
+                    "stack-lg": "32px",
+                    "gutter": "24px",
+                    "stack-sm": "8px",
+                    "margin-desktop": "48px"
+            },
+            "fontFamily": {
+                    "body-sm": [
+                            "Geist"
+                    ],
+                    "headline-md": [
+                            "Geist"
+                    ],
+                    "label-caps": [
+                            "Epilogue"
+                    ],
+                    "data-mono-sm": [
+                            "Epilogue"
+                    ],
+                    "body-lg": [
+                            "Geist"
+                    ],
+                    "headline-lg": [
+                            "Geist"
+                    ],
+                    "nav-item": [
+                            "Epilogue"
+                    ],
+                    "data-mono-lg": [
+                            "Epilogue"
+                    ]
+            },
+            "fontSize": {
+                    "body-sm": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "label-caps": [
+                            "11px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.08em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "data-mono-sm": [
+                            "13px",
+                            {
+                                    "lineHeight": "18px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "body-lg": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-lg": [
+                            "40px",
+                            {
+                                    "lineHeight": "48px",
+                                    "letterSpacing": "-0.03em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "nav-item": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "data-mono-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "24px",
+                                    "letterSpacing": "0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ]
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-background text-on-surface min-h-screen font-body-sm overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- WebGL Ambient Background -->
+<div class="fixed inset-0 z-0 opacity-20 pointer-events-none">
+
+</div>
+<!-- SideNavBar from JSON -->
+<aside class="bg-surface-glass dark:bg-surface-glass h-screen w-64 fixed left-0 top-0 border-r border-border-neutral backdrop-blur-xl flex flex-col h-full py-gutter px-stack-md z-50 transition-all duration-200 ease-in-out hidden md:flex">
+<div class="mb-stack-lg flex items-center gap-stack-sm px-2">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-primary text-lg" style="font-variation-settings: 'FILL' 1;">bubble_chart</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary leading-tight">Arenas</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant leading-none">Campus Prediction Market</p>
+</div>
+</div>
+<nav class="flex-grow flex flex-col gap-base mt-4">
+<!-- Tabs - None are "active" as this is an organizer view outside the main user flow -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">show_chart</span>
+<span>Markets</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">sensors</span>
+<span>Live</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span>Leaderboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span>Guide</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">info</span>
+<span>About</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-base border-t border-border-neutral pt-stack-sm">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span>Profile</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar from JSON -->
+<header class="bg-surface-glass dark:bg-surface-glass text-primary dark:text-primary docked full-width top-0 sticky border-b border-border-neutral backdrop-blur-xl flex justify-between items-center h-16 px-gutter ml-0 md:ml-64 z-40">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-black text-primary md:hidden">Arenas</span>
+<div class="hidden md:flex items-center gap-2 text-on-surface-variant bg-surface-container rounded-full px-4 py-1.5 border border-border-neutral focus-within:border-primary focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">search</span>
+<input class="bg-transparent border-none outline-none font-body-sm text-body-sm w-48 placeholder:text-on-surface-variant/50 focus:ring-0" placeholder="Search markets..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-0 md:ml-64 relative z-10 flex flex-col min-h-[calc(100vh-4rem)]">
+<div class="w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg flex-grow">
+<!-- Dashboard Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-stack-md mb-stack-lg">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary">Your Arenas</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Manage your prediction market tournaments and monitor live engagement.</p>
+</div>
+<button class="bg-primary text-on-primary font-nav-item text-nav-item px-6 py-3 rounded-full flex items-center justify-center gap-2 hover:bg-primary-fixed transition-colors whitespace-nowrap self-start md:self-auto shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 600;">add</span>
+                    New Arena
+                </button>
+</div>
+<!-- Metrics Row -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-stack-md mb-stack-lg">
+<div class="bg-surface-glass border border-border-neutral rounded-xl p-stack-md backdrop-blur-md relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-surface-container-high/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">Total Arenas</p>
+<p class="font-data-mono-lg text-data-mono-lg text-primary text-3xl">14</p>
+</div>
+<div class="bg-surface-glass border border-border-neutral rounded-xl p-stack-md backdrop-blur-md relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-surface-container-high/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<div class="flex items-center justify-between mb-2">
+<p class="font-label-caps text-label-caps text-on-surface-variant">Live Now</p>
+<span class="w-2 h-2 rounded-full bg-success-neon animate-pulse shadow-[0_0_8px_#22C55E]"></span>
+</div>
+<p class="font-data-mono-lg text-data-mono-lg text-primary text-3xl">3</p>
+</div>
+<div class="bg-surface-glass border border-border-neutral rounded-xl p-stack-md backdrop-blur-md relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-surface-container-high/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">Total Participants</p>
+<p class="font-data-mono-lg text-data-mono-lg text-primary text-3xl">1,842</p>
+</div>
+<div class="bg-surface-glass border border-border-neutral rounded-xl p-stack-md backdrop-blur-md relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-surface-container-high/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">Total Trades</p>
+<p class="font-data-mono-lg text-data-mono-lg text-primary text-3xl">45.2k</p>
+</div>
+</div>
+<!-- Arena Cards List -->
+<div class="flex flex-col gap-stack-md">
+<!-- Card 1: LIVE -->
+<div class="bg-surface-glass border border-border-neutral rounded-xl p-stack-md flex flex-col md:flex-row gap-stack-md justify-between items-start md:items-center hover:border-outline transition-colors backdrop-blur-md">
+<div class="flex flex-col gap-3 w-full md:w-auto">
+<div class="flex items-center gap-3">
+<span class="bg-surface-container-high text-success-neon border border-success-neon/30 px-2 py-0.5 rounded-full font-label-caps text-[10px] tracking-widest flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-success-neon"></span> LIVE
+                            </span>
+<span class="bg-surface-container border border-border-neutral px-2 py-0.5 rounded-full font-data-mono-sm text-[11px] text-on-surface-variant uppercase">
+                                DEMO24
+                            </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary">Fall '24 Tech Symposium Predictions</h3>
+<div class="flex flex-wrap items-center gap-x-6 gap-y-2 font-data-mono-sm text-data-mono-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">toll</span> USDC</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">layers</span> 5 Rounds</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">water_drop</span> $25k Liq</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">groups</span> 342 Players</span>
+</div>
+</div>
+<div class="flex items-center gap-3 w-full md:w-auto justify-end mt-4 md:mt-0">
+<button class="flex items-center justify-center w-10 h-10 rounded-full border border-border-neutral text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors" title="Big Screen View">
+<span class="material-symbols-outlined text-xl">desktop_windows</span>
+</button>
+<button class="bg-surface-container border border-border-neutral text-on-surface font-nav-item text-nav-item px-5 py-2 rounded-full hover:bg-surface-container-high hover:border-outline transition-all whitespace-nowrap">
+                            Control Panel
+                        </button>
+</div>
+</div>
+<!-- Card 2: LOBBY -->
+<div class="bg-surface-glass border border-border-neutral rounded-xl p-stack-md flex flex-col md:flex-row gap-stack-md justify-between items-start md:items-center hover:border-outline transition-colors backdrop-blur-md opacity-90">
+<div class="flex flex-col gap-3 w-full md:w-auto">
+<div class="flex items-center gap-3">
+<span class="bg-surface-container-high text-secondary border border-secondary/30 px-2 py-0.5 rounded-full font-label-caps text-[10px] tracking-widest flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[12px]">schedule</span> LOBBY
+                            </span>
+<span class="bg-surface-container border border-border-neutral px-2 py-0.5 rounded-full font-data-mono-sm text-[11px] text-on-surface-variant uppercase">
+                                HACK45
+                            </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary">CS Dept Hackathon Winners</h3>
+<div class="flex flex-wrap items-center gap-x-6 gap-y-2 font-data-mono-sm text-data-mono-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">stars</span> Points</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">layers</span> 1 Round</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">sports_score</span> 1000 pts</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">groups</span> 120 Players (Waiting)</span>
+</div>
+</div>
+<div class="flex items-center gap-3 w-full md:w-auto justify-end mt-4 md:mt-0">
+<button class="bg-surface-container border border-border-neutral text-on-surface font-nav-item text-nav-item px-5 py-2 rounded-full hover:bg-surface-container-high hover:border-outline transition-all whitespace-nowrap">
+                            Control Panel
+                        </button>
+</div>
+</div>
+<!-- Card 3: DRAFT -->
+<div class="bg-surface-glass border border-border-neutral border-dashed rounded-xl p-stack-md flex flex-col md:flex-row gap-stack-md justify-between items-start md:items-center hover:border-solid hover:border-outline transition-all backdrop-blur-md opacity-75">
+<div class="flex flex-col gap-3 w-full md:w-auto">
+<div class="flex items-center gap-3">
+<span class="border border-border-neutral text-on-surface-variant px-2 py-0.5 rounded-full font-label-caps text-[10px] tracking-widest flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[12px]">edit</span> DRAFT
+                            </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary/80">Intramural Basketball Finals</h3>
+<div class="flex flex-wrap items-center gap-x-6 gap-y-2 font-data-mono-sm text-data-mono-sm text-on-surface-variant/70">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">toll</span> USDC</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">settings</span> Setup Incomplete</span>
+</div>
+</div>
+<div class="flex items-center gap-3 w-full md:w-auto justify-end mt-4 md:mt-0">
+<button class="bg-transparent border border-border-neutral text-on-surface-variant font-nav-item text-nav-item px-5 py-2 rounded-full hover:text-primary hover:border-outline transition-all whitespace-nowrap">
+                            Edit Draft
+                        </button>
+</div>
+</div>
+<!-- Card 4: ENDED -->
+<div class="bg-surface-container-lowest border border-border-neutral rounded-xl p-stack-md flex flex-col md:flex-row gap-stack-md justify-between items-start md:items-center backdrop-blur-sm opacity-60 grayscale-[50%] hover:grayscale-0 transition-all">
+<div class="flex flex-col gap-3 w-full md:w-auto">
+<div class="flex items-center gap-3">
+<span class="bg-surface-container border border-border-neutral text-on-surface-variant px-2 py-0.5 rounded-full font-label-caps text-[10px] tracking-widest flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[12px]">done_all</span> ENDED
+                            </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary">Student Senate Election '23</h3>
+<div class="flex flex-wrap items-center gap-x-6 gap-y-2 font-data-mono-sm text-data-mono-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">calendar_today</span> Oct 12 - Nov 05</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">groups</span> 890 Players</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">receipt_long</span> 12.4k Trades</span>
+</div>
+</div>
+<div class="flex items-center gap-3 w-full md:w-auto justify-end mt-4 md:mt-0">
+<button class="bg-transparent border border-border-neutral text-on-surface font-nav-item text-nav-item px-5 py-2 rounded-full hover:bg-surface-container hover:border-outline transition-all whitespace-nowrap">
+                            View Results
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer from JSON -->
+<footer class="bg-surface dark:bg-surface w-full mt-auto border-t border-border-neutral flex flex-col md:flex-row justify-between items-center py-stack-lg px-gutter max-w-container-max mx-auto gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">© 2024 Arenas Markets. All rights reserved.</span>
+<div class="flex gap-6">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-all opacity-80 hover:opacity-100" href="#">Legal</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-all opacity-80 hover:opacity-100" href="#">Privacy</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-all opacity-80 hover:opacity-100" href="#">Terms</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-all opacity-80 hover:opacity-100" href="#">Docs</a>
+</div>
+</footer>
+</main>
+</body></html>

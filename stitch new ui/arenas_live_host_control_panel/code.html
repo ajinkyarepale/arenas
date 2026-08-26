@@ -1,0 +1,499 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Arenas - Live Host Control Panel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&amp;family=Geist:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary": "#2f3131",
+                      "on-primary-fixed-variant": "#454747",
+                      "on-background": "#e5e2e1",
+                      "error-coral": "#EF4444",
+                      "on-tertiary": "#33302d",
+                      "tertiary-fixed-dim": "#cbc5c1",
+                      "on-error-container": "#ffdad6",
+                      "secondary": "#c6c5cf",
+                      "tertiary-container": "#e8e1dc",
+                      "on-secondary-fixed-variant": "#46464e",
+                      "surface-tint": "#c6c6c7",
+                      "primary-fixed": "#e2e2e2",
+                      "primary-fixed-dim": "#c6c6c7",
+                      "secondary-container": "#4a4b53",
+                      "on-error": "#690005",
+                      "border-neutral": "#27272A",
+                      "on-surface": "#e5e2e1",
+                      "primary-container": "#e2e2e2",
+                      "surface-container": "#201f1f",
+                      "outline": "#8e9192",
+                      "surface-container-high": "#2a2a2a",
+                      "on-secondary": "#2f3038",
+                      "on-secondary-fixed": "#1a1b22",
+                      "background": "#131313",
+                      "tertiary-fixed": "#e8e1dc",
+                      "error": "#ffb4ab",
+                      "on-surface-variant": "#c4c7c8",
+                      "surface-glass": "rgba(20, 20, 20, 0.7)",
+                      "inverse-on-surface": "#313030",
+                      "surface-container-highest": "#353534",
+                      "on-primary-container": "#636565",
+                      "tertiary": "#ffffff",
+                      "outline-variant": "#444748",
+                      "on-tertiary-fixed-variant": "#494643",
+                      "on-tertiary-fixed": "#1d1b18",
+                      "primary": "#ffffff",
+                      "success-neon": "#22C55E",
+                      "inverse-primary": "#5d5f5f",
+                      "surface-container-lowest": "#0e0e0e",
+                      "surface-variant": "#353534",
+                      "error-container": "#93000a",
+                      "surface": "#131313",
+                      "surface-bright": "#3a3939",
+                      "secondary-fixed-dim": "#c6c5cf",
+                      "on-primary-fixed": "#1a1c1c",
+                      "on-secondary-container": "#bcbbc5",
+                      "surface-dim": "#131313",
+                      "surface-container-low": "#1c1b1b",
+                      "secondary-fixed": "#e3e1ec",
+                      "on-tertiary-container": "#686460",
+                      "inverse-surface": "#e5e2e1"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-max": "1280px",
+                      "stack-md": "16px",
+                      "margin-mobile": "20px",
+                      "base": "4px",
+                      "stack-lg": "32px",
+                      "gutter": "24px",
+                      "stack-sm": "8px",
+                      "margin-desktop": "48px"
+              },
+              "fontFamily": {
+                      "body-sm": [
+                              "Geist"
+                      ],
+                      "headline-md": [
+                              "Geist"
+                      ],
+                      "label-caps": [
+                              "Epilogue"
+                      ],
+                      "data-mono-sm": [
+                              "Epilogue"
+                      ],
+                      "body-lg": [
+                              "Geist"
+                      ],
+                      "headline-lg": [
+                              "Geist"
+                      ],
+                      "nav-item": [
+                              "Epilogue"
+                      ],
+                      "data-mono-lg": [
+                              "Epilogue"
+                      ]
+              },
+              "fontSize": {
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-caps": [
+                              "11px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.08em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "data-mono-sm": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.03em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "nav-item": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "data-mono-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: #131313;
+            color: #e5e2e1;
+        }
+        /* Hide scrollbar for clean data tables */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased flex">
+<!-- SideNavBar (Shared Component) -->
+<aside class="bg-surface-glass dark:bg-surface-glass h-screen w-64 fixed left-0 top-0 border-r border-border-neutral backdrop-blur-xl flex flex-col h-full py-gutter px-stack-md z-50">
+<div class="mb-stack-lg flex flex-col gap-base">
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary">Arenas</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Campus Prediction Market</p>
+</div>
+<nav class="flex-1 flex flex-col gap-stack-sm mt-stack-md">
+<!-- Active State on Live -->
+<a class="text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors flex items-center gap-stack-sm p-stack-sm rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="show_chart">show_chart</span>
+<span>Markets</span>
+</a>
+<a class="text-primary font-bold border-r-2 border-primary hover:bg-surface-container-high hover:text-primary transition-colors flex items-center gap-stack-sm p-stack-sm rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="sensors">sensors</span>
+<span>Live</span>
+</a>
+<a class="text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors flex items-center gap-stack-sm p-stack-sm rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span>Leaderboard</span>
+</a>
+<a class="text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors flex items-center gap-stack-sm p-stack-sm rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span>Guide</span>
+</a>
+<a class="text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors flex items-center gap-stack-sm p-stack-sm rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="info">info</span>
+<span>About</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-border-neutral pt-stack-md flex flex-col gap-stack-sm">
+<a class="text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors flex items-center gap-stack-sm p-stack-sm rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+<a class="text-on-surface-variant font-nav-item hover:bg-surface-container-high hover:text-primary transition-colors flex items-center gap-stack-sm p-stack-sm rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span>Profile</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 flex flex-col min-h-screen">
+<!-- TopNavBar (Shared Component) -->
+<header class="bg-surface-glass dark:bg-surface-glass docked full-width top-0 sticky border-b border-border-neutral backdrop-blur-xl flex justify-between items-center h-16 px-gutter z-40">
+<div class="flex items-center gap-gutter">
+<h2 class="font-headline-md text-headline-md font-black text-primary">Live Host Panel</h2>
+</div>
+<div class="flex items-center gap-stack-md">
+<!-- Search Bar On Right placeholder -->
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="bg-surface-container-high border-none rounded-lg pl-10 pr-4 py-2 text-body-sm font-body-sm focus:ring-1 focus:ring-primary outline-none text-on-surface placeholder:text-on-surface-variant w-64" placeholder="Search Markets..." type="text">
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90 transition-transform p-2">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90 transition-transform p-2">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+</button>
+</div>
+</header>
+<!-- Canvas -->
+<div class="p-margin-desktop flex-1 flex flex-col gap-gutter max-w-container-max mx-auto w-full">
+<!-- Action Bar -->
+<section class="flex flex-wrap gap-stack-md justify-between items-center bg-surface-container p-stack-md rounded-xl border border-border-neutral">
+<div class="flex gap-stack-md">
+<button class="bg-primary text-on-primary rounded-full px-6 py-2 font-label-caps text-label-caps hover:bg-primary-fixed-dim transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="play_arrow" style="font-size: 16px;">play_arrow</span>
+                        START SESSION
+                    </button>
+<button class="border border-border-neutral text-on-surface rounded-full px-6 py-2 font-label-caps text-label-caps hover:bg-surface-container-high hover:border-outline-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="skip_next" style="font-size: 16px;">skip_next</span>
+                        ADVANCE ROUND
+                    </button>
+<button class="border border-border-neutral text-on-surface rounded-full px-6 py-2 font-label-caps text-label-caps hover:bg-surface-container-high hover:border-outline-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="pause" style="font-size: 16px;">pause</span>
+                        PAUSE SESSION
+                    </button>
+</div>
+<button class="border border-border-neutral text-primary rounded-full px-6 py-2 font-label-caps text-label-caps hover:bg-surface-container-high hover:border-outline-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="present_to_all" style="font-size: 16px;">present_to_all</span>
+                    PROJECTOR VIEW
+                </button>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-gutter h-[600px]">
+<!-- Live Round Monitor (Col 8) -->
+<section class="col-span-12 lg:col-span-8 bg-surface-glass backdrop-blur-xl border border-border-neutral rounded-xl p-stack-lg flex flex-col relative overflow-hidden">
+<div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, transparent 70%);"></div>
+<div class="flex justify-between items-start mb-stack-lg relative z-10">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Round 4: AAPL EOD</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Closes at 16:00 EST</p>
+</div>
+<div class="text-right">
+<div class="font-data-mono-lg text-headline-lg text-primary">03:20</div>
+<div class="font-label-caps text-label-caps text-error-coral animate-pulse flex items-center gap-1 justify-end">
+<span class="material-symbols-outlined" data-icon="fiber_manual_record" style="font-size: 12px; font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+                                LIVE
+                            </div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-stack-md mb-stack-lg relative z-10 flex-1">
+<div class="bg-surface-container rounded-lg border border-border-neutral p-stack-md flex flex-col justify-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">STRIKE PRICE</span>
+<span class="font-data-mono-lg text-headline-md text-on-surface">$185.50</span>
+</div>
+<div class="bg-surface-container rounded-lg border border-border-neutral p-stack-md flex flex-col justify-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">SPOT PRICE</span>
+<span class="font-data-mono-lg text-headline-md text-success-neon">$186.12</span>
+</div>
+</div>
+<div class="flex gap-stack-md relative z-10">
+<div class="flex-1 bg-surface-container rounded-lg border border-border-neutral p-stack-md relative overflow-hidden group">
+<div class="absolute inset-0 bg-success-neon/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-success-neon">YES SHARES</span>
+<span class="material-symbols-outlined text-success-neon" data-icon="trending_up">trending_up</span>
+</div>
+<div class="font-data-mono-lg text-headline-md text-on-surface">4,250</div>
+<div class="w-full bg-surface-container-high h-1 mt-2 rounded-full overflow-hidden">
+<div class="bg-success-neon h-full w-[65%]"></div>
+</div>
+</div>
+<div class="flex-1 bg-surface-container rounded-lg border border-border-neutral p-stack-md relative overflow-hidden group">
+<div class="absolute inset-0 bg-error-coral/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-error-coral">NO SHARES</span>
+<span class="material-symbols-outlined text-error-coral" data-icon="trending_down">trending_down</span>
+</div>
+<div class="font-data-mono-lg text-headline-md text-on-surface">2,105</div>
+<div class="w-full bg-surface-container-high h-1 mt-2 rounded-full overflow-hidden">
+<div class="bg-error-coral h-full w-[35%]"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Column (Col 4) -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-gutter">
+<!-- Emergency Overrides Card -->
+<section class="bg-surface-glass backdrop-blur-xl border border-error-coral/30 rounded-xl p-stack-md flex flex-col relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-20">
+<span class="material-symbols-outlined text-error-coral" data-icon="warning" style="font-size: 64px;">warning</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-error-coral mb-stack-md relative z-10 flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="gavel" style="font-size: 16px;">gavel</span>
+                            EMERGENCY OVERRIDES
+                        </h3>
+<div class="flex flex-col gap-stack-sm relative z-10">
+<button class="bg-surface-container border border-error-coral/50 text-error-coral rounded-lg py-3 px-4 font-label-caps text-label-caps hover:bg-error-coral hover:text-on-error hover:border-error-coral transition-all text-left flex justify-between items-center">
+                                FORCE RESOLVE YES
+                                <span class="material-symbols-outlined" data-icon="check_circle" style="font-size: 16px;">check_circle</span>
+</button>
+<button class="bg-surface-container border border-error-coral/50 text-error-coral rounded-lg py-3 px-4 font-label-caps text-label-caps hover:bg-error-coral hover:text-on-error hover:border-error-coral transition-all text-left flex justify-between items-center">
+                                FORCE RESOLVE NO
+                                <span class="material-symbols-outlined" data-icon="cancel" style="font-size: 16px;">cancel</span>
+</button>
+<button class="bg-error-container text-on-error-container border border-error-coral rounded-lg py-3 px-4 font-label-caps text-label-caps hover:opacity-90 transition-all text-left flex justify-between items-center mt-2">
+                                VOID ROUND &amp; REFUND
+                                <span class="material-symbols-outlined" data-icon="delete_forever" style="font-size: 16px;">delete_forever</span>
+</button>
+</div>
+</section>
+<!-- Admin Trade Tape -->
+<section class="bg-surface-glass backdrop-blur-xl border border-border-neutral rounded-xl p-stack-md flex-1 flex flex-col overflow-hidden">
+<div class="flex justify-between items-center mb-stack-sm">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="receipt_long" style="font-size: 16px;">receipt_long</span>
+                                ADMIN TRADE TAPE
+                            </h3>
+<span class="font-label-caps text-label-caps text-primary px-2 py-1 bg-surface-container-high rounded-full border border-border-neutral">LIVE</span>
+</div>
+<div class="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-1 pr-2">
+<!-- Tape Items -->
+<div class="flex justify-between items-center py-2 border-b border-border-neutral/50">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface">j.doe@uni.edu</span>
+<span class="font-data-mono-sm text-data-mono-sm text-success-neon">BUY YES</span>
+</div>
+<div class="text-right">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface">50 @ 0.45</span>
+<span class="block font-data-mono-sm text-[10px] text-on-surface-variant">14:22:01</span>
+</div>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-border-neutral/50">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface">s.smith@uni.edu</span>
+<span class="font-data-mono-sm text-data-mono-sm text-error-coral">BUY NO</span>
+</div>
+<div class="text-right">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface">120 @ 0.60</span>
+<span class="block font-data-mono-sm text-[10px] text-on-surface-variant">14:21:55</span>
+</div>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-border-neutral/50 bg-surface-container-high/50 -mx-stack-md px-stack-md">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface">a.chen@uni.edu</span>
+<span class="font-data-mono-sm text-data-mono-sm text-success-neon">BUY YES</span>
+</div>
+<div class="text-right">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface">200 @ 0.44</span>
+<span class="block font-data-mono-sm text-[10px] text-on-surface-variant">14:21:40</span>
+</div>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-border-neutral/50">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface">r.jones@uni.edu</span>
+<span class="font-data-mono-sm text-data-mono-sm text-success-neon">SELL YES</span>
+</div>
+<div class="text-right">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface">10 @ 0.48</span>
+<span class="block font-data-mono-sm text-[10px] text-on-surface-variant">14:20:12</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Participant Roster Table -->
+<section class="bg-surface-glass backdrop-blur-xl border border-border-neutral rounded-xl overflow-hidden flex flex-col mt-4">
+<div class="p-stack-md border-b border-border-neutral flex justify-between items-center bg-surface-container-low">
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+                        Participant Roster
+                    </h3>
+<div class="flex gap-2">
+<span class="bg-surface-container-high border border-border-neutral rounded-full px-3 py-1 font-label-caps text-label-caps text-on-surface-variant">ACTIVE: 42</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container border-b border-border-neutral">
+<th class="py-3 px-stack-md font-label-caps text-label-caps text-on-surface-variant font-normal">NAME</th>
+<th class="py-3 px-stack-md font-label-caps text-label-caps text-on-surface-variant font-normal">EMAIL</th>
+<th class="py-3 px-stack-md font-label-caps text-label-caps text-on-surface-variant font-normal text-right">BALANCE</th>
+<th class="py-3 px-stack-md font-label-caps text-label-caps text-on-surface-variant font-normal text-center">TRADES</th>
+<th class="py-3 px-stack-md font-label-caps text-label-caps text-on-surface-variant font-normal text-right">ACTIONS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-border-neutral hover:bg-surface-container-high/50 transition-colors">
+<td class="py-3 px-stack-md font-body-sm text-body-sm text-on-surface">John Doe</td>
+<td class="py-3 px-stack-md font-body-sm text-body-sm text-on-surface-variant">j.doe@uni.edu</td>
+<td class="py-3 px-stack-md font-data-mono-sm text-data-mono-sm text-on-surface text-right">1,250.00</td>
+<td class="py-3 px-stack-md font-data-mono-sm text-data-mono-sm text-on-surface text-center">14</td>
+<td class="py-3 px-stack-md text-right">
+<div class="flex justify-end gap-2">
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors border border-transparent hover:border-border-neutral rounded bg-transparent hover:bg-surface-container" title="Reset Balance">
+<span class="material-symbols-outlined" data-icon="restart_alt" style="font-size: 18px;">restart_alt</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-error-coral transition-colors border border-transparent hover:border-error-coral/30 rounded bg-transparent hover:bg-error-container/20" title="Kick User">
+<span class="material-symbols-outlined" data-icon="person_remove" style="font-size: 18px;">person_remove</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="border-b border-border-neutral hover:bg-surface-container-high/50 transition-colors">
+<td class="py-3 px-stack-md font-body-sm text-body-sm text-on-surface">Sarah Smith</td>
+<td class="py-3 px-stack-md font-body-sm text-body-sm text-on-surface-variant">s.smith@uni.edu</td>
+<td class="py-3 px-stack-md font-data-mono-sm text-data-mono-sm text-on-surface text-right">840.50</td>
+<td class="py-3 px-stack-md font-data-mono-sm text-data-mono-sm text-on-surface text-center">8</td>
+<td class="py-3 px-stack-md text-right">
+<div class="flex justify-end gap-2">
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors border border-transparent hover:border-border-neutral rounded bg-transparent hover:bg-surface-container" title="Reset Balance">
+<span class="material-symbols-outlined" data-icon="restart_alt" style="font-size: 18px;">restart_alt</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-error-coral transition-colors border border-transparent hover:border-error-coral/30 rounded bg-transparent hover:bg-error-container/20" title="Kick User">
+<span class="material-symbols-outlined" data-icon="person_remove" style="font-size: 18px;">person_remove</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="border-b border-border-neutral hover:bg-surface-container-high/50 transition-colors">
+<td class="py-3 px-stack-md font-body-sm text-body-sm text-on-surface">Alex Chen</td>
+<td class="py-3 px-stack-md font-body-sm text-body-sm text-on-surface-variant">a.chen@uni.edu</td>
+<td class="py-3 px-stack-md font-data-mono-sm text-data-mono-sm text-on-surface text-right">2,100.00</td>
+<td class="py-3 px-stack-md font-data-mono-sm text-data-mono-sm text-on-surface text-center">32</td>
+<td class="py-3 px-stack-md text-right">
+<div class="flex justify-end gap-2">
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors border border-transparent hover:border-border-neutral rounded bg-transparent hover:bg-surface-container" title="Reset Balance">
+<span class="material-symbols-outlined" data-icon="restart_alt" style="font-size: 18px;">restart_alt</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-error-coral transition-colors border border-transparent hover:border-error-coral/30 rounded bg-transparent hover:bg-error-container/20" title="Kick User">
+<span class="material-symbols-outlined" data-icon="person_remove" style="font-size: 18px;">person_remove</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<!-- Footer (Shared Component) -->
+<footer class="bg-surface dark:bg-surface w-full mt-auto border-t border-border-neutral flex justify-between items-center py-stack-lg px-gutter max-w-[calc(100%)]">
+<div class="font-label-caps text-label-caps text-on-surface-variant">
+                © 2024 Arenas Markets. All rights reserved.
+            </div>
+<div class="flex gap-gutter">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-all opacity-80 hover:opacity-100" href="#">Legal</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-all opacity-80 hover:opacity-100" href="#">Privacy</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-all opacity-80 hover:opacity-100" href="#">Terms</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-all opacity-80 hover:opacity-100" href="#">Docs</a>
+</div>
+</footer>
+</main>
+</body></html>

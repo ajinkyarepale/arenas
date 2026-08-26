@@ -219,29 +219,6 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
             {arena.status !== 'ENDED' ? (
               <button
                 type="button"
-                onClick={() => void act('start')}
-                disabled={busy !== null || arena.status === 'LIVE'}
-                className="btn-primary text-sm"
-              >
-                {busy === 'start' ? <Spinner /> : null}
-                {arena.currentRound > 0 ? 'Resume' : 'Start session'}
-              </button>
-            ) : null}
-
-            {arena.status === 'LIVE' ? (
-              <button
-                type="button"
-                onClick={() => void act('pause')}
-                disabled={busy !== null}
-                className="btn-secondary text-sm"
-              >
-                {busy === 'pause' ? <Spinner /> : null} Pause
-              </button>
-            ) : null}
-
-            {arena.status !== 'ENDED' ? (
-              <button
-                type="button"
                 onClick={() => void act('end')}
                 disabled={busy !== null}
                 className="btn-danger text-sm"

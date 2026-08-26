@@ -1,206 +1,254 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { FieldBackdrop } from '@/components/field-backdrop';
 import { LiveArenasTicker } from '@/components/live-arenas-ticker';
-import { SiteShell } from '@/components/site-shell';
-import { Panel } from '@/components/ui';
 
 export const metadata: Metadata = {
-  title: 'Arenas — live prediction markets for campus FinTech events',
+  title: 'Arenas - Campus Prediction Market',
   description:
-    'Run a live Yes/No prediction market tournament at your college. Participants trade virtual points on whether the next candle closes green, priced by an automated market maker, on a big screen everyone can watch.',
+    'Experience the intensity of live 5-minute candle trading in a zero-risk campus environment.',
 };
 
 export default function LandingPage() {
   return (
-    <SiteShell width="wide" className="!py-0">
-      {/* Hero */}
-      <section className="scanlines relative -mx-4 overflow-hidden px-4 py-20 sm:-mx-6 sm:px-6 sm:py-28">
-        {/* Layered backdrop: grid ground plane, radial bloom, live particle field. */}
-        <div className="grid-field pointer-events-none absolute inset-0 opacity-70" aria-hidden />
+    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex flex-col antialiased">
+      {/* TopNavBar */}
+      <nav className="bg-[rgba(20,20,20,0.7)] backdrop-blur-xl border-b border-[#27272A] sticky top-0 flex justify-between items-center h-16 px-6 z-50">
+        <div className="flex items-center gap-4">
+          <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <Link href="/signin" className="text-sm font-semibold text-[#c4c7c8] hover:text-white transition-colors">
+            Sign in
+          </Link>
+          <Link href="/signup" className="px-4 py-2 rounded-full bg-[#22C55E] text-[#131313] font-bold text-xs hover:bg-emerald-400 transition-colors shadow">
+            Sign up
+          </Link>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative py-24 px-6 flex flex-col items-center text-center overflow-hidden min-h-[640px] justify-center">
+        {/* Abstract Tech Background */}
         <div
-          className="bloom pointer-events-none absolute left-1/2 top-0 h-[36rem] w-[52rem] -translate-x-1/2 -translate-y-1/3"
-          aria-hidden
-        />
-        <FieldBackdrop className="opacity-80" />
-        {/* Fade the field out at the bottom so it never fights the content below. */}
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ink-950 to-transparent"
-          aria-hidden
+          className="absolute inset-0 z-0 opacity-20 pointer-events-none"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 50% 50%, #2a2a2a 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
         />
 
-        <div className="relative">
-          <div className="inline-flex items-center gap-2 rounded border border-accent/30 bg-accent/[0.07] px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-yes opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-yes" />
-            </span>
-            Live rooms · not homework
+        <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center gap-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#27272A] bg-[#1c1b1b] text-[#22C55E] font-['Epilogue'] text-[11px] font-bold tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
+            LIVE ROOMS · NOT HOMEWORK
           </div>
 
-          <h1 className="font-display mt-7 max-w-4xl text-balance text-5xl font-bold uppercase leading-[0.95] tracking-tight sm:text-7xl lg:text-8xl">
-            A trading floor
-            <br />
-            <span className="text-accent glow-accent">in an afternoon</span>
+          <h1 className="font-['Geist'] text-4xl sm:text-6xl text-white font-bold tracking-tight leading-tight max-w-4xl uppercase">
+            A TRADING FLOOR IN AN AFTERNOON
           </h1>
 
-          <p className="mt-7 max-w-2xl text-lg leading-relaxed text-fg-muted">
-            Arenas turns a lecture hall into a live prediction market. Everyone gets virtual
-            points and one question every five minutes:{' '}
-            <span className="font-semibold text-fg">does this candle close green?</span>{' '}
-            Prices move as the room trades, the projector shows it happening, and the
-            leaderboard changes on every settle.
+          <p className="font-['Geist'] text-base sm:text-lg text-[#c4c7c8] max-w-2xl leading-relaxed mt-1">
+            Experience the intensity of live 5-minute candle trading in a zero-risk campus environment. Compete, analyze, and predict real-time market movements.
           </p>
 
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Link href="/signup" className="btn-primary text-base sm:w-56">
+          <div className="flex flex-col sm:flex-row gap-4 mt-6 items-center w-full sm:w-auto">
+            <Link
+              href="/signup"
+              className="w-full sm:w-auto px-8 py-3 rounded-full bg-white text-[#2f3131] font-['Epilogue'] text-sm font-semibold hover:bg-[#c6c6c7] transition-colors text-center shadow-lg"
+            >
               Get started
             </Link>
-            <Link href="/markets" className="btn-secondary text-base sm:w-56">
+            <Link
+              href="/markets"
+              className="w-full sm:w-auto px-8 py-3 rounded-full border border-[#27272A] bg-transparent text-white font-['Epilogue'] text-sm hover:bg-[#201f1f] transition-colors text-center"
+            >
               See upcoming events
             </Link>
           </div>
 
-          <p className="mt-6 font-mono text-xs uppercase tracking-[0.1em] text-fg-faint">
-            Free · virtual points only · no deposits, nothing to withdraw
+          <p className="font-['Epilogue'] text-[11px] font-bold text-[#8e9192] tracking-wider mt-4 uppercase">
+            FREE · VIRTUAL POINTS ONLY · NO DEPOSITS
           </p>
         </div>
       </section>
 
+      {/* Live Marquee Ticker */}
       <LiveArenasTicker />
 
-      {/* How a round works */}
-      <section className="border-t border-line py-16">
-        <h2 className="font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">
-          One round, start to finish
-        </h2>
-        <p className="mt-3 max-w-2xl text-fg-muted">
-          The format is called <span className="font-semibold text-fg">5-Min Candle</span>.
-          It repeats for as many rounds as the organizer sets, usually twelve.
-        </p>
+      {/* Main Content Canvas */}
+      <main className="flex-grow w-full max-w-[1280px] mx-auto px-6 py-16 flex flex-col gap-16">
+        {/* How a Round Works */}
+        <section className="flex flex-col gap-6">
+          <h2 className="font-['Geist'] text-2xl font-medium text-white">How a Round Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Step 01 */}
+            <div className="glass-panel p-5 rounded-xl border border-[#27272A] bg-[rgba(20,20,20,0.7)] flex flex-col gap-2 hover:border-[#444748] transition-colors group">
+              <div className="flex justify-between items-start mb-2">
+                <span className="font-['Epilogue'] text-xs text-[#c4c7c8] group-hover:text-white transition-colors">
+                  Step 01
+                </span>
+                <span className="material-symbols-outlined text-[#8e9192]">notifications_active</span>
+              </div>
+              <h3 className="font-['Epilogue'] text-sm font-medium text-white">The bell</h3>
+              <p className="font-['Geist'] text-xs text-[#c4c7c8]">
+                The strike price is set and the 5-minute countdown begins.
+              </p>
+            </div>
 
-        <ol className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[
-            {
-              step: '01',
-              title: 'The bell',
-              body: 'A new round opens. The asset price at that instant becomes the strike everyone is betting against, and the market resets to 50/50.',
-            },
-            {
-              step: '02',
-              title: 'The room trades',
-              body: 'Buy YES if you think it closes above the strike, NO if below. Every trade moves the price, so the number on the screen is the room’s live consensus.',
-            },
-            {
-              step: '03',
-              title: 'Lock',
-              body: 'Trading stops shortly before the close, so nobody can trade on a result they can already see coming.',
-            },
-            {
-              step: '04',
-              title: 'Settle',
-              body: 'The close is sampled over several seconds and averaged. Winning shares pay 1 point each, the leaderboard updates, and the next round opens.',
-            },
-          ].map((item) => (
-            <li key={item.step}>
-              <Panel className="hud group h-full p-5 transition-colors hover:border-accent/40">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono tnum text-xs font-bold tracking-[0.2em] text-accent">
-                    {item.step}
-                  </span>
-                  <span className="h-px flex-1 bg-gradient-to-r from-accent/50 to-transparent" />
-                </div>
-                <h3 className="font-display mt-3 text-lg font-bold uppercase tracking-tight">
-                  {item.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-fg-muted">{item.body}</p>
-              </Panel>
-            </li>
-          ))}
-        </ol>
-      </section>
+            {/* Step 02 */}
+            <div className="glass-panel p-5 rounded-xl border border-[#27272A] bg-[rgba(20,20,20,0.7)] flex flex-col gap-2 hover:border-[#444748] transition-colors group">
+              <div className="flex justify-between items-start mb-2">
+                <span className="font-['Epilogue'] text-xs text-[#c4c7c8] group-hover:text-white transition-colors">
+                  Step 02
+                </span>
+                <span className="material-symbols-outlined text-[#8e9192]">sync_alt</span>
+              </div>
+              <h3 className="font-['Epilogue'] text-sm font-medium text-white">The room trades</h3>
+              <p className="font-['Geist'] text-xs text-[#c4c7c8]">
+                Participants buy YES or NO shares based on market direction.
+              </p>
+            </div>
 
-      {/* Two audiences */}
-      <section className="border-t border-line py-16">
-        <div className="grid gap-5 lg:grid-cols-2">
-          <Panel className="p-7">
-            <div className="label">For participants</div>
-            <h3 className="font-display mt-2 text-2xl font-bold uppercase tracking-tight">
-              It works on the phone in your hand
-            </h3>
-            <ul className="mt-5 flex flex-col gap-3 text-sm text-fg-muted">
-              {[
-                'Two big buttons, a stake slider, and a countdown — nothing to learn mid-round.',
-                'Live implied probability, so you can see what everyone else thinks before you commit.',
-                'Lock your phone, come back, and the screen is correct again immediately.',
-                'Add it to your home screen for one-tap access during the event.',
-              ].map((line) => (
-                <li key={line} className="flex gap-3">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-yes" />
-                  {line}
+            {/* Step 03 */}
+            <div className="glass-panel p-5 rounded-xl border border-[#27272A] bg-[rgba(20,20,20,0.7)] flex flex-col gap-2 hover:border-[#444748] transition-colors group">
+              <div className="flex justify-between items-start mb-2">
+                <span className="font-['Epilogue'] text-xs text-[#c4c7c8] group-hover:text-white transition-colors">
+                  Step 03
+                </span>
+                <span className="material-symbols-outlined text-[#8e9192]">lock</span>
+              </div>
+              <h3 className="font-['Epilogue'] text-sm font-medium text-white">Lock</h3>
+              <p className="font-['Geist'] text-xs text-[#c4c7c8]">
+                Trading freezes shortly before the candle closes. No more entries.
+              </p>
+            </div>
+
+            {/* Step 04 */}
+            <div className="glass-panel p-5 rounded-xl border border-[#27272A] bg-[rgba(20,20,20,0.7)] flex flex-col gap-2 hover:border-[#444748] transition-colors group">
+              <div className="flex justify-between items-start mb-2">
+                <span className="font-['Epilogue'] text-xs text-[#c4c7c8] group-hover:text-white transition-colors">
+                  Step 04
+                </span>
+                <span className="material-symbols-outlined text-[#8e9192]">account_balance</span>
+              </div>
+              <h3 className="font-['Epilogue'] text-sm font-medium text-white">Settle</h3>
+              <p className="font-['Geist'] text-xs text-[#c4c7c8]">
+                Payouts are distributed and the live leaderboard updates instantly.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Audience Panels (Bento Grid) */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* For Participants */}
+          <div className="glass-panel p-8 rounded-xl border border-[#27272A] bg-[rgba(20,20,20,0.7)] flex flex-col justify-between min-h-[400px]">
+            <div className="flex flex-col gap-4">
+              <div className="inline-flex items-center gap-2 border border-[#27272A] rounded-full px-3 py-1 w-fit bg-[#1c1b1b]">
+                <span className="material-symbols-outlined text-white text-[16px]">person</span>
+                <span className="font-['Epilogue'] text-[11px] font-bold text-white tracking-wider">
+                  FOR PARTICIPANTS
+                </span>
+              </div>
+              <h3 className="font-['Geist'] text-2xl font-medium text-white mt-2">Built for Speed</h3>
+              <ul className="flex flex-col gap-3 mt-2">
+                <li className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[#22C55E] text-[18px]">check_circle</span>
+                  <span className="font-['Geist'] text-sm text-[#c4c7c8]">Mobile-first 2-button UI (YES / NO)</span>
                 </li>
-              ))}
-            </ul>
-            <Link href="/guide" className="btn-secondary mt-6 text-sm">
-              Read the 3-minute guide
-            </Link>
-          </Panel>
-
-          <Panel className="p-7">
-            <div className="label">For organizers</div>
-            <h3 className="font-display mt-2 text-2xl font-bold uppercase tracking-tight">
-              Your event, your code, your room
-            </h3>
-            <ul className="mt-5 flex flex-col gap-3 text-sm text-fg-muted">
-              {[
-                'Spin up an arena in a minute: asset, round length, number of rounds, starting points.',
-                'Share one join code. Only people with it can enter your arena.',
-                'A projector view built to be read from the back of the room.',
-                'Start, pause, and force-resolve a round if the price feed ever fails.',
-              ].map((line) => (
-                <li key={line} className="flex gap-3">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                  {line}
+                <li className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[#22C55E] text-[18px]">check_circle</span>
+                  <span className="font-['Geist'] text-sm text-[#c4c7c8]">Intuitive stake slider for fast execution</span>
                 </li>
-              ))}
-            </ul>
-            <Link href="/signup" className="btn-secondary mt-6 text-sm">
-              Run an event
-            </Link>
-          </Panel>
-        </div>
-      </section>
-
-      {/* Closing */}
-      <section className="border-t border-line py-16 pb-24">
-        <Panel className="hud grid-field scanlines relative overflow-hidden p-8 sm:p-12">
-          <div
-            className="bloom pointer-events-none absolute left-1/2 top-1/2 h-96 w-[40rem] -translate-x-1/2 -translate-y-1/2"
-            aria-hidden
-          />
-          <div className="relative">
-            <h2 className="font-display max-w-2xl text-balance text-3xl font-bold uppercase tracking-tight sm:text-4xl">
-              Anyone can host.
-              <br />
-              <span className="text-accent glow-accent">Every arena is independent.</span>
-            </h2>
-            <p className="mt-4 max-w-2xl text-fg-muted">
-              Arenas is multi-tenant by design. Any society at any college can run its own
-              event on the same platform, with its own code, its own timing, its own
-              participants — and no visibility into anyone else&apos;s.
-            </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link href="/signup" className="btn-primary sm:w-48">
-                Create an account
-              </Link>
-              <Link href="/info" className="btn-secondary sm:w-48">
-                How it works
+                <li className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[#22C55E] text-[18px]">check_circle</span>
+                  <span className="font-['Geist'] text-sm text-[#c4c7c8]">Live probability engine &amp; tracking</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[#22C55E] text-[18px]">check_circle</span>
+                  <span className="font-['Geist'] text-sm text-[#c4c7c8]">Add to home screen capability</span>
+                </li>
+              </ul>
+            </div>
+            <div className="mt-8">
+              <Link
+                href="/guide"
+                className="inline-block px-6 py-2.5 rounded-full border border-[#27272A] bg-transparent text-white font-['Epilogue'] text-sm hover:bg-[#201f1f] transition-colors"
+              >
+                Read guide
               </Link>
             </div>
           </div>
-        </Panel>
-      </section>
-    </SiteShell>
+
+          {/* For Organizers */}
+          <div className="glass-panel p-8 rounded-xl border border-[#27272A] bg-[rgba(20,20,20,0.7)] flex flex-col justify-between min-h-[400px]">
+            <div className="flex flex-col gap-4">
+              <div className="inline-flex items-center gap-2 border border-[#27272A] rounded-full px-3 py-1 w-fit bg-[#1c1b1b]">
+                <span className="material-symbols-outlined text-white text-[16px]">admin_panel_settings</span>
+                <span className="font-['Epilogue'] text-[11px] font-bold text-white tracking-wider">
+                  FOR ORGANIZERS
+                </span>
+              </div>
+              <h3 className="font-['Geist'] text-2xl font-medium text-white mt-2">Absolute Control</h3>
+              <ul className="flex flex-col gap-3 mt-2">
+                <li className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[#8e9192] text-[18px]">check_circle</span>
+                  <span className="font-['Geist'] text-sm text-[#c4c7c8]">1-minute event setup &amp; configuration</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[#8e9192] text-[18px]">check_circle</span>
+                  <span className="font-['Geist'] text-sm text-[#c4c7c8]">Secure join code gating for exclusive rooms</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[#8e9192] text-[18px]">check_circle</span>
+                  <span className="font-['Geist'] text-sm text-[#c4c7c8]">Dedicated projector view for live audiences</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[#8e9192] text-[18px]">check_circle</span>
+                  <span className="font-['Geist'] text-sm text-[#c4c7c8]">Manual round overrides &amp; safety limits</span>
+                </li>
+              </ul>
+            </div>
+            <div className="mt-8">
+              <Link
+                href="/admin/arenas/new"
+                className="inline-block px-6 py-2.5 rounded-full bg-white text-[#2f3131] font-['Epilogue'] text-sm font-semibold hover:bg-[#c6c6c7] transition-colors"
+              >
+                Run an event
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Bottom Banner */}
+      <div className="w-full border-t border-[#27272A] bg-[#201f1f] py-8 px-6 mt-auto text-center flex flex-col items-center gap-4">
+        <h2 className="font-['Geist'] text-2xl font-medium text-white">
+          Anyone can host. Every arena is independent.
+        </h2>
+        <div className="mt-2">
+          <Link
+            href="/admin"
+            className="inline-block px-6 py-2.5 rounded-full bg-white text-[#2f3131] font-['Epilogue'] text-sm font-semibold hover:bg-[#c6c6c7] transition-colors"
+          >
+            Start Hosting
+          </Link>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-[#131313] w-full border-t border-[#27272A] flex flex-col sm:flex-row justify-between items-center py-6 px-6 gap-4">
+        <span className="font-['Epilogue'] text-xs text-[#c4c7c8]">
+          © 2024 Arenas Markets. All rights reserved.
+        </span>
+        <div className="flex gap-6 text-xs text-[#c4c7c8]">
+          <Link href="/guide" className="hover:text-white hover:underline transition-colors">Legal</Link>
+          <Link href="/guide" className="hover:text-white hover:underline transition-colors">Privacy</Link>
+          <Link href="/guide" className="hover:text-white hover:underline transition-colors">Terms</Link>
+          <Link href="/guide" className="hover:text-white hover:underline transition-colors">Docs</Link>
+        </div>
+      </footer>
+    </div>
   );
 }

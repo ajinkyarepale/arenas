@@ -2,24 +2,20 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-import { LeaderboardStrip, Leaderboard } from '@/components/arena/leaderboard';
-import { ProbabilityBar, ProbabilityTrace } from '@/components/arena/probability';
-import { RoundCounter, RoundTimer, roundPhase } from '@/components/arena/round-timer';
+import { SiteSidebar } from '@/components/site-sidebar';
+import { roundPhase } from '@/components/arena/round-timer';
 import { TradePanel } from '@/components/arena/trade-panel';
-import { TradeTape } from '@/components/arena/trade-tape';
 import { useArena } from '@/hooks/use-arena';
-import { cx, formatPoints, formatPrice, formatProbability } from '@/lib/format';
+import { formatPoints } from '@/lib/format';
 import type { ArenaPublicInfo } from '@/lib/engine/snapshot';
 
-// The charting library touches `window` at import time and adds ~50KB, neither
-// of which belongs in the server render of a screen people open on 4G.
 const CandleChart = dynamic(
   () => import('@/components/arena/candle-chart').then((m) => m.CandleChart),
   {
     ssr: false,
-    loading: () => <div className="h-[200px] animate-pulse rounded bg-ink-800" />,
+    loading: () => <div className="h-[320px] animate-pulse rounded-xl bg-[#201f1f]" />,
   },
 );
 
@@ -31,13 +27,11 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
     leaderboard,
     arena,
     price,
-    lastTrade,
-    lastSettled,
-    connected,
-    error,
     clockOffsetMs,
     refresh,
   } = useArena(code);
+
+  const [rightTab, setRightTab] = useState<'tape' | 'leaderboard'>('tape');
 
   const info = snapshot?.arena ?? initialArena;
   const viewer = snapshot?.viewer ?? null;
@@ -48,331 +42,285 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
   const tradingOpen = status === 'LIVE' && phase === 'trading';
   const priceYes = round?.priceYes ?? 0.5;
 
-  const disabledReason =
-    status === 'ENDED'
-      ? 'This arena has finished.'
-      : status !== 'LIVE'
-        ? 'Waiting for the organizer to start the next round.'
-        : phase === 'locked' || phase === 'closing'
-          ? 'Trading is locked while the round settles.'
-          : phase === 'resolved'
-            ? 'Round settled — the next one opens shortly.'
-            : 'Trading is closed.';
+  const currentRoundNum = arena?.currentRound ?? info.currentRound;
+  const totalRounds = info.totalRounds;
+
+  // Calculate remaining seconds in current round
+  const closesAt = round?.locksAt ? new Date(round.locksAt).getTime() : now;
+  const remainingMs = Math.max(0, closesAt - now);
+  const remainingSec = Math.floor(remainingMs / 1000);
+  const timerMin = String(Math.floor(remainingSec / 60)).padStart(2, '0');
+  const timerSec = String(remainingSec % 60).padStart(2, '0');
+
+  const leaderboardEntries = leaderboard?.entries ?? [];
+  const userRank = viewer?.rank ?? (leaderboardEntries.findIndex((p) => p.displayName === viewer?.participantId) + 1);
+  const position = viewer?.position ?? null;
+
+  // Polymarket question title construction
+  const questionTitle = `Will ${info.asset.replace('USDT', '')} close UP above the round's open price?`;
+  const questionSubtitle = `Polymarket binary market: Buy YES if you predict ${info.asset.replace('USDT', '')} will rise, or NO if it falls. Winning outcome pays 100 points ($1.00) per share at round settlement.`;
 
   return (
-    <div className="safe-bottom flex min-h-[100dvh] flex-col bg-ink-950">
-      <StickyHeader
-        info={info}
-        balance={viewer?.balance ?? null}
-        connected={connected}
-        currentRound={arena?.currentRound ?? info.currentRound}
-        totalRounds={info.totalRounds}
-        status={status}
-      />
+    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
+      {/* SideNavBar */}
+      <SiteSidebar />
 
-      {lastSettled ? <SettlementBanner settled={lastSettled} /> : null}
+      {/* Main Content Area */}
+      <main className="flex-1 md:ml-64 flex flex-col min-h-screen relative">
+        {/* TopNavBar */}
+        <header className="flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-40">
+          <div className="flex items-center gap-4">
+            <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
+            <div className="hidden sm:flex gap-2">
+              <span className="px-2.5 py-1 rounded-full border border-[#27272A] bg-[#201f1f] font-['Epilogue'] text-xs text-[#c4c7c8] flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[14px]">vpn_key</span> {info.code}
+              </span>
+              <span className="px-2.5 py-1 rounded-full border border-[#27272A] bg-[#201f1f] font-['Epilogue'] text-xs text-[#c4c7c8] flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[14px]">cycle</span> Round {currentRoundNum} of {totalRounds}
+              </span>
+            </div>
+          </div>
 
-      {error ? (
-        <div className="mx-auto w-full max-w-6xl px-4 pt-3">
-          <p className="rounded-lg border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn">
-            {error} — retrying automatically.
-          </p>
-        </div>
-      ) : null}
-
-      {/*
-        Ordering is deliberate and differs by device.
-
-        On a phone the sequence is: the two numbers people stare at, then the
-        trade controls, then the chart. The buy buttons have to sit inside the
-        first viewport — a participant with twenty seconds left should never
-        have to scroll past a chart to reach them.
-
-        On a desktop or projector there is room for both, so the chart takes the
-        wide left column and the trade panel sits beside it.
-      */}
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-3 px-3 py-3 sm:px-6 sm:py-5 lg:grid lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start lg:gap-5">
-        <div className="order-1 flex flex-col gap-3 lg:col-start-1 lg:row-start-1">
-          {/* The two numbers people stare at, side by side and as large as the
-              viewport allows. */}
-          <section className="panel hud relative overflow-hidden p-4 sm:p-5">
-            <div className="bloom pointer-events-none absolute inset-0 opacity-60" aria-hidden />
-            <div className="relative grid grid-cols-2 items-start gap-3">
-              <div className="flex flex-col gap-1.5">
-                <div className="label">Chance it closes UP</div>
-                <div
-                  className={cx(
-                    'font-display tnum text-4xl font-bold leading-none tracking-tight transition-colors sm:text-6xl',
-                    priceYes >= 0.5 ? 'text-yes glow-yes' : 'text-no glow-no',
-                  )}
-                >
-                  {formatProbability(priceYes, 1)}
+          <div className="flex items-center gap-6">
+            <div className="hidden sm:flex items-center gap-4">
+              <div className="text-right">
+                <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">BALANCE</div>
+                <div className="font-['Epilogue'] text-sm font-bold text-white">
+                  {formatPoints(viewer?.balance ?? info.startingBalance, 0)} pts
                 </div>
               </div>
-              <RoundTimer round={round} clockOffsetMs={clockOffsetMs} />
+              <div className="h-6 w-px bg-[#27272A]" />
+              <div className="text-right">
+                <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">RANK</div>
+                <div className="font-['Epilogue'] text-sm font-bold text-white">
+                  {userRank > 0 ? `#${userRank}` : '—'}
+                </div>
+              </div>
             </div>
 
-            <div className="mt-4">
-              <ProbabilityBar value={priceYes} />
+            <div className="flex items-center gap-2">
+              <Link
+                href="/markets"
+                className="w-9 h-9 rounded-full border border-[#27272A] flex items-center justify-center text-[#c4c7c8] hover:text-white transition-colors"
+                title="Back to Markets"
+              >
+                <span className="material-symbols-outlined text-lg">close</span>
+              </Link>
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content Canvas */}
+        <div className="flex-1 p-6 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-6">
+          {/* Header Title & Timer Bar (Polymarket Question Style) */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#22C55E] uppercase tracking-wider mb-2">
+                POLYMARKET BINARY OUTCOME
+              </div>
+              <h1 className="font-['Geist'] text-2xl md:text-3xl font-bold text-white mb-1">
+                {info.name}: {questionTitle}
+              </h1>
+              <p className="font-['Geist'] text-xs text-[#c4c7c8] max-w-2xl leading-relaxed">
+                {questionSubtitle}
+              </p>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-2 border-t border-line pt-3">
-              <MiniStat label="Live" value={formatPrice(price?.price)} />
-              <MiniStat
-                label="Round open"
-                value={formatPrice(round?.openPrice)}
-                tone={
-                  price?.price != null && round?.openPrice != null
-                    ? price.price > round.openPrice
-                      ? 'yes'
-                      : 'no'
-                    : undefined
-                }
+            <div className="flex items-center gap-4 bg-[#201f1f] px-4 py-2.5 rounded-xl border border-[#27272A]">
+              <div className="text-right">
+                <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">ROUND ENDS IN</div>
+                <div className="font-['Epilogue'] text-lg font-bold text-white flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
+                  {timerMin}:{timerSec}
+                </div>
+              </div>
+              <div className="h-8 w-px bg-[#27272A]" />
+              <div>
+                <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">STATUS</div>
+                <div className="font-['Epilogue'] text-xs font-bold text-[#22C55E]">
+                  {tradingOpen ? 'TRADING' : status}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Left Column: Chart & My Positions */}
+            <div className="lg:col-span-8 flex flex-col gap-6">
+              {/* Candlestick Chart Panel */}
+              <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl flex flex-col min-h-[380px]">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="font-['Epilogue'] text-xs font-bold text-white bg-[#201f1f] px-2.5 py-1 rounded border border-[#27272A]">
+                      {info.asset}
+                    </span>
+                    <span className="font-['Epilogue'] text-xs text-[#c4c7c8]">
+                      {info.roundDurationSec / 60}m candle
+                    </span>
+                  </div>
+                  <div className="font-['Epilogue'] text-sm font-bold text-white">
+                    Live Spot: ${price?.price?.toLocaleString() ?? '—'}
+                  </div>
+                </div>
+
+                <div className="flex-1 w-full rounded-xl overflow-hidden bg-[#1c1b1b] border border-[#27272A]">
+                  <CandleChart code={info.code} openPrice={round?.openPrice} livePrice={price?.price} />
+                </div>
+              </div>
+
+              {/* My Positions Table */}
+              <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl">
+                <h3 className="font-['Geist'] text-lg font-bold text-white mb-4">My Positions</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left font-['Epilogue'] text-xs">
+                    <thead>
+                      <tr className="border-b border-[#27272A] text-[#c4c7c8]">
+                        <th className="pb-2 font-bold uppercase">OUTCOME SHARES</th>
+                        <th className="pb-2 font-bold uppercase text-right">SHARES HELD</th>
+                        <th className="pb-2 font-bold uppercase text-right">AVG COST</th>
+                        <th className="pb-2 font-bold uppercase text-right">TOTAL INVESTED</th>
+                        <th className="pb-2 font-bold uppercase text-right">PAYOUT IF WIN</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {position && (position.yesShares > 0 || position.noShares > 0) ? (
+                        <>
+                          {position.yesShares > 0 && (
+                            <tr className="border-b border-[#27272A]">
+                              <td className="py-3">
+                                <span className="px-2 py-0.5 rounded font-bold bg-[#22C55E]/20 text-[#22C55E] border border-[#22C55E]/30">
+                                  YES SHARES
+                                </span>
+                              </td>
+                              <td className="py-3 text-right font-bold text-white">
+                                {position.yesShares.toFixed(1)}
+                              </td>
+                              <td className="py-3 text-right font-bold text-white">
+                                ¢{Math.round((position.yesAvgPrice ?? 0.5) * 100)}
+                              </td>
+                              <td className="py-3 text-right font-bold text-white">
+                                {position.yesCost.toFixed(0)} pts
+                              </td>
+                              <td className="py-3 text-right font-bold text-[#22C55E]">
+                                {(position.yesShares * 100).toFixed(0)} pts
+                              </td>
+                            </tr>
+                          )}
+                          {position.noShares > 0 && (
+                            <tr className="border-b border-[#27272A]">
+                              <td className="py-3">
+                                <span className="px-2 py-0.5 rounded font-bold bg-[#EF4444]/20 text-[#EF4444] border border-[#EF4444]/30">
+                                  NO SHARES
+                                </span>
+                              </td>
+                              <td className="py-3 text-right font-bold text-white">
+                                {position.noShares.toFixed(1)}
+                              </td>
+                              <td className="py-3 text-right font-bold text-white">
+                                ¢{Math.round((position.noAvgPrice ?? 0.5) * 100)}
+                              </td>
+                              <td className="py-3 text-right font-bold text-white">
+                                {position.noCost.toFixed(0)} pts
+                              </td>
+                              <td className="py-3 text-right font-bold text-[#EF4444]">
+                                {(position.noShares * 100).toFixed(0)} pts
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      ) : (
+                        <tr>
+                          <td colSpan={5} className="py-6 text-center text-[#c4c7c8]">
+                            No active YES or NO share positions in this round.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Order Entry & Feed/Leaderboard */}
+            <div className="lg:col-span-4 flex flex-col gap-6">
+              {/* Order Entry Panel */}
+              <TradePanel
+                code={info.code}
+                balance={viewer?.balance ?? info.startingBalance}
+                maxStakePerTrade={info.maxStakePerTrade}
+                liquidityParamB={info.liquidityParamB}
+                qYes={round?.qYes ?? 100}
+                qNo={round?.qNo ?? 100}
+                priceYes={priceYes}
+                position={position}
+                tradingOpen={tradingOpen}
+                onFilled={refresh}
               />
-              <MiniStat label="Volume" value={`${formatPoints(round?.volume ?? 0, 0)} pts`} />
+
+              {/* Feed / Leaderboard Tabs */}
+              <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl flex flex-col gap-4 font-['Geist'] text-xs">
+                <div className="flex border-b border-[#27272A] pb-2 gap-4">
+                  <button
+                    onClick={() => setRightTab('tape')}
+                    className={`font-['Epilogue'] text-xs font-bold transition-colors pb-1 ${
+                      rightTab === 'tape'
+                        ? 'text-white border-b-2 border-white'
+                        : 'text-[#c4c7c8] hover:text-white'
+                    }`}
+                  >
+                    Live Feed
+                  </button>
+                  <button
+                    onClick={() => setRightTab('leaderboard')}
+                    className={`font-['Epilogue'] text-xs font-bold transition-colors pb-1 ${
+                      rightTab === 'leaderboard'
+                        ? 'text-white border-b-2 border-white'
+                        : 'text-[#c4c7c8] hover:text-white'
+                    }`}
+                  >
+                    Leaderboard
+                  </button>
+                </div>
+
+                {rightTab === 'tape' ? (
+                  <div className="flex flex-col gap-2 max-h-60 overflow-y-auto font-['Epilogue']">
+                    <p className="text-[#c4c7c8] text-center py-4">Waiting for first fill...</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 max-h-60 overflow-y-auto font-['Epilogue']">
+                    {leaderboardEntries.map((p, idx) => (
+                      <div
+                        key={p.participantId}
+                        className="flex justify-between items-center py-2 border-b border-[#27272A]/50 text-xs"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="w-5 h-5 rounded-full bg-[#201f1f] text-center text-[#c4c7c8] font-bold">
+                            {idx + 1}
+                          </span>
+                          <span className="text-white font-medium">{p.displayName}</span>
+                        </div>
+                        <span className="text-white font-bold">{formatPoints(p.balance, 0)} pts</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </section>
-
-        </div>
-
-        {/*
-          Both sides of the market, live across the round.
-
-          It sits after the trade controls on a phone for the same reason the
-          candle chart does: the buy buttons must stay inside the first
-          viewport. On desktop there is room, so it returns to the left column
-          directly under the numbers it explains.
-        */}
-        <section className="panel order-3 p-3 sm:p-4 lg:col-start-1 lg:row-start-2">
-          <div className="label mb-1.5">Probability this round</div>
-          <ProbabilityTrace value={priceYes} roundId={round?.id ?? null} height={80} />
-        </section>
-
-        {/* Chart: after the controls on a phone, left column on a desktop. */}
-        <section className="panel order-3 overflow-hidden p-3 sm:p-4 lg:col-start-1 lg:row-start-3">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="label">{info.asset}</span>
-            <span className="text-[11px] text-fg-faint">
-              Blue line = this round&apos;s open
-            </span>
-          </div>
-          <CandleChart
-            code={code}
-            openPrice={round?.openPrice ?? null}
-            livePrice={price?.price ?? null}
-            height={200}
-          />
-        </section>
-
-        <section className="panel order-3 p-3 sm:p-4 lg:col-start-1 lg:row-start-4">
-          <div className="mb-2 label">Trade tape</div>
-          <TradeTape lastTrade={lastTrade} variant="compact" />
-        </section>
-
-        <section className="order-4 lg:hidden">
-          <LeaderboardStrip
-            data={leaderboard}
-            participantId={viewer?.participantId ?? null}
-            rank={viewer?.rank ?? null}
-          />
-        </section>
-
-        {/* Trade controls: second on a phone, right column on a desktop. */}
-        <div className="order-2 flex flex-col gap-3 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-24">
-          <section className="panel p-3 sm:p-4">
-            <div className="mb-3 flex items-baseline justify-between">
-              <span className="label">Your balance</span>
-              <span className="tnum text-2xl font-bold">
-                {viewer?.balance != null ? formatPoints(viewer.balance) : '—'}
-                <span className="ml-1 text-xs font-normal text-fg-faint">pts</span>
-              </span>
-            </div>
-
-            <TradePanel
-              code={code}
-              balance={viewer?.balance ?? 0}
-              maxStakePerTrade={info.maxStakePerTrade}
-              liquidityParamB={info.liquidityParamB}
-              qYes={round?.qYes ?? 0}
-              qNo={round?.qNo ?? 0}
-              priceYes={priceYes}
-              position={viewer?.position ?? null}
-              tradingOpen={tradingOpen}
-              disabledReason={disabledReason}
-              onFilled={() => void refresh()}
-            />
-          </section>
-
-          <section className="panel hidden p-4 lg:block">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="label">Leaderboard</span>
-              <span className="text-xs text-fg-faint">
-                {leaderboard?.participantCount ?? 0} traders
-              </span>
-            </div>
-            <Leaderboard
-              data={leaderboard}
-              limit={10}
-              highlightParticipantId={viewer?.participantId ?? null}
-            />
-          </section>
-
-          <div className="flex gap-2">
-            <Link href={`/arenas/${code}/results`} className="btn-secondary flex-1 text-sm">
-              Results
-            </Link>
-            <Link href="/dashboard" className="btn-ghost flex-1 text-sm">
-              Dashboard
-            </Link>
           </div>
         </div>
+
+        {/* Footer */}
+        <footer className="w-full mt-auto flex justify-between items-center py-6 px-12 border-t border-[#27272A] bg-[#131313] text-[#c4c7c8] text-xs">
+          <p>© 2024 Arenas Markets. All rights reserved.</p>
+          <div className="flex gap-6 font-['Epilogue'] text-[11px]">
+            <Link href="/guide" className="hover:text-white underline">Legal</Link>
+            <Link href="/guide" className="hover:text-white underline">Privacy</Link>
+            <Link href="/guide" className="hover:text-white underline">Terms</Link>
+            <Link href="/guide" className="hover:text-white underline">Docs</Link>
+          </div>
+        </footer>
       </main>
-    </div>
-  );
-}
-
-function StickyHeader({
-  info,
-  balance,
-  connected,
-  currentRound,
-  totalRounds,
-  status,
-}: {
-  info: ArenaPublicInfo;
-  balance: number | null;
-  connected: boolean;
-  currentRound: number;
-  totalRounds: number;
-  status: string;
-}) {
-  return (
-    <header className="safe-top safe-x sticky top-0 z-30 border-b border-line bg-ink-950/85 backdrop-blur-xl">
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
-      <div className="mx-auto flex max-w-6xl items-center gap-3 px-3 py-2.5 sm:px-6">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <ConnectionDot connected={connected} />
-            <h1 className="truncate text-sm font-bold sm:text-base">{info.name}</h1>
-          </div>
-          <div className="mt-0.5 flex items-center gap-2 text-[11px] text-fg-faint">
-            <span>{info.asset}</span>
-            <span aria-hidden>·</span>
-            <span className="tnum">
-              Round {currentRound > 0 ? currentRound : '—'} of {totalRounds}
-            </span>
-            {status !== 'LIVE' ? (
-              <>
-                <span aria-hidden>·</span>
-                <span className="uppercase">{status === 'LOBBY' ? 'waiting' : status}</span>
-              </>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="shrink-0 text-right">
-          <div className="label !text-[10px]">Balance</div>
-          <div className="tnum text-base font-bold leading-tight sm:text-lg">
-            {balance != null ? formatPoints(balance, 0) : '—'}
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function ConnectionDot({ connected }: { connected: boolean }) {
-  return (
-    <span
-      className="flex shrink-0 items-center"
-      title={connected ? 'Live' : 'Reconnecting…'}
-      aria-label={connected ? 'Connected' : 'Reconnecting'}
-    >
-      <span
-        className={cx(
-          'h-2 w-2 rounded-full',
-          connected ? 'bg-yes' : 'animate-pulse bg-warn',
-        )}
-      />
-    </span>
-  );
-}
-
-function MiniStat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone?: 'yes' | 'no';
-}) {
-  return (
-    <div>
-      <div className="label !text-[10px]">{label}</div>
-      <div
-        className={cx(
-          'tnum mt-0.5 text-sm font-semibold',
-          tone === 'yes' && 'text-yes',
-          tone === 'no' && 'text-no',
-        )}
-      >
-        {value}
-      </div>
-    </div>
-  );
-}
-
-/** A short-lived banner announcing how the round just settled. */
-function SettlementBanner({
-  settled,
-}: {
-  settled: { roundNumber: number; outcome: string; openPrice: number | null; closePrice: number | null; voidReason: string | null };
-}) {
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    setVisible(true);
-    const timer = setTimeout(() => setVisible(false), 8000);
-    return () => clearTimeout(timer);
-  }, [settled.roundNumber, settled.outcome]);
-
-  if (!visible) return null;
-
-  const isVoid = settled.outcome === 'VOID';
-  const isYes = settled.outcome === 'YES';
-
-  return (
-    <div
-      className={cx(
-        'safe-x animate-rise border-b px-4 py-2.5',
-        isVoid
-          ? 'border-warn/40 bg-warn/10'
-          : isYes
-            ? 'border-yes/40 bg-yes/10'
-            : 'border-no/40 bg-no/10',
-      )}
-      role="status"
-    >
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-        <span className="font-bold">Round {settled.roundNumber}</span>
-        <span
-          className={cx(
-            'font-bold',
-            isVoid ? 'text-warn' : isYes ? 'text-yes' : 'text-no',
-          )}
-        >
-          {isVoid ? 'VOID — everyone refunded' : isYes ? 'closed UP · YES' : 'closed DOWN · NO'}
-        </span>
-        {!isVoid && settled.openPrice != null && settled.closePrice != null ? (
-          <span className="tnum text-fg-muted">
-            {formatPrice(settled.openPrice)} → {formatPrice(settled.closePrice)}
-          </span>
-        ) : null}
-        {isVoid && settled.voidReason ? (
-          <span className="text-fg-muted">{settled.voidReason}</span>
-        ) : null}
-      </div>
     </div>
   );
 }

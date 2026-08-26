@@ -4,187 +4,163 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { ErrorNote, Panel, Spinner } from '@/components/ui';
-import { formatPoints } from '@/lib/format';
+import { ErrorNote, Spinner } from '@/components/ui';
 
-/**
- * The join gate.
- *
- * The code is already in the URL when someone follows a link or scans a QR
- * code, so this screen mostly exists to confirm what they are joining and to
- * hand out the starting balance. Someone who typed the code themselves gets to
- * check it against the arena name before committing.
- */
 export function JoinArena({
-  code,
-  name,
-  status,
-  alreadyJoined,
-  balance,
-  startingBalance,
-  signedIn,
+  arenaCode,
+  defaultCode,
+  isLoggedIn,
+  userName,
+  isAlreadyJoined,
 }: {
-  code: string;
-  name: string;
-  status: string;
-  alreadyJoined: boolean;
-  balance: number | null;
-  startingBalance: number;
-  signedIn: boolean;
+  arenaCode: string;
+  defaultCode: string;
+  isLoggedIn: boolean;
+  userName?: string;
+  isAlreadyJoined: boolean;
 }) {
   const router = useRouter();
+  const [displayName, setDisplayName] = useState(userName || '');
+  const [accessCode, setAccessCode] = useState(defaultCode || arenaCode);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [confirmCode, setConfirmCode] = useState(code);
 
-  const closed = status === 'ENDED';
-  const notOpen = status === 'DRAFT';
+  const handleJoin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isLoggedIn) {
+      router.push(`/signin?callbackUrl=${encodeURIComponent(`/arenas/${arenaCode}`)}`);
+      return;
+    }
 
-  if (!signedIn) {
-    return (
-      <Panel className="p-6">
-        <h2 className="text-lg font-semibold">Sign in to join</h2>
-        <p className="mt-2 text-sm text-fg-muted">
-          You need an account so your points, positions and results follow you across
-          rounds. It takes a few seconds.
-        </p>
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-          <Link
-            href={`/signup?callbackUrl=${encodeURIComponent(`/arenas/${code}`)}`}
-            className="btn-primary flex-1"
-          >
-            Create an account
-          </Link>
-          <Link
-            href={`/signin?callbackUrl=${encodeURIComponent(`/arenas/${code}`)}`}
-            className="btn-secondary flex-1"
-          >
-            Sign in
-          </Link>
-        </div>
-      </Panel>
-    );
-  }
-
-  if (alreadyJoined) {
-    return (
-      <Panel className="p-6">
-        <div className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-yes/15 text-yes">
-            ✓
-          </span>
-          <h2 className="text-lg font-semibold">You are in</h2>
-        </div>
-        <p className="mt-2 text-sm text-fg-muted">
-          Your balance in {name} is{' '}
-          <span className="tnum font-semibold text-fg">
-            {formatPoints(balance ?? startingBalance)} points
-          </span>
-          .
-        </p>
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-          {closed ? (
-            <Link href={`/arenas/${code}/results`} className="btn-primary flex-1">
-              See final results
-            </Link>
-          ) : (
-            <Link href={`/arenas/${code}/live`} className="btn-primary flex-1">
-              Open trading screen
-            </Link>
-          )}
-          <Link href={`/arenas/${code}/results`} className="btn-secondary flex-1">
-            Round history
-          </Link>
-        </div>
-
-        <p className="mt-4 text-xs text-fg-faint">
-          Tip: add the trading screen to your home screen so you can get back to it in one
-          tap during the event.
-        </p>
-      </Panel>
-    );
-  }
-
-  if (closed || notOpen) {
-    return (
-      <Panel className="p-6">
-        <h2 className="text-lg font-semibold">
-          {closed ? 'This arena has finished' : 'This arena has not opened yet'}
-        </h2>
-        <p className="mt-2 text-sm text-fg-muted">
-          {closed
-            ? 'Joining is closed, but the final leaderboard is public.'
-            : 'The organizer has not opened it for joining. Check back closer to the start time.'}
-        </p>
-        {closed ? (
-          <Link href={`/arenas/${code}/results`} className="btn-secondary mt-5">
-            View results
-          </Link>
-        ) : null}
-      </Panel>
-    );
-  }
-
-  const join = async () => {
     setPending(true);
     setError(null);
+
     try {
-      const res = await fetch(
-        `/api/arenas/${encodeURIComponent(confirmCode.trim().toUpperCase())}/join`,
-        { method: 'POST' },
-      );
-      const body = await res.json().catch(() => ({}));
+      const res = await fetch(`/api/arenas/${arenaCode}/join`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ code: accessCode, displayName }),
+      });
 
       if (!res.ok) {
-        setError(body.error ?? 'Could not join this arena.');
-        return;
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? 'Could not join arena');
       }
 
-      router.push(`/arenas/${body.arena.code}/live`);
+      router.push(`/arenas/${arenaCode}/live`);
       router.refresh();
-    } catch {
-      setError('Network problem — please try again.');
-    } finally {
+    } catch (err: unknown) {
       setPending(false);
+      setError(err instanceof Error ? err.message : 'Could not join arena');
     }
   };
 
+  if (isAlreadyJoined) {
+    return (
+      <div className="flex flex-col gap-4 text-center">
+        <div className="p-4 rounded-xl border border-[#22C55E]/30 bg-[#22C55E]/10 text-[#22C55E] text-xs font-['Epilogue'] font-bold tracking-wider">
+          YOU ARE REGISTERED IN THIS ARENA
+        </div>
+        <Link
+          href={`/arenas/${arenaCode}/live`}
+          className="w-full bg-white text-[#2f3131] rounded-full py-3.5 font-['Epilogue'] text-sm font-bold hover:bg-[#c6c6c7] transition-all flex items-center justify-center gap-2 shadow-lg"
+        >
+          <span>Enter Trading Terminal</span>
+          <span className="material-symbols-outlined text-sm">arrow_forward</span>
+        </Link>
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <div className="flex flex-col gap-4 text-center">
+        <div className="p-4 rounded-xl border border-[#27272A] bg-[#201f1f] text-[#c4c7c8] text-xs leading-relaxed">
+          Authentication is mandatory to participate in prediction markets and record trading scores.
+        </div>
+
+        <Link
+          href={`/signin?callbackUrl=${encodeURIComponent(`/arenas/${arenaCode}`)}`}
+          className="w-full bg-white text-[#2f3131] rounded-full py-3.5 font-['Epilogue'] text-sm font-bold hover:bg-[#c6c6c7] transition-all flex items-center justify-center gap-2 shadow-lg"
+        >
+          <span>Sign In to Enter Arena</span>
+          <span className="material-symbols-outlined text-sm">arrow_forward</span>
+        </Link>
+
+        <p className="text-center font-['Geist'] text-xs text-[#c4c7c8]">
+          Don&apos;t have an account?{' '}
+          <Link
+            href={`/signup?callbackUrl=${encodeURIComponent(`/arenas/${arenaCode}`)}`}
+            className="text-white font-bold hover:underline"
+          >
+            Create account
+          </Link>
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <Panel className="p-6">
-      <h2 className="text-lg font-semibold">Join {name}</h2>
-      <p className="mt-2 text-sm text-fg-muted">
-        You will start with{' '}
-        <span className="tnum font-semibold text-fg">
-          {formatPoints(startingBalance, 0)} virtual points
-        </span>
-        . Points have no cash value and there is nothing to pay.
-      </p>
+    <form onSubmit={handleJoin} className="flex flex-col gap-4 font-['Geist'] text-xs">
+      <div className="space-y-1">
+        <label className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase pl-1" htmlFor="displayName">
+          Display Name
+        </label>
+        <div className="relative">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c4c7c8] text-sm">
+            person
+          </span>
+          <input
+            id="displayName"
+            type="text"
+            required
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            className="w-full bg-[#201f1f] border border-[#27272A] rounded-xl py-3 pl-10 pr-4 font-['Epilogue'] text-xs text-white focus:border-white focus:outline-none transition-all placeholder-[#8e9192]"
+            placeholder="Trader Name"
+          />
+        </div>
+      </div>
 
-      <label className="mt-5 block">
-        <span className="label">Join code</span>
-        <input
-          value={confirmCode}
-          onChange={(event) => setConfirmCode(event.target.value.toUpperCase())}
-          className="field mt-2 text-center font-mono text-xl tracking-[0.35em]"
-          autoCapitalize="characters"
-          autoCorrect="off"
-          spellCheck={false}
-          maxLength={12}
-          aria-label="Join code"
-        />
-      </label>
+      <div className="space-y-1">
+        <label className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase pl-1" htmlFor="joinCode">
+          Access Code
+        </label>
+        <div className="relative">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c4c7c8] text-sm">
+            lock
+          </span>
+          <input
+            id="joinCode"
+            type="text"
+            required
+            value={accessCode}
+            onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+            className="w-full bg-[#201f1f] border border-[#27272A] rounded-xl py-3 pl-10 pr-4 font-['Epilogue'] text-xs text-white tracking-widest uppercase focus:border-white focus:outline-none transition-all placeholder-[#8e9192]"
+            placeholder="CODE"
+          />
+        </div>
+      </div>
 
-      {error ? <div className="mt-4"><ErrorNote>{error}</ErrorNote></div> : null}
+      <ErrorNote>{error}</ErrorNote>
 
       <button
-        type="button"
-        onClick={() => void join()}
-        disabled={pending || confirmCode.trim().length < 4}
-        className="btn-primary mt-5 w-full text-base"
+        type="submit"
+        disabled={pending}
+        className="mt-2 w-full bg-white text-[#2f3131] rounded-full py-3.5 font-['Epilogue'] text-sm font-bold hover:bg-[#c6c6c7] transition-all flex items-center justify-center gap-2 shadow-lg"
       >
-        {pending ? <Spinner /> : null}
-        {pending ? 'Joining…' : 'Join arena'}
+        {pending ? <Spinner className="border-[#2f3131] border-t-transparent" /> : null}
+        <span>{pending ? 'Joining Arena…' : 'Enter Arena'}</span>
+        {!pending ? <span className="material-symbols-outlined text-sm">arrow_forward</span> : null}
       </button>
-    </Panel>
+
+      <p className="text-center font-['Geist'] text-[11px] text-[#c4c7c8] mt-1">
+        By joining, you agree to the{' '}
+        <Link href="/guide" className="underline hover:text-white transition-colors">
+          Rules of Play
+        </Link>
+        .
+      </p>
+    </form>
   );
 }

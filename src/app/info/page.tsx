@@ -1,202 +1,85 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { SiteShell } from '@/components/site-shell';
-import { PageHeader, Panel } from '@/components/ui';
+import { SiteSidebar } from '@/components/site-sidebar';
 
 export const metadata: Metadata = {
-  title: 'About',
-  description:
-    'What Arenas is, how prediction markets price information, how the platform runs multiple independent college events, and why nothing here involves real money.',
+  title: 'About — Arenas',
+  description: 'Learn about Arenas, the campus prediction market engine.',
 };
 
 export default function InfoPage() {
   return (
-    <SiteShell>
-      <div className="flex flex-col gap-10">
-        <PageHeader
-          eyebrow="About the platform"
-          title="What Arenas is"
-          subtitle="A multi-tenant platform for running live prediction market tournaments at college FinTech events."
-        />
+    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
+      {/* SideNavBar */}
+      <SiteSidebar />
 
-        <Section title="The problem it solves">
-          <p>
-            Explaining a market to a room is hard. Explaining it while a market is running,
-            with everyone&apos;s points on the line and a price moving on the projector, is
-            almost easy. Arenas exists to make that second thing possible without a
-            technical team.
-          </p>
-          <p>
-            An organizer creates an arena, shares a join code, and starts the session.
-            Everyone else opens a link on their phone. Twelve rounds later there is a
-            leaderboard, and everyone in the room has watched a price discover itself in
-            real time.
-          </p>
-        </Section>
-
-        <Section title="How a prediction market prices information">
-          <p>
-            A prediction market turns a question into a tradeable contract. Here the
-            contract is: <em>this candle closes above where it opened</em>. It pays 1 point
-            if true and 0 if false.
-          </p>
-          <p>
-            If you would pay 0.62 points for that contract, you are implicitly saying you
-            think it is about 62% likely. So the price <em>is</em> the probability. When
-            many people trade against each other, the price settles at the crowd&apos;s
-            aggregate belief — and it updates the instant anyone changes their mind.
-          </p>
-          <p>
-            That is the pedagogical payload of the whole event: prices are not decorations
-            on top of information, they are how information gets aggregated.
-          </p>
-        </Section>
-
-        <Section title="The market maker">
-          <p>
-            With thirty people in a room and a five-minute window, waiting for a buyer to
-            match every seller does not work — most orders would simply never fill. Arenas
-            uses an <Strong>automated market maker</Strong> instead, specifically Hanson&apos;s
-            Logarithmic Market Scoring Rule (LMSR).
-          </p>
-          <p>
-            It always quotes a price and always fills instantly. Its cost function is
-          </p>
-          <Formula>C(q) = b · ln( e^(qYes/b) + e^(qNo/b) )</Formula>
-          <p>
-            where <Mono>qYes</Mono> and <Mono>qNo</Mono> are the shares outstanding on each
-            side. Any trade costs the difference in <Mono>C</Mono> before and after, and the
-            instantaneous price of YES is
-          </p>
-          <Formula>p(YES) = e^(qYes/b) / ( e^(qYes/b) + e^(qNo/b) )</Formula>
-          <p>
-            which is always strictly between 0 and 1, so it reads directly as a probability.
-          </p>
-          <Panel className="p-5">
-            <p className="text-sm font-semibold">What b does</p>
-            <p className="mt-2 text-sm text-fg-muted">
-              <Mono>b</Mono> is the liquidity parameter. High <Mono>b</Mono> means a deep
-              market where trades barely move the price. Low <Mono>b</Mono> means every
-              trade visibly shifts it — which is what makes a live event worth watching, so
-              arenas default to a low value around 40.
-            </p>
-            <p className="mt-2 text-sm text-fg-muted">
-              It also bounds the house: the market maker can subsidise at most{' '}
-              <Mono>b · ln(2)</Mono> points per round, no matter what traders do.
-            </p>
-          </Panel>
-        </Section>
-
-        <Section title="How rounds settle">
-          <p>
-            The price at the open is recorded as the strike. Trading locks a configurable
-            buffer before the close so that nobody can trade against a result they can
-            already see.
-          </p>
-          <p>
-            The closing price is a short time-weighted average — several samples over a few
-            seconds — never a single tick. A close strictly above the strike resolves YES;
-            equal or below resolves NO. If the price feed cannot produce usable data, the
-            round is declared VOID and every trade in it is refunded in full.
-          </p>
-          <p className="text-sm text-fg-faint">
-            Price data comes from the Binance public REST API, proxied through the server so
-            no participant&apos;s browser talks to a third party.
-          </p>
-        </Section>
-
-        <Section title="Multiple colleges, one platform">
-          <p>
-            Every arena is a separate tenant. An organizer at one college creates an arena
-            with its own asset, timing, starting balance, liquidity setting and join code.
-            Participants, rounds, trades and balances are all scoped to that arena&apos;s id
-            and never cross between events.
-          </p>
-          <p>
-            Several arenas can run simultaneously and independently — the round scheduler
-            advances each one on its own clock.
-          </p>
-        </Section>
-
-        <Section title="The join code">
-          <p>
-            A join code is a door, not a vault. It is drawn from an alphabet with no
-            ambiguous characters (no 0/O, no 1/I/L), so it survives being read aloud and
-            typed on a phone, and it is random rather than sequential so it cannot be
-            guessed by counting upward.
-          </p>
-          <p>
-            Join attempts are rate-limited, which is the practical defence. But the intended
-            control is social: the organizer gives the code to the people in the room.
-            Browsing the public calendar needs no code at all.
-          </p>
-        </Section>
-
-        <Section title="No money. Anywhere.">
-          <p>
-            Arenas settles in virtual points with no cash value. There is no deposit, no
-            withdrawal, no payment processing, no cash-out, and no mechanism by which a
-            point becomes anything else.
-          </p>
-          <p>
-            That is a deliberate design constraint rather than a feature gap: it keeps the
-            platform an educational tool rather than a financial or gambling product, and it
-            means a student society can run an event without a compliance conversation.
-          </p>
-          <p className="text-sm text-fg-faint">
-            Nothing on this platform is investment advice, and none of the markets here are
-            financial instruments.
-          </p>
-        </Section>
-
-        <Panel className="p-7">
-          <h2 className="text-lg font-bold">Run one at your college</h2>
-          <p className="mt-2 text-sm text-fg-muted">
-            Create an organizer account, set up an arena, and share the code. The whole
-            setup takes a few minutes.
-          </p>
-          <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-            <Link href="/signup" className="btn-primary sm:w-52">
-              Create an account
+      {/* Main Content Wrapper */}
+      <div className="flex-1 md:ml-64 flex flex-col min-h-screen min-w-0">
+        {/* TopNavBar */}
+        <header className="bg-[rgba(20,20,20,0.7)] top-0 sticky border-b border-[#27272A] backdrop-blur-xl flex justify-between items-center h-16 px-6 z-40">
+          <div className="flex items-center gap-2 md:hidden">
+            <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
+          </div>
+          <div className="hidden md:block">
+            <span className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] tracking-wider uppercase">
+              ABOUT ARENAS
+            </span>
+          </div>
+          <div className="flex items-center gap-4 ml-auto">
+            <Link href="/signin" className="text-sm font-semibold text-[#c4c7c8] hover:text-white transition-colors">
+              Sign in
             </Link>
-            <Link href="/guide" className="btn-secondary sm:w-52">
-              Guide for traders
+            <Link href="/signup" className="px-4 py-2 rounded-full bg-[#22C55E] text-[#131313] font-bold text-xs hover:bg-emerald-400 transition-colors shadow">
+              Sign up
             </Link>
           </div>
-        </Panel>
+        </header>
+
+        {/* Content */}
+        <main className="flex-1 p-6 md:p-12 max-w-[1000px] mx-auto w-full flex flex-col gap-8">
+          <section className="flex flex-col gap-3">
+            <h1 className="font-['Geist'] text-4xl md:text-5xl font-bold text-white tracking-tight">
+              About Arenas
+            </h1>
+            <p className="font-['Geist'] text-base text-[#c4c7c8] leading-relaxed max-w-2xl">
+              Arenas is an open-source campus prediction market engine designed for student finance clubs, hackathons, and quantitative trading societies.
+            </p>
+          </section>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            <div className="p-6 rounded-xl border border-[#27272A] bg-[rgba(20,20,20,0.7)] flex flex-col gap-2">
+              <h3 className="font-['Geist'] text-xl font-medium text-white mb-1">
+                Automated Market Maker (LMSR)
+              </h3>
+              <p className="font-['Geist'] text-xs text-[#c4c7c8] leading-relaxed">
+                Powered by Robin Hanson&apos;s Logarithmic Market Scoring Rule, guaranteeing continuous liquidity and instant order execution for binary prediction markets.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-xl border border-[#27272A] bg-[rgba(20,20,20,0.7)] flex flex-col gap-2">
+              <h3 className="font-['Geist'] text-xl font-medium text-white mb-1">
+                Auditorium Projector Mode
+              </h3>
+              <p className="font-['Geist'] text-xs text-[#c4c7c8] leading-relaxed">
+                Dedicated 16:9 big-screen presentation interface built for auditorium projectors, featuring real-time odds gauges, countdown timers, and live leaderboard rankings.
+              </p>
+            </div>
+          </div>
+        </main>
+
+        <footer className="bg-[#131313] w-full border-t border-[#27272A] flex flex-col sm:flex-row justify-between items-center py-6 px-12 gap-4 mt-auto">
+          <span className="font-['Epilogue'] text-xs text-[#c4c7c8]">
+            © 2024 Arenas Markets. All rights reserved.
+          </span>
+          <div className="flex gap-6 text-xs text-[#c4c7c8]">
+            <Link href="/guide" className="hover:text-white hover:underline transition-colors">Legal</Link>
+            <Link href="/guide" className="hover:text-white hover:underline transition-colors">Privacy</Link>
+            <Link href="/guide" className="hover:text-white hover:underline transition-colors">Terms</Link>
+            <Link href="/guide" className="hover:text-white hover:underline transition-colors">Docs</Link>
+          </div>
+        </footer>
       </div>
-    </SiteShell>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="flex flex-col gap-4">
-      <h2 className="font-display text-2xl font-bold uppercase tracking-tight sm:text-3xl">{title}</h2>
-      <div className="flex flex-col gap-4 text-[15px] leading-relaxed text-fg-muted">
-        {children}
-      </div>
-    </section>
-  );
-}
-
-function Strong({ children }: { children: React.ReactNode }) {
-  return <strong className="font-semibold text-fg">{children}</strong>;
-}
-
-function Mono({ children }: { children: React.ReactNode }) {
-  return (
-    <code className="rounded border border-line bg-ink-900 px-1.5 py-0.5 font-mono text-[0.9em] text-fg">
-      {children}
-    </code>
-  );
-}
-
-function Formula({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="overflow-x-auto rounded border border-line bg-ink-900 px-5 py-4">
-      <code className="whitespace-nowrap font-mono text-sm text-fg">{children}</code>
     </div>
   );
 }

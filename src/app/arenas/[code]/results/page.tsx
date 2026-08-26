@@ -1,380 +1,185 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { Leaderboard } from '@/components/arena/leaderboard';
-import { RoundTimeline, SplitBar } from '@/components/charts';
 import { SiteShell } from '@/components/site-shell';
-import { Badge, EmptyState, Panel, StatusPill, Stat } from '@/components/ui';
-import { getArenaAnalytics } from '@/lib/analytics';
 import { auth } from '@/lib/auth';
-import { computeLeaderboard } from '@/lib/engine/round-engine';
-import {
-  cx,
-  formatPoints,
-  formatPrice,
-  formatProbability,
-  formatSignedPoints,
-  ordinal,
-} from '@/lib/format';
+import { formatPoints } from '@/lib/format';
 import { prisma } from '@/lib/prisma';
-import { joinCodeSchema } from '@/lib/validation';
 
+export const metadata: Metadata = { title: 'Results' };
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({
+export default async function ArenaResultsPage({
   params,
 }: {
-  params: { code: string };
-}): Promise<Metadata> {
-  const parsed = joinCodeSchema.safeParse(params.code);
-  if (!parsed.success) return { title: 'Results' };
-  const arena = await prisma.event.findUnique({
-    where: { code: parsed.data },
-    select: { name: true },
-  });
-  return { title: arena ? `${arena.name} — results` : 'Results' };
-}
-
-export default async function ResultsPage({ params }: { params: { code: string } }) {
-  const parsed = joinCodeSchema.safeParse(params.code);
-  if (!parsed.success) notFound();
-
-  const arena = await prisma.event.findUnique({
-    where: { code: parsed.data },
-    include: { organizer: { select: { name: true } } },
-  });
-  if (!arena) notFound();
-
+  params: Promise<{ code: string }>;
+}) {
+  const { code } = await params;
   const session = await auth();
 
-  const [leaderboard, rounds, market] = await Promise.all([
-    computeLeaderboard(arena.id),
-    prisma.round.findMany({
-      where: { eventId: arena.id, status: 'RESOLVED' },
-      orderBy: { roundNumber: 'asc' },
-    }),
-    getArenaAnalytics(arena.id),
-  ]);
+  const arena = await prisma.event.findUnique({
+    where: { code: code.toUpperCase() },
+    include: {
+      participants: {
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+        },
+        orderBy: { balance: 'desc' },
+      },
+      rounds: {
+        orderBy: { roundNumber: 'asc' },
+      },
+    },
+  });
 
-  const participant = session?.user?.id
-    ? await prisma.eventParticipant.findUnique({
-        where: { eventId_userId: { eventId: arena.id, userId: session.user.id } },
-        select: { id: true, balance: true },
-      })
+  if (!arena) notFound();
+
+  const participants = arena.participants;
+  const top3 = participants.slice(0, 3);
+  const userId = session?.user?.id;
+  const myParticipant = userId
+    ? participants.find((p) => p.userId === userId)
     : null;
-
-  const myTrades = participant
-    ? await prisma.trade.findMany({
-        where: { participantId: participant.id },
-        orderBy: { createdAt: 'asc' },
-        include: { round: { select: { roundNumber: true, outcome: true } } },
-      })
-    : [];
-
-  // Collapse a participant's trades into one row per round.
-  const byRound = new Map<
-    number,
-    { outcome: string | null; staked: number; payout: number; sides: Set<string> }
-  >();
-  for (const trade of myTrades) {
-    const key = trade.round.roundNumber;
-    const entry = byRound.get(key) ?? {
-      outcome: trade.round.outcome,
-      staked: 0,
-      payout: 0,
-      sides: new Set<string>(),
-    };
-    entry.staked += trade.cost;
-    entry.payout += trade.payout ?? 0;
-    entry.sides.add(trade.side);
-    byRound.set(key, entry);
-  }
-  const myRounds = Array.from(byRound.entries()).sort((a, b) => a[0] - b[0]);
-
-  const myRank = participant
-    ? (await prisma.eventParticipant.count({
-        where: { eventId: arena.id, balance: { gt: participant.balance } },
-      })) + 1
+  const myRank = userId && myParticipant
+    ? participants.findIndex((p) => p.userId === userId) + 1
     : null;
-
-  const roundsWon = myRounds.filter(([, r]) => r.payout - r.staked > 0).length;
 
   return (
     <SiteShell width="wide">
-      <div className="flex flex-col gap-8">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <div className="label">{arena.hostName ?? arena.organizer.name}</div>
-            <h1 className="font-display mt-1 text-4xl font-bold uppercase tracking-tight sm:text-5xl">
-              {arena.name}
-            </h1>
-            <p className="mt-2 text-sm text-fg-muted">
-              {arena.asset} · {rounds.length} of {arena.totalRounds} rounds settled ·{' '}
-              {leaderboard.participantCount} traders
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <StatusPill status={arena.status} />
-            {arena.status !== 'ENDED' ? (
-              <Link href={`/arenas/${arena.code}/live`} className="btn-secondary text-sm">
-                Back to trading
-              </Link>
-            ) : null}
-          </div>
-        </header>
+      <div className="flex flex-col gap-12 w-full max-w-6xl">
+        {/* Page Header */}
+        <div className="text-center max-w-2xl mx-auto">
+          <span className="font-mono text-xs font-bold text-zinc-400 uppercase tracking-widest mb-3 block">
+            Official Results · {arena.code}
+          </span>
+          <h1 className="font-display text-4xl sm:text-5xl font-bold text-zinc-100 mb-4">
+            {arena.name} Wrap-Up
+          </h1>
+          <p className="text-sm text-zinc-400 leading-relaxed">
+            The dust has settled. After {arena.totalRounds} rounds of intense forecasting and market making, the final hierarchy is established.
+          </p>
+        </div>
 
-        {participant ? (
-          <section>
-            <h2 className="label mb-3">Your event</h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Stat
-                label="Final rank"
-                value={myRank !== null ? ordinal(myRank) : '—'}
-                hint={`of ${leaderboard.participantCount}`}
-              />
-              <Stat
-                label="Balance"
-                value={formatPoints(participant.balance, 0)}
-                hint={`started at ${formatPoints(arena.startingBalance, 0)}`}
-              />
-              <Stat
-                label="Profit / loss"
-                value={formatSignedPoints(participant.balance - arena.startingBalance, 0)}
-                tone={participant.balance >= arena.startingBalance ? 'yes' : 'no'}
-              />
-              <Stat
-                label="Rounds won"
-                value={`${roundsWon} / ${myRounds.length}`}
-                hint="rounds you traded"
-              />
-            </div>
-          </section>
-        ) : null}
-
-        {market.resolvedRounds > 0 ? (
-          <section className="flex flex-col gap-4">
-            <div>
-              <h2 className="font-display text-2xl font-bold uppercase tracking-tight">
-                Was the room right?
-              </h2>
-              <p className="mt-1 max-w-2xl text-sm text-fg-muted">
-                Every round the market settled on a probability before the candle closed.
-                This is how those forecasts held up.
-              </p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Stat
-                label="Crowd accuracy"
-                value={
-                  market.crowdAccuracy !== null
-                    ? formatProbability(market.crowdAccuracy, 0)
-                    : '—'
-                }
-                hint="favourite won this often"
-                tone={
-                  market.crowdAccuracy !== null && market.crowdAccuracy > 0.5 ? 'yes' : undefined
-                }
-              />
-              <Stat
-                label="Average error"
-                value={market.crowdBrier !== null ? formatProbability(market.crowdBrier, 0) : '—'}
-                hint="lower is a sharper market"
-              />
-              <Stat
-                label="Total volume"
-                value={`${formatPoints(market.totalVolume, 0)}`}
-                hint={`${market.totalTrades} trades`}
-              />
-              <Stat
-                label="Busiest round"
-                value={market.busiestRound ? `R${market.busiestRound.roundNumber}` : '—'}
-                hint={
-                  market.busiestRound
-                    ? `${formatPoints(market.busiestRound.volume, 0)} pts`
-                    : undefined
-                }
-              />
-            </div>
-
-            <Panel className="flex flex-col gap-4 p-5">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <span className="label">Round by round</span>
-                <span className="text-xs text-fg-faint">
-                  fill height = market&apos;s YES probability · ✓ = crowd called it
-                </span>
-              </div>
-
-              <RoundTimeline rounds={market.rounds} />
-
-              {market.yesCount + market.noCount > 0 ? (
-                <div className="border-t border-line pt-4">
-                  <div className="label mb-2">How the candles actually closed</div>
-                  <SplitBar
-                    left={market.yesCount}
-                    right={market.noCount}
-                    leftLabel={`${market.yesCount} closed UP`}
-                    rightLabel={`${market.noCount} closed DOWN`}
-                  />
+        {/* Podium & Personal Summary */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Winners Podium (Left 8 cols) */}
+          <div className="lg:col-span-8 flex flex-col justify-end">
+            <h3 className="font-display text-xl font-bold text-zinc-100 mb-6">Top Forecasters</h3>
+            <div className="grid grid-cols-3 gap-3 md:gap-4 items-end h-[320px]">
+              {/* 2nd Place */}
+              {top3[1] ? (
+                <div className="glass-panel rounded-2xl p-5 flex flex-col items-center justify-end h-[75%] border border-zinc-800 bg-zinc-900/60 backdrop-blur-xl relative">
+                  <span className="font-mono text-[10px] font-bold text-zinc-400 uppercase mb-1">Silver</span>
+                  <span className="font-display text-sm font-bold text-zinc-100 truncate w-full text-center mb-2">
+                    {top3[1].user.name}
+                  </span>
+                  <span className="font-mono text-base font-bold text-zinc-200">
+                    {formatPoints(top3[1].balance, 0)} pts
+                  </span>
                 </div>
-              ) : null}
-            </Panel>
-          </section>
-        ) : null}
+              ) : <div />}
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-          {/* min-w-0 matters here: without it these grid children size to their
-              widest content, and the min-w tables below would drag the whole
-              page wider than a phone screen instead of scrolling inside their
-              own overflow-x-auto panel. */}
-          <section className="min-w-0">
-            <h2 className="label mb-3">Final leaderboard</h2>
-            {leaderboard.entries.length === 0 ? (
-              <EmptyState
-                title="No traders yet"
-                body="Nobody has joined this arena, so there is nothing to rank."
-              />
-            ) : (
-              <Leaderboard
-                data={leaderboard}
-                limit={50}
-                showPnl={false}
-                highlightParticipantId={participant?.id ?? null}
-              />
-            )}
-          </section>
+              {/* 1st Place Champion */}
+              {top3[0] ? (
+                <div className="glass-panel rounded-t-3xl rounded-b-2xl p-6 flex flex-col items-center justify-end h-[100%] border border-zinc-700 bg-zinc-900/90 backdrop-blur-xl relative shadow-[0_0_40px_rgba(255,255,255,0.08)]">
+                  <span className="font-mono text-[11px] font-bold text-amber-400 uppercase tracking-widest mb-1">
+                    🏆 Champion
+                  </span>
+                  <span className="font-display text-lg font-bold text-zinc-100 truncate w-full text-center mb-2">
+                    {top3[0].user.name}
+                  </span>
+                  <span className="font-mono text-xl font-bold text-emerald-400">
+                    {formatPoints(top3[0].balance, 0)} pts
+                  </span>
+                </div>
+              ) : <div />}
 
-          <section className="flex min-w-0 flex-col gap-6">
-            {participant ? (
-              <div>
-                <h2 className="label mb-3">Your round-by-round</h2>
-                {myRounds.length === 0 ? (
-                  <Panel className="p-6 text-sm text-fg-muted">
-                    You did not place a trade in this arena.
-                  </Panel>
-                ) : (
-                  <Panel className="overflow-x-auto">
-                    <table className="w-full min-w-[26rem] text-sm">
-                      <thead>
-                        <tr className="border-b border-line text-left">
-                          <Th>Round</Th>
-                          <Th>Side</Th>
-                          <Th>Result</Th>
-                          <Th className="text-right">Staked</Th>
-                          <Th className="text-right">P/L</Th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {myRounds.map(([roundNumber, entry]) => {
-                          const pnl = entry.payout - entry.staked;
-                          return (
-                            <tr key={roundNumber} className="border-b border-line last:border-0">
-                              <Td className="tnum font-semibold">{roundNumber}</Td>
-                              <Td>
-                                <span className="flex gap-1">
-                                  {Array.from(entry.sides).map((side) => (
-                                    <Badge key={side} tone={side === 'YES' ? 'yes' : 'no'}>
-                                      {side}
-                                    </Badge>
-                                  ))}
-                                </span>
-                              </Td>
-                              <Td>
-                                <OutcomeBadge outcome={entry.outcome} />
-                              </Td>
-                              <Td className="tnum text-right text-fg-muted">
-                                {formatPoints(entry.staked)}
-                              </Td>
-                              <Td
-                                className={cx(
-                                  'tnum text-right font-semibold',
-                                  pnl > 0 ? 'text-yes' : pnl < 0 ? 'text-no' : 'text-fg-muted',
-                                )}
-                              >
-                                {formatSignedPoints(pnl)}
-                              </Td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </Panel>
-                )}
-              </div>
-            ) : null}
-
-            <div>
-              <h2 className="label mb-3">Every round</h2>
-              {rounds.length === 0 ? (
-                <Panel className="p-6 text-sm text-fg-muted">
-                  No rounds have settled yet.
-                </Panel>
-              ) : (
-                <Panel className="overflow-x-auto">
-                  <table className="w-full min-w-[30rem] text-sm">
-                    <thead>
-                      <tr className="border-b border-line text-left">
-                        <Th>#</Th>
-                        <Th>Open</Th>
-                        <Th>Close</Th>
-                        <Th>Result</Th>
-                        <Th className="text-right">Final YES</Th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {rounds.map((round) => (
-                        <tr key={round.id} className="border-b border-line last:border-0">
-                          <Td className="tnum font-semibold">{round.roundNumber}</Td>
-                          <Td className="tnum text-fg-muted">{formatPrice(round.openPrice)}</Td>
-                          <Td className="tnum text-fg-muted">{formatPrice(round.closePrice)}</Td>
-                          <Td>
-                            <OutcomeBadge outcome={round.outcome} />
-                            {round.voidReason ? (
-                              <div className="mt-1 text-[11px] text-fg-faint">
-                                {round.voidReason}
-                              </div>
-                            ) : null}
-                          </Td>
-                          <Td className="tnum text-right text-fg-muted">
-                            {formatProbability(
-                              round.qYes + round.qNo === 0
-                                ? 0.5
-                                : 1 /
-                                    (1 +
-                                      Math.exp(
-                                        (round.qNo - round.qYes) / arena.liquidityParamB,
-                                      )),
-                            )}
-                          </Td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </Panel>
-              )}
+              {/* 3rd Place */}
+              {top3[2] ? (
+                <div className="glass-panel rounded-2xl p-5 flex flex-col items-center justify-end h-[60%] border border-zinc-800 bg-zinc-900/60 backdrop-blur-xl relative">
+                  <span className="font-mono text-[10px] font-bold text-amber-600 uppercase mb-1">Bronze</span>
+                  <span className="font-display text-sm font-bold text-zinc-100 truncate w-full text-center mb-2">
+                    {top3[2].user.name}
+                  </span>
+                  <span className="font-mono text-base font-bold text-zinc-200">
+                    {formatPoints(top3[2].balance, 0)} pts
+                  </span>
+                </div>
+              ) : <div />}
             </div>
-          </section>
+          </div>
+
+          {/* Personal Summary Card (Right 4 cols) */}
+          <div className="lg:col-span-4 flex flex-col justify-end">
+            <div className="glass-panel border border-zinc-800 rounded-2xl p-6 flex-1 flex flex-col justify-between bg-zinc-900/60 backdrop-blur-xl">
+              <div>
+                <div className="flex justify-between items-start mb-4">
+                  <span className="font-mono text-xs uppercase font-bold text-zinc-400">Final Placement</span>
+                  <span className="px-2.5 py-1 bg-zinc-800 rounded-full font-mono text-[10px] font-bold text-zinc-200 border border-zinc-700">
+                    {myRank ? `#${myRank} of ${participants.length}` : 'Participant'}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-2 mb-8">
+                  <span className="font-display text-4xl font-bold text-zinc-100">
+                    {myRank ? `#${myRank}` : '—'}
+                  </span>
+                  <span className="text-sm text-zinc-400">Rank</span>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
+                  <span className="text-zinc-400">Final Balance</span>
+                  <span className="font-mono font-bold text-emerald-400">
+                    {myParticipant ? `${formatPoints(myParticipant.balance, 0)} pts` : '—'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
+                  <span className="text-zinc-400">Starting Balance</span>
+                  <span className="font-mono text-zinc-200">
+                    {formatPoints(arena.startingBalance, 0)} pts
+                  </span>
+                </div>
+                <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
+                  <span className="text-zinc-400">Total Rounds</span>
+                  <span className="font-mono text-zinc-200">{arena.totalRounds}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Full Standings Table */}
+        <div className="flex flex-col gap-4">
+          <h3 className="font-display text-2xl font-bold text-zinc-100">Final Standings</h3>
+          <div className="glass-panel border border-zinc-800 rounded-2xl overflow-x-auto bg-zinc-900/60">
+            <table className="w-full text-left border-collapse min-w-[600px]">
+              <thead>
+                <tr className="border-b border-zinc-800 text-zinc-400 font-mono text-xs uppercase">
+                  <th className="py-4 px-6 w-16">Rank</th>
+                  <th className="py-4 px-6">Trader</th>
+                  <th className="py-4 px-6 text-right">Final Balance</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm divide-y divide-zinc-800/60">
+                {participants.map((p, idx) => (
+                  <tr key={p.id} className="hover:bg-zinc-800/40 transition-colors">
+                    <td className="py-4 px-6 font-mono text-xs font-bold text-zinc-400">
+                      {String(idx + 1).padStart(2, '0')}
+                    </td>
+                    <td className="py-4 px-6 font-semibold text-zinc-100">
+                      {p.user.name}
+                    </td>
+                    <td className="py-4 px-6 text-right font-mono font-bold text-emerald-400">
+                      {formatPoints(p.balance, 0)} pts
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </SiteShell>
   );
-}
-
-function OutcomeBadge({ outcome }: { outcome: string | null }) {
-  if (!outcome) return <span className="text-fg-faint">—</span>;
-  if (outcome === 'VOID') return <Badge tone="warn">VOID</Badge>;
-  return <Badge tone={outcome === 'YES' ? 'yes' : 'no'}>{outcome}</Badge>;
-}
-
-function Th({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <th className={cx('px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider text-fg-faint', className)}>
-      {children}
-    </th>
-  );
-}
-
-function Td({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <td className={cx('px-4 py-2.5 align-top', className)}>{children}</td>;
 }
