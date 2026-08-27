@@ -13,3 +13,4 @@ tsconfig.tsbuildinfo
 
 # Local agent tooling state
 .claude/
+stitch new ui
