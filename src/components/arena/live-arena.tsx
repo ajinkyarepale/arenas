@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { SiteSidebar } from '@/components/site-sidebar';
 import { roundPhase } from '@/components/arena/round-timer';
 import { TradePanel } from '@/components/arena/trade-panel';
+import { ArenaShareModal } from '@/components/arena/arena-share-modal';
 import { useArena } from '@/hooks/use-arena';
 import { formatPoints } from '@/lib/format';
 import type { ArenaPublicInfo } from '@/lib/engine/snapshot';
@@ -32,6 +33,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
   } = useArena(code);
 
   const [rightTab, setRightTab] = useState<'tape' | 'leaderboard'>('tape');
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const info = snapshot?.arena ?? initialArena;
   const viewer = snapshot?.viewer ?? null;
@@ -99,6 +101,15 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowShareModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#27272A] bg-[#201f1f] text-xs font-['Epilogue'] font-bold text-white hover:bg-[#2a2a2a] transition-colors"
+                title="Share & QR Code"
+              >
+                <span className="material-symbols-outlined text-[16px] text-[#22C55E]">qr_code_2</span>
+                <span className="hidden sm:inline">QR / Share</span>
+              </button>
               <Link
                 href="/markets"
                 className="w-9 h-9 rounded-full border border-[#27272A] flex items-center justify-center text-[#c4c7c8] hover:text-white transition-colors"
@@ -109,6 +120,16 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
             </div>
           </div>
         </header>
+
+        {/* Share & QR Modal */}
+        {showShareModal && (
+          <ArenaShareModal
+            code={info.code}
+            name={info.name}
+            isOpen={true}
+            onClose={() => setShowShareModal(false)}
+          />
+        )}
 
         {/* Page Content Canvas */}
         <div className="flex-1 p-6 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-6">

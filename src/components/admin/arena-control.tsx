@@ -5,10 +5,12 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { Leaderboard } from '@/components/arena/leaderboard';
 import { RoundTimer } from '@/components/arena/round-timer';
+import { ArenaShareModal } from '@/components/arena/arena-share-modal';
 import { Badge, ErrorNote, Panel, Spinner, Stat, StatusPill } from '@/components/ui';
 import { useArena } from '@/hooks/use-arena';
 import {
   cx,
+  formatDateTime,
   formatPoints,
   formatPrice,
   formatProbability,
@@ -30,6 +32,11 @@ interface AdminArena {
   name: string;
   asset: string;
   status: 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED';
+  resolvedOutcome?: 'YES' | 'NO' | 'VOID' | null;
+  resolvedAt?: string | null;
+  createdAt: string;
+  startedAt: string | null;
+  endsAt: string | null;
   currentRound: number;
   totalRounds: number;
   roundDurationSec: number;
@@ -83,6 +90,8 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [origin, setOrigin] = useState('');
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // The public arena feed drives the live numbers; the admin fetch supplies the
   // organizer-only detail (emails, per-participant balances, the trade tape).
@@ -137,6 +146,64 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
       await load();
     } catch {
       setError('Network problem — please try again.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const deleteArena = async () => {
+    if (
+      !window.confirm(
+        `Are you sure you want to permanently delete arena "${data?.arena.name}"? This will delete all its rounds, trades, and participant history. This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    setBusy('delete');
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/arenas/${arenaId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setError(body.error ?? 'Could not delete arena.');
+        setBusy(null);
+        return;
+      }
+      window.location.href = '/admin';
+    } catch {
+      setError('Network error while deleting arena.');
+      setBusy(null);
+    }
+  };
+
+  const resolveArena = async (outcome: 'YES' | 'NO' | 'VOID') => {
+    if (
+      !window.confirm(
+        `Officially resolve this entire Arena as outcome "${outcome}"? This will finalize all participant scores.`,
+      )
+    ) {
+      return;
+    }
+
+    setBusy(`resolve-${outcome}`);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/arenas/${arenaId}/resolve`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ resolveArena: true, outcome }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(body.error ?? 'Could not resolve arena.');
+        return;
+      }
+      await load();
+    } catch {
+      setError('Network error while resolving arena.');
     } finally {
       setBusy(null);
     }
@@ -226,6 +293,16 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
                 {busy === 'end' ? <Spinner /> : null} End arena
               </button>
             ) : null}
+
+            <button
+              type="button"
+              onClick={deleteArena}
+              disabled={busy !== null}
+              className="border border-red-500/40 bg-red-950/20 text-red-400 hover:bg-red-950/40 hover:border-red-500/60 rounded px-3.5 py-1.5 text-sm font-semibold transition-colors flex items-center gap-1.5"
+            >
+              {busy === 'delete' ? <Spinner /> : <span className="material-symbols-outlined text-[16px]">delete</span>}
+              <span>Delete arena</span>
+            </button>
           </div>
         </div>
 
@@ -246,21 +323,129 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
                 href={`/arenas/${arena.code}/screen`}
                 target="_blank"
                 rel="noreferrer"
-                className="btn-secondary !min-h-[38px] text-sm"
+                className="btn-secondary !min-h-[38px] text-sm flex items-center gap-1.5"
               >
-                Open big screen ↗
+                <span>Open big screen ↗</span>
               </Link>
               <button
                 type="button"
-                onClick={() => void navigator.clipboard?.writeText(joinUrl)}
+                onClick={() => setShowShareModal(true)}
+                className="btn-secondary !min-h-[38px] text-sm flex items-center gap-1.5"
+              >
+                <span>📱 Show QR Code</span>
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(joinUrl);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  } catch {
+                    // Fallback
+                  }
+                }}
                 className="btn-ghost !min-h-[38px] text-sm"
               >
-                Copy join link
+                {copied ? '✓ Copied to clipboard!' : 'Copy join link'}
               </button>
             </div>
           </div>
         </div>
+
+        {/* Official Arena Outcome Resolution Flow (Finished vs Resolved) */}
+        {arena.status === 'ENDED' && (
+          <div className="mt-5 border-t border-line pt-5 flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="label">Arena Outcome Resolution</div>
+                {arena.resolvedOutcome ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <span
+                      className={`px-2.5 py-0.5 rounded font-mono font-bold text-xs uppercase ${
+                        arena.resolvedOutcome === 'YES'
+                          ? 'bg-yes/15 text-yes border border-yes/30'
+                          : arena.resolvedOutcome === 'NO'
+                            ? 'bg-no/15 text-no border border-no/30'
+                            : 'bg-warn/15 text-warn border border-warn/30'
+                      }`}
+                    >
+                      Officially Resolved — {arena.resolvedOutcome}
+                    </span>
+                    {arena.resolvedAt && (
+                      <span className="text-xs text-fg-muted">
+                        at {formatDateTime(arena.resolvedAt)}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-sm font-semibold text-warn flex items-center gap-1.5 mt-1">
+                    <span className="material-symbols-outlined text-base">hourglass_empty</span>
+                    <span>Finished — awaiting organizer outcome resolution</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => void resolveArena('YES')}
+                  disabled={busy !== null}
+                  className="px-4 py-2 rounded-lg bg-yes/20 border border-yes/40 text-yes hover:bg-yes/30 text-xs font-bold transition-all flex items-center gap-1.5"
+                >
+                  {busy === 'resolve-YES' ? <Spinner /> : null}
+                  <span>Resolve YES</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void resolveArena('NO')}
+                  disabled={busy !== null}
+                  className="px-4 py-2 rounded-lg bg-no/20 border border-no/40 text-no hover:bg-no/30 text-xs font-bold transition-all flex items-center gap-1.5"
+                >
+                  {busy === 'resolve-NO' ? <Spinner /> : null}
+                  <span>Resolve NO</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Audit Timestamps in IST */}
+        <div className="mt-5 border-t border-line pt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div>
+            <div className="label !text-[10px]">Created (IST)</div>
+            <div className="font-mono text-fg-muted mt-0.5">{formatDateTime(arena.createdAt)}</div>
+          </div>
+          <div>
+            <div className="label !text-[10px]">Started (IST)</div>
+            <div className="font-mono text-fg-muted mt-0.5">
+              {arena.startedAt ? formatDateTime(arena.startedAt) : 'Not started'}
+            </div>
+          </div>
+          <div>
+            <div className="label !text-[10px]">Ended (IST)</div>
+            <div className="font-mono text-fg-muted mt-0.5">
+              {arena.endsAt ? formatDateTime(arena.endsAt) : 'In progress'}
+            </div>
+          </div>
+          <div>
+            <div className="label !text-[10px]">Resolved (IST)</div>
+            <div className="font-mono text-fg-muted mt-0.5">
+              {arena.resolvedAt ? formatDateTime(arena.resolvedAt) : 'Awaiting resolution'}
+            </div>
+          </div>
+        </div>
       </Panel>
+
+      {/* Arena Share & QR Modal */}
+      {showShareModal && (
+        <ArenaShareModal
+          code={arena.code}
+          name={arena.name}
+          isOpen={true}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
 
       {/* Live round */}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">

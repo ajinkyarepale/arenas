@@ -37,7 +37,11 @@ export interface ArenaPublicInfo {
   scheduledFor: string | null;
   startedAt: string | null;
   endsAt: string | null;
+  resolvedOutcome: 'YES' | 'NO' | 'VOID' | null;
+  resolvedAt: string | null;
+  createdAt: string;
   participantCount: number;
+  predictionCount: number;
 }
 
 export interface ArenaViewerInfo {
@@ -56,12 +60,22 @@ export interface ArenaSnapshot {
   serverTime: string;
 }
 
-export async function findArenaByCode(code: string) {
-  return prisma.event.findUnique({
-    where: { code: code.toUpperCase() },
+export async function findArenaByCode(rawCode: string) {
+  const code = rawCode.trim().toUpperCase();
+  const withPrefix = code.startsWith('AR-') ? code : `AR-${code.replace(/[^A-Z0-9]/g, '')}`;
+  const withoutPrefix = code.replace(/^AR-/, '');
+
+  return prisma.event.findFirst({
+    where: {
+      OR: [
+        { code: code },
+        { code: withPrefix },
+        { code: withoutPrefix },
+      ],
+    },
     include: {
       organizer: { select: { name: true } },
-      _count: { select: { participants: true } },
+      _count: { select: { participants: true, trades: true } },
     },
   });
 }
@@ -88,7 +102,11 @@ export function toPublicInfo(event: ArenaWithMeta): ArenaPublicInfo {
     scheduledFor: event.scheduledFor?.toISOString() ?? null,
     startedAt: event.startedAt?.toISOString() ?? null,
     endsAt: event.endsAt?.toISOString() ?? null,
+    resolvedOutcome: event.resolvedOutcome ?? null,
+    resolvedAt: event.resolvedAt?.toISOString() ?? null,
+    createdAt: event.createdAt.toISOString(),
     participantCount: event._count.participants,
+    predictionCount: event._count.trades,
   };
 }
 

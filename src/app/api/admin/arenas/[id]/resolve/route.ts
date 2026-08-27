@@ -3,17 +3,17 @@ import { NextResponse } from 'next/server';
 import { apiError, forbidden, notFound, parseBody, requireOrganizer, unauthorized } from '@/lib/api';
 import { resolveRound } from '@/lib/engine/round-engine';
 import { prisma } from '@/lib/prisma';
+import { emitToArena } from '@/lib/realtime/bus';
 import { forceResolveSchema } from '@/lib/validation';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * Force-resolve a round.
+ * Force-resolve a round or the entire Arena.
  *
- * The escape hatch for when the price feed dies mid-event and a room full of
- * people is waiting. The organizer can call the round manually, or void it and
- * refund everyone. Voiding is the honest default when nobody can agree what the
- * close was.
+ * An Arena ending does not automatically mean its outcome is known.
+ * After an Arena finishes, the organizer can resolve it as YES, NO, or VOID.
+ * The resolution is recorded with timestamps and calculates participant results.
  */
 export async function POST(
   request: Request,
@@ -32,6 +32,52 @@ export async function POST(
   const parsed = await parseBody(request, forceResolveSchema);
   if (!parsed.ok) return parsed.response;
 
+  // Case 1: Resolve the entire Arena
+  if (parsed.data.resolveArena || !parsed.data.roundId) {
+    const resolvedAt = new Date();
+
+    // 1. Update the Event record
+    const updatedArena = await prisma.event.update({
+      where: { id: arena.id },
+      data: {
+        resolvedOutcome: parsed.data.outcome,
+        resolvedAt,
+        resolvedById: user.id,
+        status: 'ENDED',
+      },
+    });
+
+    // 2. Resolve all active or pending rounds if not yet resolved
+    const rounds = await prisma.round.findMany({
+      where: { eventId: arena.id, status: { not: 'RESOLVED' } },
+      select: { id: true },
+    });
+
+    for (const round of rounds) {
+      await resolveRound(round.id, {
+        forcedOutcome: parsed.data.outcome,
+        reason:
+          parsed.data.reason?.trim() ||
+          `Arena resolved as ${parsed.data.outcome} by organizer ${user.name ?? ''}`,
+      });
+    }
+
+    emitToArena(arena.id, 'arena', {
+      status: 'ENDED',
+      currentRound: updatedArena.currentRound,
+      totalRounds: updatedArena.totalRounds,
+      endedAt: updatedArena.endsAt?.toISOString() ?? resolvedAt.toISOString(),
+    });
+
+    return NextResponse.json({
+      resolved: true,
+      arenaId: arena.id,
+      outcome: parsed.data.outcome,
+      resolvedAt: resolvedAt.toISOString(),
+    });
+  }
+
+  // Case 2: Resolve a specific Round
   const round = await prisma.round.findUnique({
     where: { id: parsed.data.roundId },
     select: { id: true, eventId: true, status: true, roundNumber: true },

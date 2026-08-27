@@ -110,6 +110,9 @@ model Event {
   scheduledFor    DateTime?
   startedAt       DateTime?
   endsAt          DateTime?
+  resolvedOutcome Outcome?
+  resolvedAt      DateTime?
+  resolvedById    String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -208,6 +211,7 @@ model Trade {
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   participant EventParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
+  @@unique([roundId, userId])
   @@index([roundId, createdAt])
   @@index([participantId])
   @@index([eventId, userId])

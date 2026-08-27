@@ -145,7 +145,8 @@ export const updateArenaSchema = z.object({
 });
 
 export const forceResolveSchema = z.object({
-  roundId: z.string().cuid('Unknown round'),
+  roundId: z.string().optional(),
+  resolveArena: z.boolean().optional(),
   outcome: z.enum(['YES', 'NO', 'VOID']),
   reason: z.string().trim().max(200).optional(),
 });

@@ -56,24 +56,52 @@ export function formatDuration(seconds: number): string {
   return `${seconds} sec`;
 }
 
+export const TIMEZONE_IST = 'Asia/Kolkata';
+
 export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return 'Not scheduled';
-  return new Date(iso).toLocaleString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return (
+    d.toLocaleString('en-IN', {
+      timeZone: TIMEZONE_IST,
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    }) + ' IST'
+  );
 }
 
 export function formatTime(iso: string | null | undefined): string {
   if (!iso) return '—';
-  return new Date(iso).toLocaleTimeString(undefined, {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return (
+    d.toLocaleTimeString('en-IN', {
+      timeZone: TIMEZONE_IST,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+    }) + ' IST'
+  );
+}
+
+export function formatISTDate(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return (
+    d.toLocaleDateString('en-IN', {
+      timeZone: TIMEZONE_IST,
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }) + ' (IST)'
+  );
 }
 
 export function formatRelative(iso: string | null | undefined): string {

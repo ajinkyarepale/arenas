@@ -226,6 +226,18 @@ async function placeTradeUnlocked(input: PlaceTradeInput): Promise<TradeResult> 
       };
     }
 
+    // Lock Prediction: Check if this user already submitted a prediction in this round
+    const existingTrade = await prisma.trade.findFirst({
+      where: { roundId: round.id, userId },
+    });
+    if (existingTrade) {
+      return {
+        ok: false,
+        reason: 'round-locked',
+        message: 'Your prediction for this round is already submitted and locked.',
+      };
+    }
+
     // Price against exactly the state we just read.
     const bookBefore = { qYes: round.qYes, qNo: round.qNo };
     const quote = byShares
@@ -260,6 +272,14 @@ async function placeTradeUnlocked(input: PlaceTradeInput): Promise<TradeResult> 
     }
 
     const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // Transactional anti-double-voting check
+      const duplicateInTx = await tx.trade.findFirst({
+        where: { roundId: round.id, userId },
+      });
+      if (duplicateInTx) {
+        return { kind: 'already-predicted' as const };
+      }
+
       // Balance is re-checked inside the transaction against the live row.
       const freshParticipant = await tx.eventParticipant.findUniqueOrThrow({
         where: { id: participant.id },
@@ -309,6 +329,14 @@ async function placeTradeUnlocked(input: PlaceTradeInput): Promise<TradeResult> 
         balance: updatedParticipant.balance,
       };
     });
+
+    if (result.kind === 'already-predicted') {
+      return {
+        ok: false,
+        reason: 'round-locked',
+        message: 'Your prediction for this round is already submitted and locked.',
+      };
+    }
 
     if (result.kind === 'insufficient') {
       return {

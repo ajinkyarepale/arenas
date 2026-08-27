@@ -47,6 +47,12 @@ const inFlight = new Set<string>();
 const openRetryAfter = new Map<string, number>();
 
 async function advanceArena(event: Event, now: number): Promise<void> {
+  // If the arena has reached its scheduled end time, end it cleanly.
+  if (event.endsAt && now >= event.endsAt.getTime()) {
+    await endEvent(event.id);
+    return;
+  }
+
   const round =
     event.currentRound > 0
       ? await prisma.round.findUnique({

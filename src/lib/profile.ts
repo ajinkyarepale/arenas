@@ -2,13 +2,6 @@ import { prisma } from '@/lib/prisma';
 
 /**
  * A user's cross-arena profile: every arena they have joined plus career stats.
- *
- * Shared by the dashboard page (server-rendered) and GET /api/me, so the two can
- * never drift apart.
- *
- * Win rate is measured per round rather than per arena — in a twelve round event
- * most people care how often they called the candle right, not whether they
- * topped one leaderboard.
  */
 
 export interface ProfileArena {
@@ -27,6 +20,7 @@ export interface ProfileArena {
     name: string;
     asset: string;
     status: 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED';
+    resolvedOutcome: 'YES' | 'NO' | 'VOID' | null;
     totalRounds: number;
     currentRound: number;
     startingBalance: number;
@@ -35,6 +29,25 @@ export interface ProfileArena {
     startedAt: string | null;
     endsAt: string | null;
   };
+}
+
+export interface UserPredictionItem {
+  id: string;
+  arenaId: string;
+  arenaName: string;
+  arenaCode: string;
+  arenaAsset: string;
+  arenaStatus: 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED';
+  resolvedOutcome: 'YES' | 'NO' | 'VOID' | null;
+  roundNumber: number;
+  side: 'YES' | 'NO';
+  shares: number;
+  cost: number;
+  priceAtFill: number;
+  payout: number | null;
+  predictionTimestamp: string;
+  isResolved: boolean;
+  isCorrect: boolean | null;
 }
 
 export interface ProfileStats {
@@ -49,6 +62,76 @@ export interface ProfileStats {
 export interface Profile {
   stats: ProfileStats;
   arenas: ProfileArena[];
+}
+
+export async function getUserPredictions(userId: string): Promise<UserPredictionItem[]> {
+  const trades = await prisma.trade.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      event: {
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          asset: true,
+          status: true,
+          resolvedOutcome: true,
+          endsAt: true,
+        },
+      },
+      round: {
+        select: {
+          roundNumber: true,
+          status: true,
+          outcome: true,
+        },
+      },
+    },
+    take: 100,
+  });
+
+  const now = Date.now();
+
+  return trades.map((trade) => {
+    const isEndedByTime = trade.event.endsAt
+      ? new Date(trade.event.endsAt).getTime() <= now
+      : false;
+    const effectiveStatus: 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED' =
+      trade.event.status === 'ENDED' || isEndedByTime ? 'ENDED' : trade.event.status;
+
+    const roundResolved = trade.round.status === 'RESOLVED';
+    const arenaResolved = trade.event.resolvedOutcome !== null;
+    const isResolved = roundResolved || arenaResolved;
+
+    let isCorrect: boolean | null = null;
+    if (trade.payout !== null) {
+      isCorrect = trade.payout > trade.cost;
+    } else if (trade.round.outcome) {
+      isCorrect = trade.round.outcome === trade.side;
+    } else if (trade.event.resolvedOutcome) {
+      isCorrect = trade.event.resolvedOutcome === trade.side;
+    }
+
+    return {
+      id: trade.id,
+      arenaId: trade.event.id,
+      arenaName: trade.event.name,
+      arenaCode: trade.event.code,
+      arenaAsset: trade.event.asset,
+      arenaStatus: effectiveStatus,
+      resolvedOutcome: trade.event.resolvedOutcome ?? trade.round.outcome ?? null,
+      roundNumber: trade.round.roundNumber,
+      side: trade.side,
+      shares: trade.shares,
+      cost: trade.cost,
+      priceAtFill: trade.priceAtFill,
+      payout: trade.payout,
+      predictionTimestamp: trade.createdAt.toISOString(),
+      isResolved,
+      isCorrect,
+    };
+  });
 }
 
 export async function getProfile(userId: string): Promise<Profile> {
@@ -66,6 +149,7 @@ export async function getProfile(userId: string): Promise<Profile> {
           name: true,
           asset: true,
           status: true,
+          resolvedOutcome: true,
           totalRounds: true,
           currentRound: true,
           startingBalance: true,
@@ -132,6 +216,7 @@ export async function getProfile(userId: string): Promise<Profile> {
           name: participation.event.name,
           asset: participation.event.asset,
           status: participation.event.status,
+          resolvedOutcome: participation.event.resolvedOutcome ?? null,
           totalRounds: participation.event.totalRounds,
           currentRound: participation.event.currentRound,
           startingBalance: participation.event.startingBalance,

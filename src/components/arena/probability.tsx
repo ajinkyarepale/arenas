@@ -8,16 +8,20 @@ import { cx, formatProbability } from '@/lib/format';
  * The live implied probability of YES — the market's answer to "does this
  * candle close green?".
  *
- * It flashes green or red on every change, because the whole reason `b` is kept
- * low is so that a trade visibly moves this number in front of a room.
+ * Flashes green or red on every change. If no predictions have been placed in the
+ * round yet, renders a clear empty state rather than a misleading default percentage.
  */
 export function ProbabilityReadout({
   value,
+  tradeCount,
+  hasPredictions,
   variant = 'compact',
   label = 'Chance the candle closes UP',
   className,
 }: {
-  value: number;
+  value: number | null;
+  tradeCount?: number;
+  hasPredictions?: boolean;
   variant?: 'compact' | 'display';
   label?: string;
   className?: string;
@@ -25,7 +29,17 @@ export function ProbabilityReadout({
   const [flash, setFlash] = useState<'up' | 'down' | null>(null);
   const previous = useRef(value);
 
+  const isEmpty =
+    hasPredictions === false ||
+    tradeCount === 0 ||
+    value === null ||
+    !Number.isFinite(value);
+
   useEffect(() => {
+    if (value === null || previous.current === null) {
+      previous.current = value;
+      return;
+    }
     const delta = value - previous.current;
     if (Math.abs(delta) > 0.0005) {
       setFlash(delta > 0 ? 'up' : 'down');
@@ -37,6 +51,23 @@ export function ProbabilityReadout({
   }, [value]);
 
   const isDisplay = variant === 'display';
+
+  if (isEmpty) {
+    return (
+      <div className={cx('flex flex-col gap-2', className)}>
+        <div className={cx('label', isDisplay && '!text-base !tracking-[0.2em]')}>{label}</div>
+        <div
+          className={cx(
+            'font-display tnum rounded font-bold leading-none tracking-tight text-fg-muted',
+            isDisplay ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl',
+          )}
+        >
+          No predictions yet
+        </div>
+        <ProbabilityBar value={null} tradeCount={0} variant={variant} />
+      </div>
+    );
+  }
 
   return (
     <div className={cx('flex flex-col gap-2', className)}>
@@ -61,15 +92,55 @@ export function ProbabilityReadout({
 /** The YES/NO split bar. Reads at a glance from the back of a room. */
 export function ProbabilityBar({
   value,
+  tradeCount,
+  hasPredictions,
   variant = 'compact',
   showLabels = true,
 }: {
-  value: number;
+  value: number | null;
+  tradeCount?: number;
+  hasPredictions?: boolean;
   variant?: 'compact' | 'display';
   showLabels?: boolean;
 }) {
-  const pct = Math.min(100, Math.max(0, value * 100));
+  const isEmpty =
+    hasPredictions === false ||
+    tradeCount === 0 ||
+    value === null ||
+    !Number.isFinite(value);
+
   const isDisplay = variant === 'display';
+
+  if (isEmpty) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        <div
+          className={cx(
+            'flex w-full overflow-hidden rounded-full bg-[#201f1f] border border-[#27272A]',
+            isDisplay ? 'h-6' : 'h-3',
+          )}
+          role="img"
+          aria-label="No predictions placed yet"
+        >
+          <div className="w-full bg-[#27272A]/60" />
+        </div>
+        {showLabels ? (
+          <div
+            className={cx(
+              'tnum flex justify-between font-medium text-[#8e9192]',
+              isDisplay ? 'text-lg' : 'text-xs',
+            )}
+          >
+            <span>YES — —%</span>
+            <span className="italic text-[11px]">No predictions yet</span>
+            <span>NO — —%</span>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  const pct = Math.min(100, Math.max(0, value * 100));
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -90,12 +161,12 @@ export function ProbabilityBar({
       {showLabels ? (
         <div
           className={cx(
-            'tnum flex justify-between font-semibold',
+            'tnum flex justify-between font-semibold font-mono',
             isDisplay ? 'text-2xl' : 'text-xs',
           )}
         >
-          <span className="text-yes">YES {formatProbability(value)}</span>
-          <span className="text-no">NO {formatProbability(1 - value)}</span>
+          <span className="text-yes">YES — {formatProbability(value, 0)}</span>
+          <span className="text-no">NO — {formatProbability(1 - value, 0)}</span>
         </div>
       ) : null}
     </div>

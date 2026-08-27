@@ -45,11 +45,6 @@ export function SignInForm() {
     router.refresh();
   };
 
-  const fillDemo = (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('arenas-demo-2024');
-  };
-
   return (
     <div className="w-full font-['Geist'] text-sm">
       <h2 className="font-['Geist'] text-2xl font-bold mb-4 text-white">Sign in to Arena</h2>
@@ -101,27 +96,7 @@ export function SignInForm() {
           {pending ? 'Signing in…' : 'Sign in'}
         </button>
 
-        {/* Quick Fill Demo */}
-        <div className="mt-6 border-t border-[#27272A] pt-4">
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => fillDemo('organizer@arenas.dev')}
-              className="flex-1 border border-[#27272A] bg-[#201f1f] hover:bg-[#2a2a2a] rounded-full py-2 font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] transition-colors"
-            >
-              Organizer
-            </button>
-            <button
-              type="button"
-              onClick={() => fillDemo('ada.chen@arenas.dev')}
-              className="flex-1 border border-[#27272A] bg-[#201f1f] hover:bg-[#2a2a2a] rounded-full py-2 font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] transition-colors"
-            >
-              Participant
-            </button>
-          </div>
-        </div>
-
-        <p className="text-center text-xs text-[#c4c7c8] mt-2">
+        <p className="text-center text-xs text-[#c4c7c8] mt-4">
           Don&apos;t have an account?{' '}
           <Link
             href={`/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}

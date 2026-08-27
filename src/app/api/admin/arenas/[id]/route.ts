@@ -93,6 +93,8 @@ export async function GET(
       scheduledFor: arena.scheduledFor?.toISOString() ?? null,
       startedAt: arena.startedAt?.toISOString() ?? null,
       endsAt: arena.endsAt?.toISOString() ?? null,
+      resolvedOutcome: arena.resolvedOutcome ?? null,
+      resolvedAt: arena.resolvedAt?.toISOString() ?? null,
       createdAt: arena.createdAt.toISOString(),
       updatedAt: arena.updatedAt.toISOString(),
     },
@@ -189,3 +191,20 @@ export async function POST(
       return apiError('Unknown action.', 400);
   }
 }
+
+/** Delete an arena and its associated rounds, trades, and participant records. */
+export async function DELETE(
+  _request: Request,
+  { params }: { params: { id: string } },
+) {
+  const result = await authorise(params.id);
+  if ('error' in result) return result.error;
+  const { arena } = result;
+
+  await prisma.event.delete({
+    where: { id: arena.id },
+  });
+
+  return NextResponse.json({ success: true, deletedId: arena.id });
+}
+

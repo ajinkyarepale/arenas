@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 
 import { JoinArena } from '@/components/arena/join-arena';
+import { SiteNavAuth } from '@/components/site-nav-auth';
 import { SiteSidebar } from '@/components/site-sidebar';
 import { authOptions } from '@/lib/auth';
 import { findArenaByCode, toPublicInfo } from '@/lib/engine/snapshot';
@@ -18,9 +19,30 @@ export async function generateMetadata({
   params: { code: string };
 }): Promise<Metadata> {
   const parsed = joinCodeSchema.safeParse(params.code);
-  if (!parsed.success) return { title: 'Arena' };
+  if (!parsed.success) return { title: 'Arena · Arenas' };
   const arena = await findArenaByCode(parsed.data);
-  return { title: arena ? `${arena.name} · Join Arena` : 'Arena' };
+  if (!arena) return { title: 'Arena Not Found · Arenas' };
+
+  const description =
+    arena.description ||
+    `Join ${arena.name} (${arena.code}) — Live binary prediction market for ${arena.asset}. Predict YES or NO in real-time.`;
+
+  return {
+    title: `${arena.name} (${arena.code}) · Arenas`,
+    description,
+    openGraph: {
+      title: `${arena.name} | Binary Prediction Market`,
+      description,
+      url: `/arenas/${arena.code}`,
+      siteName: 'Arenas Markets',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${arena.name} (${arena.code})`,
+      description,
+    },
+  };
 }
 
 export default async function ArenaJoinPage({ params }: { params: { code: string } }) {
@@ -57,19 +79,8 @@ export default async function ArenaJoinPage({ params }: { params: { code: string
               JOIN TOURNAMENT
             </span>
           </div>
-          <div className="flex items-center gap-4 ml-auto">
-            {session?.user ? (
-              <span className="font-['Epilogue'] text-xs text-[#c4c7c8]">
-                {session.user.name ?? session.user.email}
-              </span>
-            ) : (
-              <Link
-                href={`/signin?callbackUrl=/arenas/${arena.code}`}
-                className="text-sm font-semibold text-[#c4c7c8] hover:text-white transition-colors"
-              >
-                Sign in
-              </Link>
-            )}
+          <div className="ml-auto">
+            <SiteNavAuth />
           </div>
         </header>
 

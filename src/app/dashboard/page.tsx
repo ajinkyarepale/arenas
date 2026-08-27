@@ -6,8 +6,8 @@ import { getServerSession } from 'next-auth';
 import { SiteSidebar } from '@/components/site-sidebar';
 import { authOptions, isOrganizer } from '@/lib/auth';
 import { getTraderAnalytics } from '@/lib/analytics';
-import { formatPercent, formatSignedPoints } from '@/lib/format';
-import { getProfile } from '@/lib/profile';
+import { formatDateTime, formatPercent, formatPoints, formatSignedPoints } from '@/lib/format';
+import { getProfile, getUserPredictions } from '@/lib/profile';
 
 export const metadata: Metadata = { title: 'Profile · Dashboard' };
 export const dynamic = 'force-dynamic';
@@ -16,9 +16,10 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect('/signin?callbackUrl=/dashboard');
 
-  const [{ stats, arenas }, analytics] = await Promise.all([
+  const [{ stats, arenas }, analytics, predictions] = await Promise.all([
     getProfile(session.user.id),
     getTraderAnalytics(session.user.id),
+    getUserPredictions(session.user.id),
   ]);
 
   const roleTitle = isOrganizer(session.user.role) ? 'ORGANIZER' : 'PRO TRADER';
@@ -92,7 +93,7 @@ export default async function DashboardPage() {
               </p>
             </div>
             <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-xl p-5 flex flex-col gap-1">
-              <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase">TRADES SETTLED</p>
+              <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase">PREDICTIONS SETTLED</p>
               <p className="font-['Epilogue'] text-xl font-bold text-white">
                 {analytics.settledTrades}
               </p>
@@ -111,11 +112,116 @@ export default async function DashboardPage() {
             </div>
           </section>
 
+          {/* Real Prediction History Section */}
+          <section className="bg-[rgba(20,20,20,0.7)] backdrop-blur-xl border border-[#27272A] rounded-xl p-6 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-['Geist'] text-lg font-bold text-white">My Prediction History</h3>
+                <p className="font-['Geist'] text-xs text-[#c4c7c8]">
+                  Verified history of all predictions submitted by your account.
+                </p>
+              </div>
+              <span className="font-['Epilogue'] text-xs text-[#c4c7c8]">
+                {predictions.length} Total Predictions
+              </span>
+            </div>
+
+            {predictions.length === 0 ? (
+              <div className="text-center py-10 border border-[#27272A]/50 rounded-lg bg-[#201f1f]/30">
+                <p className="text-sm text-[#c4c7c8]">No predictions submitted yet.</p>
+                <p className="text-xs text-[#8e9192] mt-1">
+                  Join any live or upcoming tournament to lock in your first prediction.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left font-['Epilogue'] text-xs">
+                  <thead>
+                    <tr className="border-b border-[#27272A] text-[#c4c7c8]">
+                      <th className="pb-3 font-bold uppercase">ARENA</th>
+                      <th className="pb-3 font-bold uppercase">PREDICTION</th>
+                      <th className="pb-3 font-bold uppercase text-right">STAKE / SHARES</th>
+                      <th className="pb-3 font-bold uppercase">DATE & TIME (IST)</th>
+                      <th className="pb-3 font-bold uppercase">STATUS</th>
+                      <th className="pb-3 font-bold uppercase text-right">RESULT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {predictions.map((p) => {
+                      const isWon = p.isCorrect === true;
+                      const isLost = p.isCorrect === false;
+
+                      return (
+                        <tr key={p.id} className="border-b border-[#27272A]/50 hover:bg-[#201f1f]/30 transition-colors">
+                          <td className="py-3 font-['Geist']">
+                            <Link href={`/arenas/${p.arenaCode}`} className="font-medium text-white hover:text-[#22C55E] transition-colors">
+                              {p.arenaName}
+                            </Link>
+                            <div className="text-[11px] text-[#c4c7c8] font-mono">
+                              Round {p.roundNumber} · {p.arenaCode}
+                            </div>
+                          </td>
+                          <td className="py-3">
+                            <span
+                              className={`px-2.5 py-0.5 rounded font-bold text-[11px] inline-flex items-center gap-1 ${
+                                p.side === 'YES'
+                                  ? 'bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30'
+                                  : 'bg-[#ef4444]/15 text-[#ef4444] border border-[#ef4444]/30'
+                              }`}
+                            >
+                              <span className="material-symbols-outlined text-[12px]">lock</span>
+                              {p.side}
+                            </span>
+                          </td>
+                          <td className="py-3 text-right font-medium text-white">
+                            <div>{formatPoints(p.cost, 0)} pts</div>
+                            <div className="text-[11px] text-[#8e9192]">{p.shares.toFixed(1)} shs</div>
+                          </td>
+                          <td className="py-3 text-[#c4c7c8]">
+                            {formatDateTime(p.predictionTimestamp)}
+                          </td>
+                          <td className="py-3">
+                            {p.resolvedOutcome ? (
+                              <span className="px-2 py-0.5 rounded bg-[#201f1f] border border-[#27272A] text-[#c4c7c8] text-[10px] font-bold">
+                                Resolved: {p.resolvedOutcome}
+                              </span>
+                            ) : p.arenaStatus === 'ENDED' ? (
+                              <span className="px-2 py-0.5 rounded bg-[#201f1f] border border-[#27272A] text-[#8e9192] text-[10px]">
+                                Finished (Awaiting)
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#22C55E] text-[10px] font-bold">
+                                Active Round
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3 text-right font-bold">
+                            {isWon ? (
+                              <span className="text-[#22C55E]">
+                                +{p.payout ? (p.payout - p.cost).toFixed(0) : '—'} pts (Won)
+                              </span>
+                            ) : isLost ? (
+                              <span className="text-[#ef4444]">
+                                -{p.cost.toFixed(0)} pts (Lost)
+                              </span>
+                            ) : (
+                              <span className="text-[#c4c7c8] font-normal">Pending</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
           {/* Quick Actions */}
           <div className="flex gap-4">
             <Link
               href="/markets"
-              className="bg-white text-[#2f3131] px-6 py-3 rounded-full font-['Epilogue'] text-xs font-bold hover:bg-[#c6c6c7] transition-all"
+              className="bg-white text-[#2f3131] px-6 py-3 rounded-full font-['Epilogue'] text-xs font-bold hover:bg-[#c6c6c7] transition-all shadow"
             >
               Browse Markets
             </Link>

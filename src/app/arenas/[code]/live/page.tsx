@@ -15,10 +15,24 @@ export async function generateMetadata({
   params: { code: string };
 }): Promise<Metadata> {
   const parsed = joinCodeSchema.safeParse(params.code);
-  if (!parsed.success) return { title: 'Arena' };
+  if (!parsed.success) return { title: 'Arena · Arenas' };
   const arena = await findArenaByCode(parsed.data);
+  if (!arena) return { title: 'Arena Not Found · Arenas' };
+
+  const description =
+    arena.description ||
+    `Trading Terminal for ${arena.name} (${arena.code}) · Asset: ${arena.asset}. Live binary prediction market.`;
+
   return {
-    title: arena ? `${arena.name} — live` : 'Arena',
+    title: `${arena.name} (${arena.code}) — Live Market`,
+    description,
+    openGraph: {
+      title: `${arena.name} — Live Prediction Terminal`,
+      description,
+      url: `/arenas/${arena.code}/live`,
+      siteName: 'Arenas Markets',
+      type: 'website',
+    },
     robots: { index: false, follow: false },
   };
 }

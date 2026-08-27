@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
 import { Leaderboard } from '@/components/arena/leaderboard';
+import { ArenaQRCodeCard } from '@/components/arena/arena-share-modal';
 import { ProbabilityBar, ProbabilityTrace } from '@/components/arena/probability';
 import { RoundTimer, roundPhase } from '@/components/arena/round-timer';
 import { TradeTape } from '@/components/arena/trade-tape';
@@ -133,17 +134,30 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
             />
             <div className="relative">
               <div className="label !text-base !tracking-[0.2em]">Chance it closes UP</div>
-              <div
-                className={cx(
-                  'font-display tnum mt-1 text-mega font-bold leading-none tracking-tight transition-colors',
-                  priceYes >= 0.5 ? 'text-yes glow-yes' : 'text-no glow-no',
-                )}
-              >
-                {formatProbability(priceYes, 1)}
-              </div>
-              <div className="mt-4">
-                <ProbabilityBar value={priceYes} variant="display" />
-              </div>
+              {round && (round.tradeCount > 0 || round.qYes > 0 || round.qNo > 0) ? (
+                <>
+                  <div
+                    className={cx(
+                      'font-display tnum mt-1 text-mega font-bold leading-none tracking-tight transition-colors',
+                      priceYes >= 0.5 ? 'text-yes glow-yes' : 'text-no glow-no',
+                    )}
+                  >
+                    {formatProbability(priceYes, 1)}
+                  </div>
+                  <div className="mt-4">
+                    <ProbabilityBar value={priceYes} variant="display" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="font-display tnum mt-1 text-4xl xl:text-5xl font-bold leading-none tracking-tight text-fg-muted">
+                    No predictions yet
+                  </div>
+                  <div className="mt-4">
+                    <ProbabilityBar value={null} tradeCount={0} variant="display" />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -325,31 +339,33 @@ function IdleOverlay({
   }
 
   if (status === 'LOBBY' || status === 'DRAFT') {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const joinUrl = origin ? `${origin}/arenas/${code}` : `/arenas/${code}`;
+
     return (
-      <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-ink-950/85 backdrop-blur-md">
-        <div className="text-center">
-          {/*
-            The join card inverts: a solid pane of light blue against the dark
-            room. On a projector this is the one thing people at the back need
-            to read, so it is the brightest surface on the wall rather than
-            another sheet of glass.
-          */}
-          <div className="mx-auto inline-block rounded-2xl bg-accent-light px-16 py-10 text-ink-950 shadow-[0_0_120px_-20px_rgba(163,201,255,0.75)]">
-            <div className="font-display text-2xl font-semibold uppercase tracking-[0.25em] text-ink-900/70">
-              Join to predict
+      <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-ink-950/85 backdrop-blur-md p-6">
+        <div className="text-center flex flex-col items-center max-w-2xl">
+          <div className="mx-auto flex flex-col sm:flex-row items-center gap-8 rounded-2xl bg-accent-light px-10 py-8 text-ink-950 shadow-[0_0_120px_-20px_rgba(163,201,255,0.75)]">
+            <div className="text-left flex flex-col justify-center">
+              <div className="font-display text-xl font-semibold uppercase tracking-[0.25em] text-ink-900/70">
+                Join to predict
+              </div>
+              <div className="font-display mt-2 text-6xl font-bold leading-none tracking-[0.04em] text-ink-950">
+                {code}
+              </div>
+              <div className="mt-3 text-base font-medium text-ink-900/80">
+                Scan QR or enter code at <span className="underline font-mono">{origin || 'arenas'}</span>
+              </div>
             </div>
-            <div className="font-display mt-3 text-mega font-bold leading-none tracking-[0.04em] text-ink-950">
-              {code}
-            </div>
-            <div className="mt-4 text-xl font-medium text-ink-900/70">
-              Enter this code at the arena page
+            <div className="pointer-events-auto shrink-0 p-2 bg-white rounded-xl shadow-md">
+              <ArenaQRCodeCard code={code} joinUrl={joinUrl} size={160} showDownload={false} />
             </div>
           </div>
 
-          <p className="mt-10 text-4xl font-semibold text-fg-muted">
+          <p className="mt-8 text-3xl font-semibold text-fg-muted">
             Waiting for the first round to open
           </p>
-          <p className="mt-3 text-2xl text-fg-faint">{name}</p>
+          <p className="mt-2 text-xl text-fg-faint">{name}</p>
         </div>
       </div>
     );
