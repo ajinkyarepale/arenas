@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { ErrorNote, Spinner } from '@/components/ui';
+import { BeamsBackground, ErrorNote, Spinner } from '@/components/ui';
 
 interface HostStatus {
   role: string;
@@ -96,7 +96,7 @@ export default function HostPage() {
     data?.role === 'ORGANIZER' || data?.role === 'SUPERADMIN' || data?.role === 'ADMIN';
 
   return (
-    <div className="min-h-screen bg-[#131313] text-[#e5e2e1] font-['Geist'] px-4 py-12 sm:px-6 lg:px-8">
+    <BeamsBackground intensity="medium" className="min-h-screen text-[#e5e2e1] font-['Geist'] px-4 py-12 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto flex flex-col gap-12">
         {/* Header Hero */}
         <div className="text-center flex flex-col items-center gap-4">
@@ -295,6 +295,6 @@ export default function HostPage() {
           )}
         </div>
       </div>
-    </div>
+    </BeamsBackground>
   );
 }
