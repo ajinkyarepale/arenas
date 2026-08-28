@@ -63,13 +63,10 @@ export interface ArenaViewerInfo {
 
 export interface ArenaSnapshot {
   arena: ArenaPublicInfo;
-  viewer: ArenaViewerInfo;
   round: RoundPayload | null;
-  leaderboard: LeaderboardEntry[];
-  price: PriceTick | null;
-  lastTrade: TradePayload | null;
-  lastSettled: RoundPayload | null;
-  serverTime: number;
+  leaderboard: LeaderboardPayload;
+  viewer: ArenaViewerInfo;
+  serverTime: string;
 }
 
 export async function findArenaByCode(code: string) {

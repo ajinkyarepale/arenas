@@ -48,8 +48,16 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
       {/* Header */}
       <header className="relative flex shrink-0 items-center justify-between gap-6 border-b border-[#27272A] pb-4">
         <div className="min-w-0">
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#22C55E] tracking-widest uppercase mb-1">
-            {isCustomMarket ? 'CAMPUS PREDICTION ARENA' : 'BIG SCREEN PROJECTOR VIEW'}
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#22C55E] tracking-widest uppercase">
+              {isCustomMarket ? 'CAMPUS PREDICTION ARENA' : 'BIG SCREEN PROJECTOR VIEW'}
+            </div>
+            {info.collegeName && (
+              <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8] uppercase tracking-wider">
+                <span className="material-symbols-outlined text-[13px]">school</span>
+                <span>{info.collegeName}</span>
+              </div>
+            )}
           </div>
           <h1 className="font-['Geist'] truncate text-3xl font-bold tracking-tight text-white xl:text-5xl">
             {info.name}
@@ -77,10 +85,10 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
         {/* Chart / Question Spotlight Column */}
         <section className="flex min-h-0 flex-col gap-4">
           {isCustomMarket ? (
-            <div className="bg-[rgba(20,20,20,0.85)] border border-purple-500/30 backdrop-blur-xl rounded-xl flex min-h-0 flex-1 flex-col justify-between p-6 sm:p-8 shadow-2xl">
+            <div className="bg-[rgba(20,20,20,0.85)] border border-[#27272A] backdrop-blur-xl rounded-xl flex min-h-0 flex-1 flex-col justify-between p-6 sm:p-8 shadow-2xl">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-['Epilogue'] text-xs font-bold uppercase tracking-widest">
+                  <span className="px-3 py-1 rounded-full bg-[#201f1f] text-[#c4c7c8] border border-[#27272A] font-['Epilogue'] text-xs font-bold uppercase tracking-widest">
                     LIVE PREDICTION QUESTION
                   </span>
                   <span className="font-['Epilogue'] text-sm text-[#a1a1aa]">

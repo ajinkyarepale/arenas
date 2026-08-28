@@ -92,11 +92,11 @@ export async function POST(request: Request) {
 
     void createAuditLog({
       actorId: user.id,
-      actorEmail: user.email,
-      action: 'ORGANIZER_APPLY',
-      resourceType: 'ORGANIZER_REQUEST',
+      action: 'PERMISSIONS_UPDATED',
+      resourceType: 'USER',
       resourceId: organizerRequest.id,
-      details: {
+      metadata: {
+        type: 'ORGANIZER_APPLICATION',
         collegeName: parsed.data.collegeName,
         clubName: parsed.data.clubName,
       },
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       request: organizerRequest,
-      message: 'Your application has been submitted to the SuperAdmin for approval.',
+      message: 'Your application has been submitted to Our Team for approval.',
     });
   } catch (error) {
     console.error('[/api/host/apply POST] Failed to submit application:', error);

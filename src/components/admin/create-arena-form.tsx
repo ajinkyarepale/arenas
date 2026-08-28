@@ -15,6 +15,9 @@ interface FormState {
   resolutionCriteria: string;
   description: string;
   hostName: string;
+  collegeName: string;
+  collegeLogoUrl: string;
+  enableBots: boolean;
   asset: string;
   roundDurationSec: number;
   lockBufferSec: number;
@@ -32,6 +35,9 @@ const DEFAULTS: FormState = {
   resolutionCriteria: '',
   description: '',
   hostName: '',
+  collegeName: '',
+  collegeLogoUrl: '',
+  enableBots: false,
   asset: 'BTCUSDT',
   roundDurationSec: 300, // 5 mins default
   lockBufferSec: 30,
@@ -243,15 +249,12 @@ export function CreateArenaForm() {
                 }`}
               >
                 <div className="flex flex-col gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-purple-400 text-xl">school</span>
-                  </div>
                   <h3 className="font-['Epilogue'] text-base font-bold text-white">Campus & Custom Event</h3>
                   <p className="text-[#a1a1aa] text-xs leading-relaxed">
                     Create questions for hackathons, club elections, sports matches, or custom trivia. You declare the winning outcome with 1-click settlement.
                   </p>
                 </div>
-                <div className="flex items-center gap-2 font-['Epilogue'] text-[11px] font-bold text-purple-400">
+                <div className="flex items-center gap-2 font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8]">
                   <span>Manual / 1-Click Settlement</span>
                   <span>→</span>
                 </div>
@@ -267,15 +270,12 @@ export function CreateArenaForm() {
                 }`}
               >
                 <div className="flex flex-col gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-emerald-400 text-xl">currency_bitcoin</span>
-                  </div>
                   <h3 className="font-['Epilogue'] text-base font-bold text-white">Live Crypto Oracle</h3>
                   <p className="text-[#a1a1aa] text-xs leading-relaxed">
                     Continuous sequential trading on BTC, ETH, or SOL. Rounds resolve automatically against live Binance spot candlestick oracles.
                   </p>
                 </div>
-                <div className="flex items-center gap-2 font-['Epilogue'] text-[11px] font-bold text-emerald-400">
+                <div className="flex items-center gap-2 font-['Epilogue'] text-[11px] font-bold text-[#22C55E]">
                   <span>100% Automated Binance TWAP</span>
                   <span>→</span>
                 </div>
@@ -384,16 +384,29 @@ export function CreateArenaForm() {
 
               <div>
                 <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-1.5">
-                  Overview / Description (Optional)
+                  College / Institution Name (Optional)
                 </label>
                 <input
                   type="text"
-                  value={form.description}
-                  onChange={(e) => set('description', e.target.value)}
-                  placeholder="Brief context for attendees..."
+                  value={form.collegeName}
+                  onChange={(e) => set('collegeName', e.target.value)}
+                  placeholder="e.g. MIT / IIT Delhi"
                   className="w-full bg-[#18181B] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Geist'] text-sm focus:border-white focus:outline-none transition-colors placeholder-[#71717A]"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-1.5">
+                Overview / Fest Description (Optional)
+              </label>
+              <input
+                type="text"
+                value={form.description}
+                onChange={(e) => set('description', e.target.value)}
+                placeholder="Brief context or instructions for attendees..."
+                className="w-full bg-[#18181B] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Geist'] text-sm focus:border-white focus:outline-none transition-colors placeholder-[#71717A]"
+              />
             </div>
           </div>
         )}
@@ -529,6 +542,37 @@ export function CreateArenaForm() {
                 />
               </div>
             </div>
+
+            {/* AI NOISE TRADER BOTS TOGGLE */}
+            <div className="p-4 bg-[#18181B] border border-[#27272A] rounded-xl flex items-center justify-between gap-4">
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="font-['Epilogue'] text-xs font-bold text-white uppercase">
+                    AI Noise Traders & Market Makers
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-[#27272A] text-[#c4c7c8] border border-[#3f3f46] text-[9px] font-bold uppercase font-['Epilogue']">
+                    Autonomous
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#a1a1aa] leading-relaxed">
+                  Automated micro-traders place realistic trades during live rounds to seed initial liquidity before crowd participation surges.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => set('enableBots', !form.enableBots)}
+                className={`w-12 h-6 rounded-full transition-colors relative shrink-0 p-0.5 ${
+                  form.enableBots ? 'bg-[#22C55E]' : 'bg-[#27272A]'
+                }`}
+              >
+                <div
+                  className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                    form.enableBots ? 'translate-x-6' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         )}
 
@@ -546,13 +590,21 @@ export function CreateArenaForm() {
             <div className="bg-[#18181B] border border-[#27272A] rounded-2xl p-5 flex flex-col gap-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-['Epilogue'] font-bold uppercase tracking-wider mb-2 ${
-                    form.marketCategory === 'CRYPTO_PRICE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                  }`}>
-                    {form.marketCategory === 'CRYPTO_PRICE' ? 'Live Crypto Oracle' : 'Campus / Custom Prediction'}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-['Epilogue'] font-bold uppercase tracking-wider bg-[#201f1f] text-[#c4c7c8] border border-[#27272A]">
+                      {form.marketCategory === 'CRYPTO_PRICE' ? 'Live Crypto Oracle' : 'Campus / Custom Prediction'}
+                    </span>
+                    {form.enableBots && (
+                      <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] text-[#c4c7c8] text-[10px] font-['Epilogue'] font-bold uppercase">
+                        AI Noise Traders Active
+                      </span>
+                    )}
+                  </div>
                   <h3 className="font-['Geist'] text-xl font-bold text-white">{form.name}</h3>
-                  {form.hostName && <p className="text-xs text-[#a1a1aa]">Hosted by {form.hostName}</p>}
+                  <p className="text-xs text-[#a1a1aa] mt-0.5">
+                    {form.collegeName && <strong className="text-white">{form.collegeName} · </strong>}
+                    {form.hostName ? `Hosted by ${form.hostName}` : 'Campus Arena'}
+                  </p>
                 </div>
               </div>
 

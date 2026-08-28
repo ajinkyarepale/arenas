@@ -210,8 +210,16 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
           {/* Header Title & Timer Bar */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#22C55E] uppercase tracking-wider mb-2">
-                {isCustomMarket ? 'CAMPUS PREDICTION MARKET' : 'POLYMARKET BINARY OUTCOME'}
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#22C55E] uppercase tracking-wider">
+                  {isCustomMarket ? 'CAMPUS PREDICTION MARKET' : 'POLYMARKET BINARY OUTCOME'}
+                </div>
+                {info.collegeName && (
+                  <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8] uppercase tracking-wider">
+                    <span className="material-symbols-outlined text-[13px]">school</span>
+                    <span>{info.collegeName}</span>
+                  </div>
+                )}
               </div>
               <h1 className="font-['Geist'] text-2xl md:text-3xl font-bold text-white mb-1">
                 {questionTitle}
@@ -245,10 +253,10 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
             <div className="lg:col-span-8 flex flex-col gap-6">
               {/* Spotlight Question & Probability Meter (Custom) or Candlestick Chart (Crypto) */}
               {isCustomMarket ? (
-                <div className="glass-panel p-6 border border-purple-500/30 bg-[rgba(20,20,20,0.85)] backdrop-blur-xl rounded-xl flex flex-col gap-4 shadow-xl">
+                <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.85)] backdrop-blur-xl rounded-xl flex flex-col gap-4 shadow-xl">
                   <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-['Epilogue'] text-[10px] font-bold uppercase tracking-wider">
-                      Prediction Spotlight
+                    <span className="px-2.5 py-1 rounded-full bg-[#201f1f] text-[#c4c7c8] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold uppercase tracking-wider">
+                      Prediction Question
                     </span>
                     <span className="font-['Epilogue'] text-xs text-[#a1a1aa]">
                       Round {currentRoundNum} of {totalRounds}

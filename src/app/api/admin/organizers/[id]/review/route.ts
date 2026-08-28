@@ -72,11 +72,11 @@ export async function POST(
 
       void createAuditLog({
         actorId: user.id,
-        actorEmail: user.email,
-        action: 'ORGANIZER_APPROVE',
+        action: 'ROLE_CHANGED',
         resourceType: 'USER',
         resourceId: organizerRequest.userId,
-        details: {
+        metadata: {
+          action: 'ORGANIZER_APPROVE',
           requestId: id,
           collegeName: organizerRequest.collegeName,
           targetUserEmail: organizerRequest.user.email,
@@ -103,11 +103,11 @@ export async function POST(
 
       void createAuditLog({
         actorId: user.id,
-        actorEmail: user.email,
-        action: 'ORGANIZER_REJECT',
-        resourceType: 'ORGANIZER_REQUEST',
+        action: 'PERMISSIONS_UPDATED',
+        resourceType: 'USER',
         resourceId: id,
-        details: {
+        metadata: {
+          action: 'ORGANIZER_REJECT',
           collegeName: organizerRequest.collegeName,
           reason: rejectionReason,
         },

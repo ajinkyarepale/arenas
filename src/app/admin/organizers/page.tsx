@@ -115,8 +115,8 @@ export default function AdminOrganizersPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#27272A] pb-5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-['Epilogue'] text-[10px] font-bold uppercase tracking-widest">
-                SUPERADMIN GOVERNANCE
+              <span className="px-2.5 py-0.5 rounded-full bg-[#201f1f] text-[#c4c7c8] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold uppercase tracking-widest">
+                ORGANIZER REVIEW &amp; GOVERNANCE
               </span>
             </div>
             <h1 className="font-['Geist'] text-2xl sm:text-3xl font-extrabold text-white mt-1">
@@ -249,7 +249,7 @@ export default function AdminOrganizersPage() {
                         </span>
                       </div>
                       <p className="text-xs text-[#a1a1aa] mt-0.5">
-                        Applicant: <strong className="text-white">{req.user.name}</strong> ({req.user.email}) · Role: <span className="font-mono text-purple-400">{req.user.role}</span>
+                        Applicant: <strong className="text-white">{req.user.name}</strong> ({req.user.email}) · Role: <span className="font-mono text-white bg-[#201f1f] px-1.5 py-0.5 rounded border border-[#27272A] text-[10px]">{req.user.role}</span>
                         {req.designation && ` · Designation: ${req.designation}`}
                       </p>
                     </div>

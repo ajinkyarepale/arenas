@@ -99,6 +99,16 @@ export default async function ArenaResultsPage({
             <p className="font-['Geist'] text-sm text-[#c4c7c8] leading-relaxed">
               After {arena.totalRounds} rounds of live forecasting and automated LMSR pricing, the final tournament rankings are set.
             </p>
+            <div className="mt-2">
+              <a
+                href={`/api/admin/arenas/${arena.id}/export`}
+                download
+                className="px-4 py-2 rounded-full bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] font-['Epilogue'] text-xs font-bold text-[#c4c7c8] hover:text-white transition-colors inline-flex items-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-[15px] text-[#22C55E]">download</span>
+                <span>Export Standings (CSV)</span>
+              </a>
+            </div>
           </div>
 
           {/* Podium & Personal Summary */}

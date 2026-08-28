@@ -27,6 +27,8 @@ interface AdminArena {
   question?: string | null;
   resolutionCriteria?: string | null;
   isManualResolution?: boolean;
+  collegeName?: string | null;
+  enableBots?: boolean;
   status: 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED';
   resolvedOutcome?: 'YES' | 'NO' | 'VOID' | null;
   resolvedAt?: string | null;
@@ -276,9 +278,7 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
                   FINISHED
                 </span>
               )}
-              <span className={`px-2.5 py-0.5 rounded-full font-['Epilogue'] text-[10px] font-bold uppercase ${
-                isCustomMarket ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-              }`}>
+              <span className="px-2.5 py-0.5 rounded-full font-['Epilogue'] text-[10px] font-bold uppercase bg-[#201f1f] text-[#c4c7c8] border border-[#27272A]">
                 {isCustomMarket ? 'Custom Event Market' : 'Crypto Oracle'}
               </span>
               <span className="font-mono text-xs font-bold text-white uppercase bg-[#201f1f] border border-[#27272A] px-2.5 py-0.5 rounded-full">
@@ -446,6 +446,15 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
               >
                 <span>Projector Big Screen ↗</span>
               </Link>
+              <a
+                href={`/api/admin/arenas/${arena.id}/export`}
+                download
+                className="px-4 py-2 rounded-full bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] font-['Epilogue'] text-xs font-bold text-[#c4c7c8] hover:text-white transition-colors flex items-center gap-1.5"
+                title="Download CSV standings of all participants"
+              >
+                <span className="material-symbols-outlined text-[15px] text-[#22C55E]">download</span>
+                <span>Export Standings (CSV)</span>
+              </a>
             </div>
           </div>
         </div>
@@ -470,7 +479,7 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
           </div>
           <div className="flex flex-col gap-0.5">
             <span className="text-[10px] font-bold text-[#c4c7c8] uppercase">PRICE ORACLE</span>
-            <span className={isCustomMarket ? "text-purple-400 font-medium" : "text-[#22C55E] font-medium"}>
+            <span className="text-white font-medium">
               {isCustomMarket ? "Organizer 1-Click Settlement" : "Binance TWAP Automated"}
             </span>
           </div>
@@ -479,10 +488,10 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
 
       {/* 1-Click Settlement Card for Custom Markets only */}
       {isCustomMarket && (
-        <div className="bg-[rgba(20,20,20,0.85)] border border-purple-500/30 backdrop-blur-xl rounded-xl p-6 flex flex-col gap-4 shadow-xl">
+        <div className="bg-[rgba(20,20,20,0.85)] border border-[#27272A] backdrop-blur-xl rounded-xl p-6 flex flex-col gap-4 shadow-xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#22C55E] animate-pulse" />
               <h3 className="font-['Geist'] text-base font-bold text-white">
                 Declare Winning Outcome
               </h3>

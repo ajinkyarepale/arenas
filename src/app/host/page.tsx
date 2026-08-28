@@ -83,7 +83,7 @@ export default function HostPage() {
         throw new Error(json.error || 'Failed to submit application');
       }
 
-      setSuccess('Your application has been submitted successfully to the SuperAdmin.');
+      setSuccess('Your application has been submitted successfully to Our Team.');
       await loadStatus();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Submission failed');
@@ -100,7 +100,7 @@ export default function HostPage() {
       <div className="max-w-4xl mx-auto flex flex-col gap-12">
         {/* Header Hero */}
         <div className="text-center flex flex-col items-center gap-4">
-          <span className="px-3.5 py-1 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-['Epilogue'] text-xs font-bold uppercase tracking-widest">
+          <span className="px-3.5 py-1 rounded-full bg-[#201f1f] text-[#c4c7c8] border border-[#27272A] font-['Epilogue'] text-xs font-bold uppercase tracking-widest">
             CAMPUS TOURNAMENT PARTNERSHIP
           </span>
           <h1 className="font-['Geist'] text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
@@ -114,9 +114,6 @@ export default function HostPage() {
         {/* Feature Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <div className="p-5 bg-[rgba(20,20,20,0.85)] border border-[#27272A] rounded-2xl flex flex-col gap-2">
-            <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-              <span className="material-symbols-outlined text-lg">school</span>
-            </div>
             <h3 className="font-['Epilogue'] text-sm font-bold text-white">Custom Campus Markets</h3>
             <p className="text-xs text-[#a1a1aa] leading-relaxed">
               Create custom prediction questions for your hackathon tracks, sports matches, or student elections with 1-click outcome resolution.
@@ -124,9 +121,6 @@ export default function HostPage() {
           </div>
 
           <div className="p-5 bg-[rgba(20,20,20,0.85)] border border-[#27272A] rounded-2xl flex flex-col gap-2">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-              <span className="material-symbols-outlined text-lg">tv</span>
-            </div>
             <h3 className="font-['Epilogue'] text-sm font-bold text-white">Auditorium Big Screen</h3>
             <p className="text-xs text-[#a1a1aa] leading-relaxed">
               Project real-time probability curves, countdown timers, and live student podiums onto auditorium screens and stage LED walls.
@@ -134,9 +128,6 @@ export default function HostPage() {
           </div>
 
           <div className="p-5 bg-[rgba(20,20,20,0.85)] border border-[#27272A] rounded-2xl flex flex-col gap-2">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-              <span className="material-symbols-outlined text-lg">military_tech</span>
-            </div>
             <h3 className="font-['Epilogue'] text-sm font-bold text-white">1-Click Prize Export</h3>
             <p className="text-xs text-[#a1a1aa] leading-relaxed">
               Instantly export full leaderboard standings with rankings, win rates, and points to CSV for certificate and prize distribution.
@@ -153,9 +144,6 @@ export default function HostPage() {
             </div>
           ) : isOrganizerOrAdmin ? (
             <div className="flex flex-col items-center text-center py-6 gap-4">
-              <div className="w-12 h-12 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 flex items-center justify-center text-[#22C55E]">
-                <span className="material-symbols-outlined text-2xl">verified</span>
-              </div>
               <div>
                 <h3 className="font-['Geist'] text-xl font-bold text-white mb-1">
                   Organizer Privileges Active
@@ -181,11 +169,8 @@ export default function HostPage() {
             </div>
           ) : data?.latestRequest?.status === 'PENDING' ? (
             <div className="flex flex-col items-center text-center py-8 gap-4">
-              <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                <span className="material-symbols-outlined text-2xl animate-pulse">hourglass_top</span>
-              </div>
               <div>
-                <span className="px-3 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 font-['Epilogue'] text-[11px] font-bold uppercase tracking-wider mb-2 inline-block">
+                <span className="px-3 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] text-[#c4c7c8] font-['Epilogue'] text-[11px] font-bold uppercase tracking-wider mb-2 inline-block">
                   Application Under Review
                 </span>
                 <h3 className="font-['Geist'] text-xl font-bold text-white mb-1">
@@ -195,7 +180,7 @@ export default function HostPage() {
                   <p className="text-xs text-[#a1a1aa] mb-2">{data.latestRequest.clubName}</p>
                 )}
                 <p className="text-xs text-[#a1a1aa] max-w-md mx-auto leading-relaxed">
-                  Your organizer application has been submitted to the SuperAdmin. Once approved, you will be able to create and host campus tournaments.
+                  Your organizer application has been submitted to Our Team. Once approved, you will be able to create and host campus tournaments.
                 </p>
               </div>
               <p className="text-[11px] text-[#71717a] font-['Epilogue']">
@@ -209,7 +194,7 @@ export default function HostPage() {
                   Apply for College Organizer Access
                 </h2>
                 <p className="text-xs text-[#a1a1aa]">
-                  Fill out your institution details. SuperAdmin will review and grant organizer hosting privileges.
+                  Fill out your institution details. Our Team will review and grant organizer hosting privileges.
                 </p>
               </div>
 
