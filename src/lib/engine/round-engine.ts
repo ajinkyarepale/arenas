@@ -1,4 +1,4 @@
-import type { Event, Prisma, Round } from '@prisma/client';
+import type { Event, Prisma, Round } from '@/generated/client';
 
 import { priceYes as lmsrPriceYes, payoutForTrade } from '@/lib/lmsr';
 import { getPrice, sampleTwap } from '@/lib/price/binance';
@@ -85,6 +85,7 @@ export function buildRoundPayload(
     roundNumber: round.roundNumber,
     totalRounds: event.totalRounds,
     status: round.status,
+    question: round.question ?? event.question ?? null,
     openPrice: round.openPrice,
     closePrice: round.closePrice,
     outcome: round.outcome,
@@ -223,15 +224,18 @@ export async function openNextRound(eventId: string): Promise<OpenResult> {
     return { ok: false, reason: 'complete' };
   }
 
-  // The strike. Without it there is nothing to resolve against, so we refuse to
-  // open and let the scheduler retry on the next tick.
-  let openPrice: number;
-  try {
-    const tick = await getPrice(event.asset, 0);
-    openPrice = tick.price;
-  } catch (error) {
-    console.error(`[engine] cannot open round for ${event.code}: price unavailable`, error);
-    return { ok: false, reason: 'price-unavailable' };
+  let openPrice: number | null = null;
+  if (event.marketCategory === 'CRYPTO_PRICE') {
+    try {
+      const tick = await getPrice(event.asset, 0);
+      openPrice = tick.price;
+    } catch (error) {
+      console.error(`[engine] cannot open round for ${event.code}: price unavailable`, error);
+      return { ok: false, reason: 'price-unavailable' };
+    }
+  } else {
+    // Custom market: Open price anchor 50 (representing base 50/50 probability)
+    openPrice = 50;
   }
 
   const roundNumber = event.currentRound + 1;
@@ -242,6 +246,7 @@ export async function openNextRound(eventId: string): Promise<OpenResult> {
     create: {
       eventId,
       roundNumber,
+      question: event.question ?? null,
       openPrice,
       status: 'TRADING',
       qYes: 0,
@@ -249,6 +254,7 @@ export async function openNextRound(eventId: string): Promise<OpenResult> {
       ...timings,
     },
     update: {
+      question: event.question ?? null,
       openPrice,
       status: 'TRADING',
       qYes: 0,
@@ -332,13 +338,17 @@ export async function resolveRound(
   if (options.forcedOutcome) {
     outcome = options.forcedOutcome;
     voidReason = options.reason ?? 'Resolved manually by the organizer';
-    if (outcome !== 'VOID') {
+    if (outcome !== 'VOID' && event.marketCategory === 'CRYPTO_PRICE') {
       try {
         closePrice = (await getPrice(event.asset, 2000)).price;
       } catch {
         closePrice = null;
       }
     }
+  } else if (event.marketCategory !== 'CRYPTO_PRICE') {
+    // For custom prediction markets, if no outcome was explicitly submitted yet,
+    // we keep the round locked and wait for the organizer to declare the outcome.
+    return false;
   } else if (round.openPrice === null) {
     outcome = 'VOID';
     voidReason = 'No opening price was recorded for this round';
@@ -407,9 +417,27 @@ export async function settleRound(
 
       for (const [participantId, credit] of creditByParticipant) {
         if (credit === 0) continue;
-        await tx.eventParticipant.update({
+        const participantBefore = await tx.eventParticipant.findUniqueOrThrow({
+          where: { id: participantId },
+          select: { balance: true, userId: true },
+        });
+
+        const updated = await tx.eventParticipant.update({
           where: { id: participantId },
           data: { balance: { increment: credit } },
+        });
+
+        await tx.pointLedger.create({
+          data: {
+            eventId: current.eventId,
+            participantId,
+            userId: participantBefore.userId,
+            type: outcome === 'VOID' ? 'PREDICTION_REFUND' : 'PREDICTION_PAYOUT',
+            amount: credit,
+            balanceBefore: participantBefore.balance,
+            balanceAfter: updated.balance,
+            reason: outcome === 'VOID' ? `Round ${current.roundNumber} refund` : `Round ${current.roundNumber} payout (${outcome})`,
+          },
         });
       }
 

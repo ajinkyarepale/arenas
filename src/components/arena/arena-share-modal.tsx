@@ -160,9 +160,16 @@ export function ArenaShareModal({
             <button
               type="button"
               onClick={handleCopy}
-              className="px-3 py-1 bg-white text-[#2f3131] hover:bg-[#c6c6c7] rounded-lg font-['Epilogue'] text-xs font-bold transition-colors shrink-0"
+              className="px-3 py-1 bg-white text-[#2f3131] hover:bg-[#c6c6c7] rounded-lg font-['Epilogue'] text-xs font-bold transition-colors shrink-0 flex items-center gap-1"
             >
-              {copied ? '✓ Copied' : 'Copy'}
+              {copied ? (
+                <>
+                  <span className="material-symbols-outlined text-[14px] text-[#22c55e]">check</span>
+                  <span>Copied</span>
+                </>
+              ) : (
+                'Copy'
+              )}
             </button>
           </div>
         </div>
@@ -174,14 +181,25 @@ export function ArenaShareModal({
             onClick={handleShare}
             className="w-full py-2.5 px-4 rounded-full bg-[#201f1f] border border-[#27272A] text-white hover:bg-[#2a2a2a] font-['Epilogue'] text-xs font-bold transition-colors flex items-center justify-center gap-2"
           >
-            <span>{shared ? '✓ Shared' : '🔗 Share Link'}</span>
+            {shared ? (
+              <>
+                <span className="material-symbols-outlined text-[14px] text-[#22c55e]">check</span>
+                <span>Shared</span>
+              </>
+            ) : (
+              <>
+                <span className="material-symbols-outlined text-[14px]">share</span>
+                <span>Share Link</span>
+              </>
+            )}
           </button>
           <button
             type="button"
             onClick={handleDownloadQR}
-            className="w-full py-2.5 px-4 rounded-full bg-white text-[#2f3131] hover:bg-[#c6c6c7] font-['Epilogue'] text-xs font-bold transition-colors flex items-center justify-center gap-2"
+            className="w-full py-2.5 px-4 rounded-full bg-white text-[#2f3131] hover:bg-[#c6c6c7] font-['Epilogue'] text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
           >
-            <span>⬇ Download QR</span>
+            <span className="material-symbols-outlined text-[14px]">download</span>
+            <span>Download QR</span>
           </button>
         </div>
       </div>
@@ -252,7 +270,7 @@ export function ArenaQRCodeCard({
           onClick={handleCopy}
           className="text-[11px] font-['Epilogue'] font-medium text-[#c4c7c8] hover:text-white underline transition-colors"
         >
-          {copied ? '✓ Link copied!' : 'Copy join URL'}
+          {copied ? 'Link copied!' : 'Copy join URL'}
         </button>
       </div>
     </div>

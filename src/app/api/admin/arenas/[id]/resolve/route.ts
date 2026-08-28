@@ -23,7 +23,16 @@ export async function POST(
   if (!user) return unauthorized();
   if (!allowed) return forbidden('Only organizers can manage arenas.');
 
-  const arena = await prisma.event.findUnique({ where: { id: params.id } });
+  const arena = await prisma.event.findFirst({
+    where: {
+      OR: [
+        { id: params.id },
+        { code: params.id },
+        { code: `AR-${params.id.replace(/^AR-/, '')}` },
+        { code: params.id.replace(/^AR-/, '') },
+      ],
+    },
+  });
   if (!arena) return notFound('No such arena.');
   if (user.role !== 'SUPERADMIN' && arena.organizerId !== user.id) {
     return notFound('No such arena.');

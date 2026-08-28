@@ -1,4 +1,4 @@
-import type { Event } from '@prisma/client';
+import type { Event } from '@/generated/client';
 
 import {
   endEvent,

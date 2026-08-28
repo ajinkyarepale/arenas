@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { SiteShell } from '@/components/site-shell';
+import { SiteSidebar } from '@/components/site-sidebar';
 import { auth } from '@/lib/auth';
 import { formatPoints } from '@/lib/format';
 import { prisma } from '@/lib/prisma';
 
-export const metadata: Metadata = { title: 'Results' };
+export const metadata: Metadata = { title: 'Results · Arenas' };
 export const dynamic = 'force-dynamic';
 
 export default async function ArenaResultsPage({
@@ -17,8 +18,14 @@ export default async function ArenaResultsPage({
   const { code } = await params;
   const session = await auth();
 
-  const arena = await prisma.event.findUnique({
-    where: { code: code.toUpperCase() },
+  const arena = await prisma.event.findFirst({
+    where: {
+      OR: [
+        { code: code.toUpperCase() },
+        { code: `AR-${code.toUpperCase().replace(/^AR-/, '')}` },
+        { code: code.toUpperCase().replace(/^AR-/, '') },
+      ],
+    },
     include: {
       participants: {
         include: {
@@ -45,141 +52,179 @@ export default async function ArenaResultsPage({
     : null;
 
   return (
-    <SiteShell width="wide">
-      <div className="flex flex-col gap-12 w-full max-w-6xl">
-        {/* Page Header */}
-        <div className="text-center max-w-2xl mx-auto">
-          <span className="font-mono text-xs font-bold text-zinc-400 uppercase tracking-widest mb-3 block">
-            Official Results · {arena.code}
-          </span>
-          <h1 className="font-display text-4xl sm:text-5xl font-bold text-zinc-100 mb-4">
-            {arena.name} Wrap-Up
-          </h1>
-          <p className="text-sm text-zinc-400 leading-relaxed">
-            The dust has settled. After {arena.totalRounds} rounds of intense forecasting and market making, the final hierarchy is established.
-          </p>
-        </div>
+    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
+      {/* SideNavBar */}
+      <SiteSidebar />
 
-        {/* Podium & Personal Summary */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Winners Podium (Left 8 cols) */}
-          <div className="lg:col-span-8 flex flex-col justify-end">
-            <h3 className="font-display text-xl font-bold text-zinc-100 mb-6">Top Forecasters</h3>
-            <div className="grid grid-cols-3 gap-3 md:gap-4 items-end h-[320px]">
-              {/* 2nd Place */}
-              {top3[1] ? (
-                <div className="glass-panel rounded-2xl p-5 flex flex-col items-center justify-end h-[75%] border border-zinc-800 bg-zinc-900/60 backdrop-blur-xl relative">
-                  <span className="font-mono text-[10px] font-bold text-zinc-400 uppercase mb-1">Silver</span>
-                  <span className="font-display text-sm font-bold text-zinc-100 truncate w-full text-center mb-2">
-                    {top3[1].user.name}
-                  </span>
-                  <span className="font-mono text-base font-bold text-zinc-200">
-                    {formatPoints(top3[1].balance, 0)} pts
-                  </span>
-                </div>
-              ) : <div />}
-
-              {/* 1st Place Champion */}
-              {top3[0] ? (
-                <div className="glass-panel rounded-t-3xl rounded-b-2xl p-6 flex flex-col items-center justify-end h-[100%] border border-zinc-700 bg-zinc-900/90 backdrop-blur-xl relative shadow-[0_0_40px_rgba(255,255,255,0.08)]">
-                  <span className="font-mono text-[11px] font-bold text-amber-400 uppercase tracking-widest mb-1">
-                    🏆 Champion
-                  </span>
-                  <span className="font-display text-lg font-bold text-zinc-100 truncate w-full text-center mb-2">
-                    {top3[0].user.name}
-                  </span>
-                  <span className="font-mono text-xl font-bold text-emerald-400">
-                    {formatPoints(top3[0].balance, 0)} pts
-                  </span>
-                </div>
-              ) : <div />}
-
-              {/* 3rd Place */}
-              {top3[2] ? (
-                <div className="glass-panel rounded-2xl p-5 flex flex-col items-center justify-end h-[60%] border border-zinc-800 bg-zinc-900/60 backdrop-blur-xl relative">
-                  <span className="font-mono text-[10px] font-bold text-amber-600 uppercase mb-1">Bronze</span>
-                  <span className="font-display text-sm font-bold text-zinc-100 truncate w-full text-center mb-2">
-                    {top3[2].user.name}
-                  </span>
-                  <span className="font-mono text-base font-bold text-zinc-200">
-                    {formatPoints(top3[2].balance, 0)} pts
-                  </span>
-                </div>
-              ) : <div />}
-            </div>
+      {/* Main Content Area */}
+      <div className="flex-1 md:ml-64 flex flex-col min-h-screen relative pt-16 md:pt-0">
+        {/* Desktop TopNavBar */}
+        <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-30">
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/arenas/${arena.code}`}
+              className="text-[#c4c7c8] hover:text-white flex items-center gap-1 font-['Epilogue'] text-xs transition-colors"
+            >
+              <span className="material-symbols-outlined text-base">arrow_back</span>
+              <span>Back to Arena</span>
+            </Link>
+            <div className="h-4 w-px bg-[#27272A]" />
+            <span className="font-['Epilogue'] text-xs font-bold text-white tracking-wider uppercase">
+              TOURNAMENT RESULTS · {arena.code}
+            </span>
           </div>
 
-          {/* Personal Summary Card (Right 4 cols) */}
-          <div className="lg:col-span-4 flex flex-col justify-end">
-            <div className="glass-panel border border-zinc-800 rounded-2xl p-6 flex-1 flex flex-col justify-between bg-zinc-900/60 backdrop-blur-xl">
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/arenas/${arena.code}/screen`}
+              target="_blank"
+              className="px-3 py-1.5 rounded-full bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] font-['Epilogue'] text-xs font-bold text-white transition-colors flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-[16px] text-[#22C55E]">desktop_windows</span>
+              <span>Big Screen</span>
+            </Link>
+          </div>
+        </header>
+
+        {/* Results Container */}
+        <main className="flex-1 p-4 sm:p-6 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-6 md:gap-8">
+          {/* Header */}
+          <div className="text-center max-w-2xl mx-auto flex flex-col items-center gap-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#27272A] bg-[#201f1f] text-[#22C55E] font-['Epilogue'] text-[11px] font-bold tracking-wider uppercase">
+              OFFICIAL RESULTS
+            </div>
+            <h1 className="font-['Geist'] text-3xl md:text-5xl font-bold text-white tracking-tight">
+              {arena.name} Wrap-Up
+            </h1>
+            <p className="font-['Geist'] text-sm text-[#c4c7c8] leading-relaxed">
+              After {arena.totalRounds} rounds of live forecasting and automated LMSR pricing, the final tournament rankings are set.
+            </p>
+          </div>
+
+          {/* Podium & Personal Summary */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Winners Podium (Left 8 cols) */}
+            <div className="lg:col-span-8 flex flex-col justify-end bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl p-6">
+              <h3 className="font-['Geist'] text-xl font-bold text-white mb-6">Top Forecasters</h3>
+              <div className="grid grid-cols-3 gap-3 md:gap-4 items-end h-[280px]">
+                {/* 2nd Place */}
+                {top3[1] ? (
+                  <div className="rounded-xl p-4 flex flex-col items-center justify-end h-[75%] border border-[#27272A] bg-[#141414] relative text-center">
+                    <span className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8] uppercase mb-1">
+                      2nd · Silver
+                    </span>
+                    <span className="font-['Geist'] text-sm font-bold text-white truncate w-full mb-1">
+                      {top3[1].user.name}
+                    </span>
+                    <span className="font-mono text-sm font-bold text-[#c4c7c8]">
+                      {formatPoints(top3[1].balance, 0)} pts
+                    </span>
+                  </div>
+                ) : <div />}
+
+                {/* 1st Place Champion */}
+                {top3[0] ? (
+                  <div className="rounded-t-2xl rounded-b-xl p-5 flex flex-col items-center justify-end h-[100%] border border-[#22C55E]/40 bg-[#22C55E]/10 backdrop-blur-xl relative shadow-lg text-center">
+                    <span className="font-['Epilogue'] text-[11px] font-bold text-[#22C55E] uppercase tracking-widest mb-1 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[16px]">military_tech</span>
+                      <span>Champion</span>
+                    </span>
+                    <span className="font-['Geist'] text-base font-bold text-white truncate w-full mb-1">
+                      {top3[0].user.name}
+                    </span>
+                    <span className="font-mono text-xl font-bold text-[#22C55E]">
+                      {formatPoints(top3[0].balance, 0)} pts
+                    </span>
+                  </div>
+                ) : <div />}
+
+                {/* 3rd Place */}
+                {top3[2] ? (
+                  <div className="rounded-xl p-4 flex flex-col items-center justify-end h-[60%] border border-[#27272A] bg-[#141414] relative text-center">
+                    <span className="font-['Epilogue'] text-[10px] font-bold text-[#EAB308] uppercase mb-1">
+                      3rd · Bronze
+                    </span>
+                    <span className="font-['Geist'] text-sm font-bold text-white truncate w-full mb-1">
+                      {top3[2].user.name}
+                    </span>
+                    <span className="font-mono text-sm font-bold text-[#c4c7c8]">
+                      {formatPoints(top3[2].balance, 0)} pts
+                    </span>
+                  </div>
+                ) : <div />}
+              </div>
+            </div>
+
+            {/* Personal Summary Card (Right 4 cols) */}
+            <div className="lg:col-span-4 flex flex-col justify-between bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl p-6">
               <div>
                 <div className="flex justify-between items-start mb-4">
-                  <span className="font-mono text-xs uppercase font-bold text-zinc-400">Final Placement</span>
-                  <span className="px-2.5 py-1 bg-zinc-800 rounded-full font-mono text-[10px] font-bold text-zinc-200 border border-zinc-700">
-                    {myRank ? `#${myRank} of ${participants.length}` : 'Participant'}
+                  <span className="font-['Epilogue'] text-xs uppercase font-bold text-[#c4c7c8]">Your Placement</span>
+                  <span className="px-2.5 py-1 bg-[#201f1f] rounded-full font-mono text-[10px] font-bold text-white border border-[#27272A]">
+                    {myRank ? `#${myRank} of ${participants.length}` : 'Spectator'}
                   </span>
                 </div>
-                <div className="flex items-baseline gap-2 mb-8">
-                  <span className="font-display text-4xl font-bold text-zinc-100">
+                <div className="flex items-baseline gap-2 mb-6">
+                  <span className="font-['Geist'] text-4xl font-bold text-white">
                     {myRank ? `#${myRank}` : '—'}
                   </span>
-                  <span className="text-sm text-zinc-400">Rank</span>
+                  <span className="text-sm text-[#c4c7c8]">Rank</span>
                 </div>
               </div>
 
-              <div className="space-y-4 text-xs">
-                <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
-                  <span className="text-zinc-400">Final Balance</span>
-                  <span className="font-mono font-bold text-emerald-400">
+              <div className="space-y-3 text-xs font-['Epilogue'] border-t border-[#27272A] pt-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-[#c4c7c8]">Final Balance</span>
+                  <span className="font-mono font-bold text-[#22C55E]">
                     {myParticipant ? `${formatPoints(myParticipant.balance, 0)} pts` : '—'}
                   </span>
                 </div>
-                <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
-                  <span className="text-zinc-400">Starting Balance</span>
-                  <span className="font-mono text-zinc-200">
+                <div className="flex justify-between items-center">
+                  <span className="text-[#c4c7c8]">Starting Balance</span>
+                  <span className="font-mono text-white">
                     {formatPoints(arena.startingBalance, 0)} pts
                   </span>
                 </div>
-                <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
-                  <span className="text-zinc-400">Total Rounds</span>
-                  <span className="font-mono text-zinc-200">{arena.totalRounds}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#c4c7c8]">Total Rounds</span>
+                  <span className="font-mono text-white">{arena.totalRounds}</span>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Full Standings Table */}
-        <div className="flex flex-col gap-4">
-          <h3 className="font-display text-2xl font-bold text-zinc-100">Final Standings</h3>
-          <div className="glass-panel border border-zinc-800 rounded-2xl overflow-x-auto bg-zinc-900/60">
-            <table className="w-full text-left border-collapse min-w-[600px]">
-              <thead>
-                <tr className="border-b border-zinc-800 text-zinc-400 font-mono text-xs uppercase">
-                  <th className="py-4 px-6 w-16">Rank</th>
-                  <th className="py-4 px-6">Trader</th>
-                  <th className="py-4 px-6 text-right">Final Balance</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm divide-y divide-zinc-800/60">
-                {participants.map((p, idx) => (
-                  <tr key={p.id} className="hover:bg-zinc-800/40 transition-colors">
-                    <td className="py-4 px-6 font-mono text-xs font-bold text-zinc-400">
-                      {String(idx + 1).padStart(2, '0')}
-                    </td>
-                    <td className="py-4 px-6 font-semibold text-zinc-100">
-                      {p.user.name}
-                    </td>
-                    <td className="py-4 px-6 text-right font-mono font-bold text-emerald-400">
-                      {formatPoints(p.balance, 0)} pts
-                    </td>
+          {/* Full Standings Table */}
+          <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl p-6 flex flex-col gap-4">
+            <h3 className="font-['Geist'] text-xl font-bold text-white">Final Standings</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left font-['Epilogue'] text-xs">
+                <thead>
+                  <tr className="border-b border-[#27272A] text-[#c4c7c8]">
+                    <th className="pb-3 font-bold uppercase w-16">RANK</th>
+                    <th className="pb-3 font-bold uppercase">TRADER</th>
+                    <th className="pb-3 font-bold uppercase text-right">FINAL BALANCE</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {participants.map((p, idx) => (
+                    <tr key={p.id} className="border-b border-[#27272A]/40 hover:bg-[#201f1f]/30 transition-colors">
+                      <td className="py-3 font-mono font-bold text-[#c4c7c8]">
+                        #{idx + 1}
+                      </td>
+                      <td className="py-3 font-medium text-white">
+                        {p.user.name || p.user.email}
+                      </td>
+                      <td className="py-3 text-right font-mono font-bold text-[#22C55E]">
+                        {formatPoints(p.balance, 0)} pts
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </main>
       </div>
-    </SiteShell>
+    </div>
   );
 }

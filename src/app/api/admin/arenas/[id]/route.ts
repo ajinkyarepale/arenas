@@ -13,18 +13,29 @@ export const dynamic = 'force-dynamic';
  * through this — the tenancy boundary is enforced per request, not by hiding
  * buttons in the UI.
  */
-async function authorise(id: string) {
-  const { user, allowed } = await requireOrganizer();
-  if (!user) return { error: unauthorized() } as const;
-  if (!allowed) return { error: forbidden('Only organizers can manage arenas.') } as const;
+import { PermissionKey } from '@/generated/client';
+import { can } from '@/lib/auth/rbac';
+import { createAuditLog } from '@/lib/audit';
 
-  const arena = await prisma.event.findUnique({ where: { id } });
+async function authorise(id: string, requiredPermission: PermissionKey = PermissionKey.ARENA_MANAGE_OWN) {
+  const { user } = await requireOrganizer();
+  if (!user) return { error: unauthorized() } as const;
+
+  const arena = await prisma.event.findFirst({
+    where: {
+      OR: [
+        { id },
+        { code: id },
+        { code: `AR-${id.replace(/^AR-/, '')}` },
+        { code: id.replace(/^AR-/, '') },
+      ],
+    },
+  });
   if (!arena) return { error: notFound('No such arena.') } as const;
 
-  if (user.role !== 'SUPERADMIN' && arena.organizerId !== user.id) {
-    // Deliberately the same message as a missing arena, so probing IDs cannot
-    // be used to enumerate other organizers' events.
-    return { error: notFound('No such arena.') } as const;
+  const permitted = await can(user, requiredPermission, { organizerId: arena.organizerId });
+  if (!permitted) {
+    return { error: forbidden('You do not have permission to manage this arena.') } as const;
   }
 
   return { user, arena } as const;
@@ -133,12 +144,37 @@ export async function POST(
 ) {
   const result = await authorise(params.id);
   if ('error' in result) return result.error;
-  const { arena } = result;
+  const { user, arena } = result;
 
   const parsed = await parseBody(request, updateArenaSchema);
   if (!parsed.ok) return parsed.response;
 
+  void createAuditLog({
+    actorId: user.id,
+    action: 'ARENA_UPDATED',
+    resourceType: 'EVENT',
+    resourceId: arena.id,
+    metadata: { action: parsed.data.action, tradesPerMinuteLimit: parsed.data.tradesPerMinuteLimit },
+  });
+
+  if (parsed.data.tradesPerMinuteLimit !== undefined) {
+    if (arena.status === 'LIVE' || arena.status === 'ENDED') {
+      return apiError('Submission rules must be configured before starting the round.', 400);
+    }
+    const updated = await prisma.event.update({
+      where: { id: arena.id },
+      data: { tradesPerMinuteLimit: parsed.data.tradesPerMinuteLimit },
+    });
+    if (!parsed.data.action || parsed.data.action === 'update-rules') {
+      return NextResponse.json({ arena: updated });
+    }
+  }
+
   switch (parsed.data.action) {
+    case 'update-rules': {
+      return NextResponse.json({ arena });
+    }
+
     case 'publish': {
       if (arena.status !== 'DRAFT') {
         return apiError('This arena is already published.', 409);
@@ -151,7 +187,9 @@ export async function POST(
       return NextResponse.json({ arena: updated });
     }
 
-    case 'start': {
+    case 'start':
+    case 'start-round':
+    case 'resume': {
       if (arena.status === 'ENDED') {
         return apiError('This arena has already finished.', 409);
       }
@@ -192,17 +230,32 @@ export async function POST(
   }
 }
 
+export async function PATCH(
+  request: Request,
+  context: { params: { id: string } },
+) {
+  return POST(request, context);
+}
+
 /** Delete an arena and its associated rounds, trades, and participant records. */
 export async function DELETE(
   _request: Request,
   { params }: { params: { id: string } },
 ) {
-  const result = await authorise(params.id);
+  const result = await authorise(params.id, PermissionKey.ARENA_DELETE_OWN);
   if ('error' in result) return result.error;
-  const { arena } = result;
+  const { user, arena } = result;
 
   await prisma.event.delete({
     where: { id: arena.id },
+  });
+
+  void createAuditLog({
+    actorId: user.id,
+    action: 'ARENA_DELETED',
+    resourceType: 'EVENT',
+    resourceId: arena.id,
+    metadata: { code: arena.code, name: arena.name },
   });
 
   return NextResponse.json({ success: true, deletedId: arena.id });

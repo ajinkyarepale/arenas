@@ -68,13 +68,10 @@ export default async function ArenaJoinPage({ params }: { params: { code: string
       <SiteSidebar />
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 flex flex-col min-h-screen relative">
-        {/* TopNavBar */}
-        <header className="flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-40">
-          <div className="flex items-center gap-2 md:hidden">
-            <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
-          </div>
-          <div className="hidden md:block">
+      <main className="flex-1 md:ml-64 flex flex-col min-h-screen relative pt-16 md:pt-0">
+        {/* Desktop TopNavBar */}
+        <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-30">
+          <div>
             <span className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] tracking-wider uppercase">
               JOIN TOURNAMENT
             </span>
@@ -85,7 +82,7 @@ export default async function ArenaJoinPage({ params }: { params: { code: string
         </header>
 
         {/* Page Canvas: Join Tournament */}
-        <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 relative overflow-hidden">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 md:p-12 relative overflow-hidden">
           {/* Atmospheric background element */}
           <div className="absolute inset-0 pointer-events-none opacity-30 flex items-center justify-center overflow-hidden">
             <div className="w-[800px] h-[800px] rounded-full bg-[#2a2a2a] blur-[100px] -translate-y-1/4" />

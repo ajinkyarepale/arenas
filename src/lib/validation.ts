@@ -38,9 +38,9 @@ export const joinCodeSchema = z
   .string()
   .trim()
   .min(4, 'Join codes are at least 4 characters')
-  .max(12, 'That does not look like a join code')
-  .transform((value) => value.toUpperCase().replace(/[\s-]/g, ''))
-  .refine((value) => /^[A-Z0-9]+$/.test(value), 'Join codes are letters and numbers only');
+  .max(16, 'That does not look like a join code')
+  .transform((value) => value.toUpperCase().trim())
+  .refine((value) => /^[A-Z0-9-]+$/.test(value), 'Join codes are letters and numbers only');
 
 export const joinArenaSchema = z.object({
   code: joinCodeSchema,
@@ -79,7 +79,10 @@ export const placeTradeSchema = z
   });
 export type PlaceTradeInput = z.infer<typeof placeTradeSchema>;
 
-const TICKER = /^[A-Z0-9]{5,20}$/;
+export const marketCategorySchema = z.enum(['CRYPTO_PRICE', 'CAMPUS_EVENT', 'CUSTOM_TRIVIA']);
+export type MarketCategory = z.infer<typeof marketCategorySchema>;
+
+const TICKER = /^[A-Z0-9_-]{3,20}$/;
 
 export const createArenaSchema = z
   .object({
@@ -87,23 +90,33 @@ export const createArenaSchema = z
       .string()
       .trim()
       .min(3, 'Give the arena a name')
-      .max(80, 'That name is too long'),
-    description: z.string().trim().max(400).optional().or(z.literal('')),
+      .max(100, 'That name is too long'),
+    description: z.string().trim().max(500).optional().or(z.literal('')),
     hostName: z.string().trim().max(80).optional().or(z.literal('')),
+    marketCategory: marketCategorySchema.optional().default('CRYPTO_PRICE'),
+    question: z.string().trim().max(300).optional().or(z.literal('')),
+    resolutionCriteria: z.string().trim().max(500).optional().or(z.literal('')),
+    isManualResolution: z.boolean().optional().default(false),
+    collegeName: z.string().trim().max(100).optional().or(z.literal('')),
+    collegeLogoUrl: z.string().trim().url().optional().or(z.literal('')),
+    themeColor: z.string().trim().max(30).optional().or(z.literal('')),
+    enableBots: z.boolean().optional().default(false),
+    botIntensity: z.enum(['LOW', 'BALANCED', 'AGGRESSIVE']).optional().default('BALANCED'),
     asset: z
       .string()
       .trim()
+      .default('BTCUSDT')
       .transform((value) => value.toUpperCase())
-      .refine((value) => TICKER.test(value), 'Use a Binance symbol such as BTCUSDT'),
+      .refine((value) => TICKER.test(value), 'Use a valid market symbol or code'),
     roundDurationSec: z
       .number()
       .int('Round duration must be a whole number of seconds')
-      .min(60, 'Rounds must run at least 60 seconds')
-      .max(3600, 'Rounds cannot run longer than an hour'),
+      .min(30, 'Rounds must run at least 30 seconds')
+      .max(86400, 'Rounds cannot run longer than 24 hours'),
     lockBufferSec: z
       .number()
       .int()
-      .min(5, 'Allow at least 5 seconds to sample the closing price')
+      .min(5, 'Allow at least 5 seconds for final locking')
       .max(600),
     totalRounds: z
       .number()
@@ -141,7 +154,8 @@ export const createArenaSchema = z
 export type CreateArenaInput = z.infer<typeof createArenaSchema>;
 
 export const updateArenaSchema = z.object({
-  action: z.enum(['start', 'pause', 'end', 'publish']),
+  action: z.enum(['start', 'start-round', 'pause', 'resume', 'end', 'publish', 'update-rules']).optional(),
+  tradesPerMinuteLimit: z.number().int().min(0).max(600).optional(),
 });
 
 export const forceResolveSchema = z.object({

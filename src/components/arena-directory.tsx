@@ -12,12 +12,15 @@ export interface DirectoryArena {
   name: string;
   description: string | null;
   host: string;
+  marketCategory?: 'CRYPTO_PRICE' | 'CAMPUS_EVENT' | 'CUSTOM_TRIVIA';
+  question?: string | null;
+  resolutionCriteria?: string | null;
   asset: string;
   roundDurationSec: number;
   totalRounds: number;
   currentRound: number;
   startingBalance: number;
-  status: 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED';
+  status: 'DRAFT' | 'LOBBY' | 'LIVE' | 'PAUSED' | 'ENDED' | 'ARCHIVED';
   resolvedOutcome: 'YES' | 'NO' | 'VOID' | null;
   resolvedAt: string | null;
   createdAt: string;
@@ -219,9 +222,29 @@ export function ArenaDirectory({ showJoinActions }: { showJoinActions?: boolean 
                 </div>
 
                 <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className={`px-2 py-0.5 rounded-full font-['Epilogue'] text-[9px] font-bold uppercase tracking-wider ${
+                      arena.marketCategory !== 'CRYPTO_PRICE'
+                        ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                        : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    }`}>
+                      {arena.marketCategory !== 'CRYPTO_PRICE' ? 'Campus Market' : 'Crypto Oracle'}
+                    </span>
+                    <span className="font-['Epilogue'] text-[10px] text-[#8e9192]">
+                      {arena.roundDurationSec >= 60 ? `${Math.round(arena.roundDurationSec / 60)}m` : `${arena.roundDurationSec}s`} / round
+                    </span>
+                  </div>
+
                   <h3 className="font-['Geist'] text-xl font-medium text-white mb-1 group-hover:text-white transition-colors">
                     {arena.name}
                   </h3>
+
+                  {arena.question && arena.marketCategory !== 'CRYPTO_PRICE' && (
+                    <p className="font-['Geist'] text-xs text-[#d4d4d8] font-medium bg-[#141414] p-2 rounded-md border border-[#27272a] mb-2 line-clamp-2">
+                      {arena.question}
+                    </p>
+                  )}
+
                   <p className="font-['Geist'] text-xs text-[#c4c7c8] flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px]">person</span> Hosted by {arena.host}
                   </p>

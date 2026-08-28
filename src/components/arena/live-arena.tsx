@@ -2,21 +2,26 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { SiteSidebar } from '@/components/site-sidebar';
-import { roundPhase } from '@/components/arena/round-timer';
-import { TradePanel } from '@/components/arena/trade-panel';
 import { ArenaShareModal } from '@/components/arena/arena-share-modal';
+import { CrowdGraph, type CrowdTradeItem } from '@/components/arena/crowd-graph';
+import { TradePanel } from '@/components/arena/trade-panel';
+import { SiteSidebar } from '@/components/site-sidebar';
 import { useArena } from '@/hooks/use-arena';
-import { formatPoints } from '@/lib/format';
 import type { ArenaPublicInfo } from '@/lib/engine/snapshot';
+import { formatPoints, formatTime } from '@/lib/format';
+import { roundPhase } from '@/components/arena/round-timer';
 
 const CandleChart = dynamic(
-  () => import('@/components/arena/candle-chart').then((m) => m.CandleChart),
+  () => import('@/components/arena/candle-chart').then((mod) => mod.CandleChart),
   {
     ssr: false,
-    loading: () => <div className="h-[320px] animate-pulse rounded-xl bg-[#201f1f]" />,
+    loading: () => (
+      <div className="h-72 w-full animate-pulse rounded-xl bg-[#201f1f] flex items-center justify-center font-['Epilogue'] text-xs text-[#c4c7c8]">
+        Loading price action...
+      </div>
+    ),
   },
 );
 
@@ -29,11 +34,51 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
     arena,
     price,
     clockOffsetMs,
+    lastTrade,
     refresh,
   } = useArena(code);
 
   const [rightTab, setRightTab] = useState<'tape' | 'leaderboard'>('tape');
   const [showShareModal, setShowShareModal] = useState(false);
+  const [trades, setTrades] = useState<CrowdTradeItem[]>([]);
+
+  const loadTrades = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/arenas/${encodeURIComponent(code)}/trades`, {
+        cache: 'no-store',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.trades)) {
+          setTrades(data.trades);
+        }
+      }
+    } catch {}
+  }, [code]);
+
+  useEffect(() => {
+    void loadTrades();
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') void loadTrades();
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [loadTrades]);
+
+  // When a new trade arrives over socket, update trades state
+  useEffect(() => {
+    if (lastTrade) {
+      setTrades((prev) => [
+        ...prev,
+        {
+          id: `sock-${Date.now()}-${Math.random()}`,
+          side: lastTrade.side,
+          shares: lastTrade.shares,
+          cost: lastTrade.cost,
+          at: lastTrade.at,
+        },
+      ]);
+    }
+  }, [lastTrade]);
 
   const info = snapshot?.arena ?? initialArena;
   const viewer = snapshot?.viewer ?? null;
@@ -43,6 +88,17 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
   const phase = roundPhase(round, now);
   const tradingOpen = status === 'LIVE' && phase === 'trading';
   const priceYes = round?.priceYes ?? 0.5;
+
+  const disabledReason =
+    status === 'LOBBY'
+      ? 'Waiting for organizer to start Round 1'
+      : status === 'ENDED'
+        ? 'This Arena has finished'
+        : phase === 'closing'
+          ? 'Round is locking — calculating settlement'
+          : phase === 'waiting'
+            ? 'Waiting for round to open'
+            : 'Trading is currently closed.';
 
   const currentRoundNum = arena?.currentRound ?? info.currentRound;
   const totalRounds = info.totalRounds;
@@ -58,9 +114,17 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
   const userRank = viewer?.rank ?? (leaderboardEntries.findIndex((p) => p.displayName === viewer?.participantId) + 1);
   const position = viewer?.position ?? null;
 
-  // Polymarket question title construction
-  const questionTitle = `Will ${info.asset.replace('USDT', '')} close UP above the round's open price?`;
-  const questionSubtitle = `Polymarket binary market: Buy YES if you predict ${info.asset.replace('USDT', '')} will rise, or NO if it falls. Winning outcome pays 100 points ($1.00) per share at round settlement.`;
+  // Question & subtitle construction
+  const isCustomMarket = info.marketCategory !== 'CRYPTO_PRICE';
+  const customQuestion = round?.question || info.question;
+  const questionTitle = isCustomMarket
+    ? (customQuestion || info.name)
+    : `Will ${info.asset.replace('USDT', '')} close UP above the round's open price?`;
+  const questionSubtitle = isCustomMarket
+    ? (info.resolutionCriteria
+        ? `Resolution Criteria: ${info.resolutionCriteria}. Winning outcome pays 100 points per share.`
+        : `Buy YES if you predict this outcome will occur, or NO if not. Winning outcome pays 100 points per share.`)
+    : `Polymarket binary market: Buy YES if you predict ${info.asset.replace('USDT', '')} will rise, or NO if it falls. Winning outcome pays 100 points ($1.00) per share at round settlement.`;
 
   return (
     <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
@@ -68,9 +132,9 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
       <SiteSidebar />
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 flex flex-col min-h-screen relative">
-        {/* TopNavBar */}
-        <header className="flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-40">
+      <main className="flex-1 md:ml-64 flex flex-col min-h-screen relative pt-16 md:pt-0">
+        {/* Desktop TopNavBar */}
+        <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-30">
           <div className="flex items-center gap-4">
             <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
             <div className="hidden sm:flex gap-2">
@@ -108,20 +172,12 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                 title="Share & QR Code"
               >
                 <span className="material-symbols-outlined text-[16px] text-[#22C55E]">qr_code_2</span>
-                <span className="hidden sm:inline">QR / Share</span>
+                <span className="hidden sm:inline">Share</span>
               </button>
-              <Link
-                href="/markets"
-                className="w-9 h-9 rounded-full border border-[#27272A] flex items-center justify-center text-[#c4c7c8] hover:text-white transition-colors"
-                title="Back to Markets"
-              >
-                <span className="material-symbols-outlined text-lg">close</span>
-              </Link>
             </div>
           </div>
         </header>
 
-        {/* Share & QR Modal */}
         {showShareModal && (
           <ArenaShareModal
             code={info.code}
@@ -132,15 +188,33 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
         )}
 
         {/* Page Content Canvas */}
-        <div className="flex-1 p-6 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-6">
-          {/* Header Title & Timer Bar (Polymarket Question Style) */}
+        <div className="flex-1 p-3 sm:p-6 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-4 sm:gap-6">
+          {/* Mobile Status Strip */}
+          <div className="md:hidden flex flex-wrap items-center justify-between bg-[#141414] border border-[#27272A] rounded-xl px-4 py-2.5 gap-2 font-['Epilogue'] text-xs">
+            <div className="flex items-center gap-2">
+              <span className="font-mono font-bold text-[#22C55E]">{info.code}</span>
+              <span className="text-[#8e9192]">·</span>
+              <span className="text-[#c4c7c8]">R{currentRoundNum}/{totalRounds}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-white font-bold">{formatPoints(viewer?.balance ?? info.startingBalance, 0)} pts</span>
+              <button
+                type="button"
+                onClick={() => setShowShareModal(true)}
+                className="p-1 rounded bg-[#201f1f] border border-[#27272A] text-white flex items-center"
+              >
+                <span className="material-symbols-outlined text-[14px]">qr_code_2</span>
+              </button>
+            </div>
+          </div>
+          {/* Header Title & Timer Bar */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
             <div>
               <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#22C55E] uppercase tracking-wider mb-2">
-                POLYMARKET BINARY OUTCOME
+                {isCustomMarket ? 'CAMPUS PREDICTION MARKET' : 'POLYMARKET BINARY OUTCOME'}
               </div>
               <h1 className="font-['Geist'] text-2xl md:text-3xl font-bold text-white mb-1">
-                {info.name}: {questionTitle}
+                {questionTitle}
               </h1>
               <p className="font-['Geist'] text-xs text-[#c4c7c8] max-w-2xl leading-relaxed">
                 {questionSubtitle}
@@ -167,27 +241,77 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
 
           {/* Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Column: Chart & My Positions */}
+            {/* Left Column: Chart, Crowd Graph & Positions */}
             <div className="lg:col-span-8 flex flex-col gap-6">
-              {/* Candlestick Chart Panel */}
-              <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl flex flex-col min-h-[380px]">
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="font-['Epilogue'] text-xs font-bold text-white bg-[#201f1f] px-2.5 py-1 rounded border border-[#27272A]">
-                      {info.asset}
+              {/* Spotlight Question & Probability Meter (Custom) or Candlestick Chart (Crypto) */}
+              {isCustomMarket ? (
+                <div className="glass-panel p-6 border border-purple-500/30 bg-[rgba(20,20,20,0.85)] backdrop-blur-xl rounded-xl flex flex-col gap-4 shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-['Epilogue'] text-[10px] font-bold uppercase tracking-wider">
+                      Prediction Spotlight
                     </span>
-                    <span className="font-['Epilogue'] text-xs text-[#c4c7c8]">
-                      {info.roundDurationSec / 60}m candle
+                    <span className="font-['Epilogue'] text-xs text-[#a1a1aa]">
+                      Round {currentRoundNum} of {totalRounds}
                     </span>
                   </div>
-                  <div className="font-['Epilogue'] text-sm font-bold text-white">
-                    Live Spot: ${price?.price?.toLocaleString() ?? '—'}
-                  </div>
-                </div>
 
-                <div className="flex-1 w-full rounded-xl overflow-hidden bg-[#1c1b1b] border border-[#27272A]">
-                  <CandleChart code={info.code} openPrice={round?.openPrice} livePrice={price?.price} />
+                  <h2 className="font-['Geist'] text-xl sm:text-2xl font-bold text-white leading-snug">
+                    {customQuestion || info.name}
+                  </h2>
+
+                  {info.resolutionCriteria && (
+                    <div className="p-3 bg-[#18181b] rounded-lg border border-[#27272a] text-xs text-[#a1a1aa]">
+                      <strong className="text-[#e4e4e7]">Resolution Criteria:</strong> {info.resolutionCriteria}
+                    </div>
+                  )}
+
+                  {/* Probability Bar */}
+                  <div className="flex flex-col gap-2 pt-2 border-t border-[#27272a]">
+                    <div className="flex justify-between items-center text-xs font-['Epilogue'] font-bold">
+                      <span className="text-[#22C55E]">YES CHANCE: {Math.round(priceYes * 100)}%</span>
+                      <span className="text-[#EF4444]">NO CHANCE: {Math.round((1 - priceYes) * 100)}%</span>
+                    </div>
+                    <div className="h-3.5 w-full rounded-full bg-[#EF4444]/30 overflow-hidden flex p-0.5 border border-[#27272a]">
+                      <div
+                        className="h-full bg-[#22C55E] transition-all duration-500 rounded-full"
+                        style={{ width: `${Math.max(5, Math.min(95, priceYes * 100))}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
+              ) : (
+                <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl flex flex-col min-h-[380px]">
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="font-['Epilogue'] text-xs font-bold text-white bg-[#201f1f] px-2.5 py-1 rounded border border-[#27272A]">
+                        {info.asset}
+                      </span>
+                      <span className="font-['Epilogue'] text-xs text-[#c4c7c8]">
+                        {info.roundDurationSec / 60}m candle
+                      </span>
+                    </div>
+                    <div className="font-['Epilogue'] text-sm font-bold text-white">
+                      Live Spot: ${price?.price?.toLocaleString() ?? '—'}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 w-full rounded-xl overflow-hidden bg-[#1c1b1b] border border-[#27272A]">
+                    <CandleChart code={info.code} openPrice={round?.openPrice} livePrice={price?.price} />
+                  </div>
+                </div>
+              )}
+
+              {/* YES / NO Crowd Investment Graph (Switchable Line / Bar) */}
+              <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl">
+                <CrowdGraph
+                  trades={trades}
+                  priceYes={priceYes}
+                  qYes={round?.qYes}
+                  qNo={round?.qNo}
+                  asset={info.asset}
+                  openPrice={round?.openPrice}
+                  livePrice={price?.price}
+                />
               </div>
 
               {/* My Positions Table */}
@@ -271,76 +395,103 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                 balance={viewer?.balance ?? info.startingBalance}
                 maxStakePerTrade={info.maxStakePerTrade}
                 liquidityParamB={info.liquidityParamB}
-                qYes={round?.qYes ?? 100}
-                qNo={round?.qNo ?? 100}
+                qYes={round?.qYes ?? 0}
+                qNo={round?.qNo ?? 0}
                 priceYes={priceYes}
                 position={position}
                 tradingOpen={tradingOpen}
-                onFilled={refresh}
+                disabledReason={disabledReason}
+                tradesPerMinuteLimit={info.tradesPerMinuteLimit}
+                onFilled={() => {
+                  void refresh();
+                  void loadTrades();
+                }}
               />
 
-              {/* Feed / Leaderboard Tabs */}
-              <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl flex flex-col gap-4 font-['Geist'] text-xs">
-                <div className="flex border-b border-[#27272A] pb-2 gap-4">
-                  <button
-                    onClick={() => setRightTab('tape')}
-                    className={`font-['Epilogue'] text-xs font-bold transition-colors pb-1 ${
-                      rightTab === 'tape'
-                        ? 'text-white border-b-2 border-white'
-                        : 'text-[#c4c7c8] hover:text-white'
-                    }`}
-                  >
-                    Live Feed
-                  </button>
-                  <button
-                    onClick={() => setRightTab('leaderboard')}
-                    className={`font-['Epilogue'] text-xs font-bold transition-colors pb-1 ${
-                      rightTab === 'leaderboard'
-                        ? 'text-white border-b-2 border-white'
-                        : 'text-[#c4c7c8] hover:text-white'
-                    }`}
-                  >
-                    Leaderboard
-                  </button>
+              {/* Feed & Leaderboard Switcher */}
+              <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl flex flex-col gap-4">
+                <div className="flex items-center justify-between border-b border-[#27272A] pb-3">
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setRightTab('tape')}
+                      className={`font-['Epilogue'] text-xs font-bold transition-colors ${
+                        rightTab === 'tape' ? 'text-white border-b-2 border-[#22C55E] pb-1' : 'text-[#c4c7c8]'
+                      }`}
+                    >
+                      LIVE TAPE
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRightTab('leaderboard')}
+                      className={`font-['Epilogue'] text-xs font-bold transition-colors ${
+                        rightTab === 'leaderboard'
+                          ? 'text-white border-b-2 border-[#22C55E] pb-1'
+                          : 'text-[#c4c7c8]'
+                      }`}
+                    >
+                      LEADERBOARD
+                    </button>
+                  </div>
+                  <span className="font-mono text-[10px] text-[#22C55E] uppercase flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" /> LIVE
+                  </span>
                 </div>
 
                 {rightTab === 'tape' ? (
-                  <div className="flex flex-col gap-2 max-h-60 overflow-y-auto font-['Epilogue']">
-                    <p className="text-[#c4c7c8] text-center py-4">Waiting for first fill...</p>
+                  <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
+                    {trades.length === 0 ? (
+                      <p className="text-xs text-[#c4c7c8] py-8 text-center">No trades placed in this round yet.</p>
+                    ) : (
+                      [...trades]
+                        .reverse()
+                        .slice(0, 15)
+                        .map((trade) => (
+                          <div
+                            key={trade.id}
+                            className="flex justify-between items-center py-2 px-3 rounded-lg bg-[#201f1f]/50 border border-[#27272A] font-['Epilogue'] text-xs"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                  trade.side === 'YES'
+                                    ? 'bg-[#22C55E]/15 text-[#22C55E]'
+                                    : 'bg-[#EF4444]/15 text-[#EF4444]'
+                                }`}
+                              >
+                                {trade.side}
+                              </span>
+                              <span className="text-[#c4c7c8]">{formatPoints(trade.cost, 0)} pts</span>
+                            </div>
+                            <span className="text-[10px] text-[#8e9192]">{formatTime(trade.at)}</span>
+                          </div>
+                        ))
+                    )}
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-2 max-h-60 overflow-y-auto font-['Epilogue']">
-                    {leaderboardEntries.map((p, idx) => (
-                      <div
-                        key={p.participantId}
-                        className="flex justify-between items-center py-2 border-b border-[#27272A]/50 text-xs"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="w-5 h-5 rounded-full bg-[#201f1f] text-center text-[#c4c7c8] font-bold">
-                            {idx + 1}
-                          </span>
-                          <span className="text-white font-medium">{p.displayName}</span>
+                  <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
+                    {leaderboardEntries.length === 0 ? (
+                      <p className="text-xs text-[#c4c7c8] py-8 text-center">No participants ranked yet.</p>
+                    ) : (
+                      leaderboardEntries.map((p, idx) => (
+                        <div
+                          key={p.displayName}
+                          className="flex justify-between items-center py-2 px-3 rounded-lg bg-[#201f1f]/50 border border-[#27272A] font-['Epilogue'] text-xs"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-[#8e9192] w-4">{idx + 1}</span>
+                            <span className="text-white truncate max-w-[120px]">{p.displayName}</span>
+                          </div>
+                          <span className="font-bold text-[#22C55E]">{formatPoints(p.balance, 0)} pts</span>
                         </div>
-                        <span className="text-white font-bold">{formatPoints(p.balance, 0)} pts</span>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 )}
               </div>
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <footer className="w-full mt-auto flex justify-between items-center py-6 px-12 border-t border-[#27272A] bg-[#131313] text-[#c4c7c8] text-xs">
-          <p>© 2024 Arenas Markets. All rights reserved.</p>
-          <div className="flex gap-6 font-['Epilogue'] text-[11px]">
-            <Link href="/guide" className="hover:text-white underline">Legal</Link>
-            <Link href="/guide" className="hover:text-white underline">Privacy</Link>
-            <Link href="/guide" className="hover:text-white underline">Terms</Link>
-            <Link href="/guide" className="hover:text-white underline">Docs</Link>
-          </div>
-        </footer>
       </main>
     </div>
   );

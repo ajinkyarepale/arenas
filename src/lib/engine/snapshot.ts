@@ -25,6 +25,14 @@ export interface ArenaPublicInfo {
   description: string | null;
   hostName: string | null;
   organizerName: string;
+  marketCategory: 'CRYPTO_PRICE' | 'CAMPUS_EVENT' | 'CUSTOM_TRIVIA';
+  question: string | null;
+  resolutionCriteria: string | null;
+  isManualResolution: boolean;
+  collegeName: string | null;
+  collegeLogoUrl: string | null;
+  themeColor: string | null;
+  enableBots: boolean;
   asset: string;
   roundDurationSec: number;
   lockBufferSec: number;
@@ -42,6 +50,7 @@ export interface ArenaPublicInfo {
   createdAt: string;
   participantCount: number;
   predictionCount: number;
+  tradesPerMinuteLimit: number;
 }
 
 export interface ArenaViewerInfo {
@@ -54,27 +63,20 @@ export interface ArenaViewerInfo {
 
 export interface ArenaSnapshot {
   arena: ArenaPublicInfo;
-  round: RoundPayload | null;
-  leaderboard: LeaderboardPayload;
   viewer: ArenaViewerInfo;
-  serverTime: string;
+  round: RoundPayload | null;
+  leaderboard: LeaderboardEntry[];
+  price: PriceTick | null;
+  lastTrade: TradePayload | null;
+  lastSettled: RoundPayload | null;
+  serverTime: number;
 }
 
-export async function findArenaByCode(rawCode: string) {
-  const code = rawCode.trim().toUpperCase();
-  const withPrefix = code.startsWith('AR-') ? code : `AR-${code.replace(/[^A-Z0-9]/g, '')}`;
-  const withoutPrefix = code.replace(/^AR-/, '');
-
-  return prisma.event.findFirst({
-    where: {
-      OR: [
-        { code: code },
-        { code: withPrefix },
-        { code: withoutPrefix },
-      ],
-    },
+export async function findArenaByCode(code: string) {
+  return prisma.event.findUnique({
+    where: { code },
     include: {
-      organizer: { select: { name: true } },
+      organizer: { select: { name: true, email: true } },
       _count: { select: { participants: true, trades: true } },
     },
   });
@@ -90,6 +92,14 @@ export function toPublicInfo(event: ArenaWithMeta): ArenaPublicInfo {
     description: event.description,
     hostName: event.hostName,
     organizerName: event.organizer.name,
+    marketCategory: event.marketCategory,
+    question: event.question,
+    resolutionCriteria: event.resolutionCriteria,
+    isManualResolution: event.isManualResolution,
+    collegeName: event.collegeName ?? null,
+    collegeLogoUrl: event.collegeLogoUrl ?? null,
+    themeColor: event.themeColor ?? null,
+    enableBots: Boolean(event.enableBots),
     asset: event.asset,
     roundDurationSec: event.roundDurationSec,
     lockBufferSec: event.lockBufferSec,
@@ -107,6 +117,7 @@ export function toPublicInfo(event: ArenaWithMeta): ArenaPublicInfo {
     createdAt: event.createdAt.toISOString(),
     participantCount: event._count.participants,
     predictionCount: event._count.trades,
+    tradesPerMinuteLimit: event.tradesPerMinuteLimit ?? 0,
   };
 }
 

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getServerSession } from 'next-auth';
+import { EventStatus } from '@/generated/client';
 
 import { AdminArenaList } from '@/components/admin/admin-arena-list';
 import { SiteSidebar } from '@/components/site-sidebar';
@@ -34,8 +35,7 @@ export default async function AdminPage() {
 
   const arenas = dbArenas.map((a) => {
     const isEndedByTime = a.endsAt ? new Date(a.endsAt).getTime() <= now : false;
-    const effectiveStatus: 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED' =
-      a.status === 'ENDED' || isEndedByTime ? 'ENDED' : a.status;
+    const effectiveStatus: EventStatus = a.status === 'ENDED' || isEndedByTime ? 'ENDED' : a.status;
 
     return {
       id: a.id,
@@ -63,13 +63,10 @@ export default async function AdminPage() {
       <SiteSidebar />
 
       {/* Main Content Wrapper */}
-      <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
-        {/* TopNavBar */}
-        <header className="bg-[rgba(20,20,20,0.7)] top-0 sticky border-b border-[#27272A] backdrop-blur-xl flex justify-between items-center h-16 px-6 z-40">
-          <div className="flex items-center gap-2 md:hidden">
-            <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
-          </div>
-          <div className="hidden md:block">
+      <div className="flex-1 md:ml-64 flex flex-col min-h-screen pt-16 md:pt-0">
+        {/* Desktop TopNavBar */}
+        <header className="hidden md:flex bg-[rgba(20,20,20,0.7)] top-0 sticky border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
+          <div>
             <span className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] tracking-wider uppercase">
               ORGANIZER DASHBOARD
             </span>
@@ -77,15 +74,15 @@ export default async function AdminPage() {
           <div className="flex items-center gap-4 ml-auto">
             <Link
               href="/admin/arenas/new"
-              className="px-4 py-2 rounded-full bg-white text-[#2f3131] font-['Epilogue'] text-xs font-bold hover:bg-[#c6c6c7] transition-colors shadow"
+              className="bg-white text-[#2f3131] hover:bg-[#c6c6c7] font-['Epilogue'] text-xs font-bold px-4 py-2 rounded-full transition-all flex items-center gap-1 shadow"
             >
-              + Create Arena
+              <span>+ Create Arena</span>
             </Link>
           </div>
         </header>
 
-        {/* Dashboard Content */}
-        <main className="flex-1 p-6 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-8">
+        {/* Content Container */}
+        <main className="flex-1 p-4 sm:p-6 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-6 md:gap-8">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>

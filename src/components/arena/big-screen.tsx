@@ -14,17 +14,9 @@ import type { ArenaPublicInfo } from '@/lib/engine/snapshot';
 
 const CandleChart = dynamic(
   () => import('@/components/arena/candle-chart').then((m) => m.CandleChart),
-  { ssr: false, loading: () => <div className="h-full animate-pulse rounded bg-ink-800" /> },
+  { ssr: false, loading: () => <div className="h-full animate-pulse rounded-xl bg-[#201f1f]" /> },
 );
 
-/**
- * The projector view.
- *
- * Designed to be read from the back of a lecture hall: no controls, no
- * interaction, nothing hover-dependent, and the two numbers that matter — the
- * implied probability and the countdown — sized to fill a wall. It authenticates
- * nobody, because a projector should never be logged into a participant account.
- */
 export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
   const code = initialArena.code;
   const {
@@ -48,134 +40,177 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
   const priceUp =
     price?.price != null && round?.openPrice != null ? price.price > round.openPrice : null;
 
-  return (
-    <div className="scanlines relative flex h-[100dvh] w-full flex-col overflow-hidden bg-ink-950 p-4 xl:p-6">
-      {/* Ground plane + bloom behind everything on the wall. */}
-      <div className="grid-field pointer-events-none absolute inset-0 opacity-50" aria-hidden />
-      <div
-        className="bloom pointer-events-none absolute left-1/2 top-0 h-[40rem] w-[70rem] -translate-x-1/2 -translate-y-1/4"
-        aria-hidden
-      />
+  const isCustomMarket = info.marketCategory !== 'CRYPTO_PRICE';
+  const customQuestion = round?.question || info.question;
 
+  return (
+    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#131313] text-[#e5e2e1] font-['Geist'] p-4 xl:p-6 antialiased">
       {/* Header */}
-      <header className="relative flex shrink-0 items-center justify-between gap-6 border-b border-line pb-4">
+      <header className="relative flex shrink-0 items-center justify-between gap-6 border-b border-[#27272A] pb-4">
         <div className="min-w-0">
-          <h1 className="font-display truncate text-3xl font-bold uppercase tracking-tight xl:text-5xl">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#22C55E] tracking-widest uppercase mb-1">
+            {isCustomMarket ? 'CAMPUS PREDICTION ARENA' : 'BIG SCREEN PROJECTOR VIEW'}
+          </div>
+          <h1 className="font-['Geist'] truncate text-3xl font-bold tracking-tight text-white xl:text-5xl">
             {info.name}
           </h1>
-          <p className="mt-1 text-lg text-fg-muted xl:text-2xl">
-            {info.hostName ?? info.organizerName} · {info.asset} · join code{' '}
-            <span className="font-mono font-bold text-accent glow-accent">{info.code}</span>
+          <p className="mt-1 font-['Epilogue'] text-base text-[#c4c7c8] xl:text-xl">
+            {info.hostName ?? info.organizerName} · {isCustomMarket ? 'Custom Market' : info.asset} · Join Code:{' '}
+            <span className="font-mono font-bold text-[#22C55E] tracking-wider">{info.code}</span>
           </p>
         </div>
 
         <div className="flex shrink-0 items-center gap-8">
           <div className="text-right">
-            <div className="label !text-sm !tracking-[0.2em]">Round</div>
-            <div className="font-display tnum text-5xl font-bold leading-none xl:text-7xl">
+            <div className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] uppercase tracking-wider">ROUND</div>
+            <div className="font-['Epilogue'] text-4xl font-bold text-white leading-none xl:text-6xl">
               {currentRound > 0 ? currentRound : '—'}
-              <span className="text-fg-faint"> / {info.totalRounds}</span>
+              <span className="text-[#8e9192]"> / {info.totalRounds}</span>
             </div>
           </div>
           <StatusLamp status={status} connected={connected} />
         </div>
       </header>
 
-      {/* Main */}
+      {/* Main Grid */}
       <main className="relative grid min-h-0 flex-1 grid-cols-1 gap-4 py-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] xl:gap-6">
-        {/* Chart column */}
+        {/* Chart / Question Spotlight Column */}
         <section className="flex min-h-0 flex-col gap-4">
-          <div className="panel flex min-h-0 flex-1 flex-col p-4">
-            <div className="mb-2 flex items-baseline justify-between">
-              <span className="label !text-sm !tracking-[0.2em]">{info.asset}</span>
-              <div className="flex items-baseline gap-5">
-                <span className="text-lg text-fg-faint">
-                  open{' '}
-                  <span className="tnum font-semibold text-fg-muted">
-                    {formatPrice(round?.openPrice)}
+          {isCustomMarket ? (
+            <div className="bg-[rgba(20,20,20,0.85)] border border-purple-500/30 backdrop-blur-xl rounded-xl flex min-h-0 flex-1 flex-col justify-between p-6 sm:p-8 shadow-2xl">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-['Epilogue'] text-xs font-bold uppercase tracking-widest">
+                    LIVE PREDICTION QUESTION
                   </span>
-                </span>
-                <span
-                  className={cx(
-                    'font-display tnum text-4xl font-bold xl:text-5xl',
-                    priceUp === true && 'text-yes',
-                    priceUp === false && 'text-no',
-                  )}
-                >
-                  {formatPrice(price?.price)}
-                </span>
+                  <span className="font-['Epilogue'] text-sm text-[#a1a1aa]">
+                    Round {currentRound > 0 ? currentRound : 1} of {info.totalRounds}
+                  </span>
+                </div>
+
+                <h2 className="font-['Geist'] text-2xl sm:text-4xl font-extrabold text-white leading-tight mt-2">
+                  {customQuestion || info.name}
+                </h2>
+
+                {info.resolutionCriteria && (
+                  <div className="p-4 bg-[#18181b] rounded-xl border border-[#27272a] text-sm text-[#a1a1aa] mt-2">
+                    <strong className="text-white">Resolution Criteria:</strong> {info.resolutionCriteria}
+                  </div>
+                )}
+              </div>
+
+              {/* Large Implied Probability Bar */}
+              <div className="flex flex-col gap-3 pt-6 border-t border-[#27272a]">
+                <div className="flex justify-between items-end font-['Epilogue']">
+                  <div>
+                    <span className="text-xs text-[#a1a1aa] uppercase font-bold block mb-1">YES ODDS</span>
+                    <span className="font-['Geist'] text-3xl sm:text-5xl font-extrabold text-[#22C55E]">
+                      {formatProbability(priceYes, 1)}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-[#a1a1aa] uppercase font-bold block mb-1">NO ODDS</span>
+                    <span className="font-['Geist'] text-3xl sm:text-5xl font-extrabold text-[#EF4444]">
+                      {formatProbability(1 - priceYes, 1)}
+                    </span>
+                  </div>
+                </div>
+                <div className="h-6 w-full rounded-full bg-[#EF4444]/30 overflow-hidden flex p-1 border border-[#27272a]">
+                  <div
+                    className="h-full bg-[#22C55E] transition-all duration-500 rounded-full"
+                    style={{ width: `${Math.max(5, Math.min(95, priceYes * 100))}%` }}
+                  />
+                </div>
               </div>
             </div>
-            <div className="min-h-0 flex-1">
-              <ChartFill code={code} openPrice={round?.openPrice ?? null} livePrice={price?.price ?? null} />
+          ) : (
+            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl flex min-h-0 flex-1 flex-col p-4">
+              <div className="mb-2 flex items-baseline justify-between">
+                <span className="font-['Epilogue'] text-xs font-bold text-white bg-[#201f1f] px-2.5 py-1 rounded border border-[#27272A]">
+                  {info.asset}
+                </span>
+                <div className="flex items-baseline gap-5 font-['Epilogue']">
+                  <span className="text-sm text-[#c4c7c8]">
+                    Open:{' '}
+                    <span className="font-semibold text-white font-mono">
+                      {formatPrice(round?.openPrice)}
+                    </span>
+                  </span>
+                  <span
+                    className={cx(
+                      'font-mono text-3xl font-bold xl:text-4xl',
+                      priceUp === true ? 'text-[#22C55E]' : priceUp === false ? 'text-[#ef4444]' : 'text-white',
+                    )}
+                  >
+                    {formatPrice(price?.price)}
+                  </span>
+                </div>
+              </div>
+              <div className="min-h-0 flex-1 rounded-lg overflow-hidden border border-[#27272A] bg-[#141414]">
+                <ChartFill code={code} openPrice={round?.openPrice ?? null} livePrice={price?.price ?? null} />
+              </div>
             </div>
-          </div>
+          )}
 
-          <div className="panel shrink-0 p-4">
-            <div className="mb-1 flex items-center justify-between">
-              <span className="label !text-sm !tracking-[0.2em]">
-                Implied probability this round
+          <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl shrink-0 p-4">
+            <div className="mb-2 flex items-center justify-between font-['Epilogue'] text-xs">
+              <span className="font-bold text-[#c4c7c8] uppercase tracking-wider">
+                Implied Probability This Round
               </span>
-              <span className="text-lg text-fg-faint">
-                {formatPoints(round?.volume ?? 0, 0)} pts traded ·{' '}
-                {round?.tradeCount ?? 0} trades
+              <span className="text-[#8e9192]">
+                {formatPoints(round?.volume ?? 0, 0)} pts traded · {round?.tradeCount ?? 0} trades
               </span>
             </div>
-            <ProbabilityTrace value={priceYes} roundId={round?.id ?? null} height={100} />
+            <ProbabilityTrace value={priceYes} roundId={round?.id ?? null} height={90} />
           </div>
         </section>
 
-        {/* Numbers + leaderboard column */}
+        {/* Numbers + Leaderboard Column */}
         <section className="flex min-h-0 flex-col gap-4">
-          <div className="panel hud relative shrink-0 overflow-hidden p-5">
-            <div
-              className="bloom pointer-events-none absolute inset-0 opacity-70"
-              aria-hidden
-            />
-            <div className="relative">
-              <div className="label !text-base !tracking-[0.2em]">Chance it closes UP</div>
-              {round && (round.tradeCount > 0 || round.qYes > 0 || round.qNo > 0) ? (
-                <>
-                  <div
-                    className={cx(
-                      'font-display tnum mt-1 text-mega font-bold leading-none tracking-tight transition-colors',
-                      priceYes >= 0.5 ? 'text-yes glow-yes' : 'text-no glow-no',
-                    )}
-                  >
-                    {formatProbability(priceYes, 1)}
-                  </div>
-                  <div className="mt-4">
-                    <ProbabilityBar value={priceYes} variant="display" />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="font-display tnum mt-1 text-4xl xl:text-5xl font-bold leading-none tracking-tight text-fg-muted">
-                    No predictions yet
-                  </div>
-                  <div className="mt-4">
-                    <ProbabilityBar value={null} tradeCount={0} variant="display" />
-                  </div>
-                </>
-              )}
+          <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl p-5 flex flex-col gap-2">
+            <div className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] uppercase tracking-wider">
+              Chance It Closes UP (YES)
             </div>
+            {round && (round.tradeCount > 0 || round.qYes > 0 || round.qNo > 0) ? (
+              <>
+                <div
+                  className={`font-['Geist'] text-5xl font-bold tracking-tight ${
+                    priceYes >= 0.5 ? 'text-[#22C55E]' : 'text-[#ef4444]'
+                  }`}
+                >
+                  {formatProbability(priceYes, 1)}
+                </div>
+                <div className="mt-2">
+                  <ProbabilityBar value={priceYes} variant="display" />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="font-['Geist'] text-3xl font-bold text-[#8e9192]">
+                  No predictions yet
+                </div>
+                <div className="mt-2">
+                  <ProbabilityBar value={null} tradeCount={0} variant="display" />
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="panel hud shrink-0 p-5">
+          <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl p-5">
             <RoundTimer round={round} clockOffsetMs={clockOffsetMs} variant="display" />
           </div>
 
-          <div className="panel shrink-0 max-h-40 overflow-hidden p-4">
-            <div className="mb-2 label !text-sm !tracking-[0.2em]">Trade tape</div>
+          <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl max-h-36 overflow-hidden p-4">
+            <div className="mb-2 font-['Epilogue'] text-xs font-bold text-[#c4c7c8] uppercase tracking-wider">
+              Live Order Tape
+            </div>
             <TradeTape lastTrade={lastTrade} variant="display" />
           </div>
 
-          <div className="panel flex min-h-0 flex-1 flex-col p-5">
-            <div className="mb-3 flex shrink-0 items-center justify-between">
-              <span className="label !text-base !tracking-[0.2em]">Leaderboard</span>
-              <span className="text-lg text-fg-faint">
-                {leaderboard?.participantCount ?? 0} traders
-              </span>
+          <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl flex min-h-0 flex-1 flex-col p-5">
+            <div className="mb-3 flex shrink-0 items-center justify-between font-['Epilogue'] text-xs">
+              <span className="font-bold text-[#c4c7c8] uppercase tracking-wider">Leaderboard</span>
+              <span className="text-[#8e9192]">{leaderboard?.participantCount ?? 0} traders</span>
             </div>
             <div className="min-h-0 flex-1 overflow-hidden">
               <Leaderboard data={leaderboard} limit={10} variant="display" />
@@ -184,17 +219,16 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
         </section>
       </main>
 
-      {/* Settlement flash */}
+      {/* Settlement Flash */}
       {lastSettled ? <SettlementOverlay settled={lastSettled} /> : null}
 
       {status !== 'LIVE' ? (
-        <IdleOverlay status={status} code={info.code} name={info.name} phase={phase} />
+        <IdleOverlay status={status} code={info.code} name={info.name} />
       ) : null}
     </div>
   );
 }
 
-/** Measures its box and hands the chart an explicit pixel height. */
 function ChartFill({
   code,
   openPrice,
@@ -234,23 +268,24 @@ function ChartFill({
 function StatusLamp({ status, connected }: { status: string; connected: boolean }) {
   const live = status === 'LIVE';
   return (
-    <div className="flex flex-col items-end gap-1">
+    <div className="flex flex-col items-end gap-1 font-['Epilogue']">
       <div
-        className={cx(
-          'flex items-center gap-2.5 rounded-full border px-4 py-2 text-xl font-bold uppercase tracking-wider',
-          live ? 'border-yes/50 bg-yes/12 text-yes' : 'border-line-strong bg-ink-800 text-fg-muted',
-        )}
+        className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm uppercase tracking-wider ${
+          live
+            ? 'bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E]'
+            : 'bg-[#201f1f] border border-[#27272A] text-[#c4c7c8]'
+        }`}
       >
         {live ? (
-          <span className="relative flex h-3 w-3">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-yes opacity-75" />
-            <span className="relative inline-flex h-3 w-3 rounded-full bg-yes" />
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#22C55E] opacity-75" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#22C55E]" />
           </span>
         ) : null}
-        {status === 'LOBBY' ? 'Open' : status}
+        {status === 'LOBBY' ? 'Open (Lobby)' : status}
       </div>
       {!connected ? (
-        <span className="text-sm text-warn">reconnecting…</span>
+        <span className="text-xs text-[#EAB308]">reconnecting…</span>
       ) : null}
     </div>
   );
@@ -281,27 +316,27 @@ function SettlementOverlay({
   const isYes = settled.outcome === 'YES';
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
+    <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm font-['Geist']">
       <div
-        className={cx(
-          'hud animate-rise rounded border-2 px-16 py-10 text-center backdrop-blur-md',
+        className={`rounded-2xl border-2 px-16 py-10 text-center backdrop-blur-xl ${
           isVoid
-            ? 'border-warn bg-warn/15 shadow-[0_0_80px_-10px_rgba(255,176,32,0.6)]'
+            ? 'border-[#EAB308] bg-[#EAB308]/15 shadow-2xl'
             : isYes
-              ? 'border-yes bg-yes/12 shadow-glow-yes'
-              : 'border-no bg-no/12 shadow-glow-no',
-        )}
+              ? 'border-[#22C55E] bg-[#22C55E]/15 shadow-2xl'
+              : 'border-[#ef4444] bg-[#ef4444]/15 shadow-2xl'
+        }`}
       >
-        <div className="label !text-xl !tracking-[0.25em]">Round {settled.roundNumber}</div>
+        <div className="font-['Epilogue'] text-sm font-bold uppercase tracking-widest text-[#c4c7c8]">
+          Round {settled.roundNumber} Result
+        </div>
         <div
-          className={cx(
-            'font-display mt-3 text-mega font-bold uppercase leading-none tracking-tight',
-            isVoid ? 'text-warn' : isYes ? 'text-yes glow-yes' : 'text-no glow-no',
-          )}
+          className={`font-['Geist'] mt-3 text-7xl font-bold uppercase tracking-tight ${
+            isVoid ? 'text-[#EAB308]' : isYes ? 'text-[#22C55E]' : 'text-[#ef4444]'
+          }`}
         >
           {isVoid ? 'VOID' : isYes ? 'YES' : 'NO'}
         </div>
-        <div className="mt-4 text-3xl font-semibold text-fg-muted">
+        <div className="mt-4 font-mono text-xl font-semibold text-white">
           {isVoid
             ? 'Everyone refunded'
             : `${formatPrice(settled.openPrice)} → ${formatPrice(settled.closePrice)}`}
@@ -315,23 +350,21 @@ function IdleOverlay({
   status,
   code,
   name,
-  phase,
 }: {
   status: string;
   code: string;
   name: string;
-  phase: string;
 }) {
   if (status === 'ENDED') {
     return (
-      <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-ink-950/80 backdrop-blur-sm">
-        <div className="text-center">
-          <div className="label !text-xl !tracking-[0.25em]">{name}</div>
-          <div className="font-display mt-4 text-mega font-bold leading-none tracking-tight">
-            Final results
+      <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-[#131313]/90 backdrop-blur-md">
+        <div className="text-center font-['Geist']">
+          <div className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] uppercase tracking-widest">{name}</div>
+          <div className="font-['Geist'] mt-4 text-5xl font-bold text-white">
+            Tournament Finished
           </div>
-          <p className="mt-6 text-3xl text-fg-muted">
-            Leaderboard below is final. Thanks for playing.
+          <p className="mt-4 font-['Geist'] text-lg text-[#c4c7c8]">
+            Final leaderboard and standings are displayed on screen.
           </p>
         </div>
       </div>
@@ -343,29 +376,29 @@ function IdleOverlay({
     const joinUrl = origin ? `${origin}/arenas/${code}` : `/arenas/${code}`;
 
     return (
-      <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-ink-950/85 backdrop-blur-md p-6">
+      <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-[#131313]/90 backdrop-blur-md p-6 font-['Geist']">
         <div className="text-center flex flex-col items-center max-w-2xl">
-          <div className="mx-auto flex flex-col sm:flex-row items-center gap-8 rounded-2xl bg-accent-light px-10 py-8 text-ink-950 shadow-[0_0_120px_-20px_rgba(163,201,255,0.75)]">
+          <div className="flex flex-col sm:flex-row items-center gap-8 rounded-2xl bg-[rgba(20,20,20,0.9)] border border-[#27272A] p-8 text-white shadow-2xl backdrop-blur-xl">
             <div className="text-left flex flex-col justify-center">
-              <div className="font-display text-xl font-semibold uppercase tracking-[0.25em] text-ink-900/70">
-                Join to predict
+              <div className="font-['Epilogue'] text-xs font-bold uppercase tracking-widest text-[#22C55E]">
+                JOIN TOURNAMENT
               </div>
-              <div className="font-display mt-2 text-6xl font-bold leading-none tracking-[0.04em] text-ink-950">
+              <div className="font-mono mt-2 text-5xl font-bold tracking-widest text-white">
                 {code}
               </div>
-              <div className="mt-3 text-base font-medium text-ink-900/80">
-                Scan QR or enter code at <span className="underline font-mono">{origin || 'arenas'}</span>
+              <div className="mt-3 font-['Geist'] text-xs text-[#c4c7c8]">
+                Scan QR or navigate to <span className="underline font-mono text-white">{origin || 'arenas'}</span>
               </div>
             </div>
-            <div className="pointer-events-auto shrink-0 p-2 bg-white rounded-xl shadow-md">
+            <div className="pointer-events-auto shrink-0 p-3 bg-white rounded-xl shadow-lg">
               <ArenaQRCodeCard code={code} joinUrl={joinUrl} size={160} showDownload={false} />
             </div>
           </div>
 
-          <p className="mt-8 text-3xl font-semibold text-fg-muted">
-            Waiting for the first round to open
+          <p className="mt-8 font-['Geist'] text-2xl font-semibold text-white">
+            Waiting for Round 1 to start
           </p>
-          <p className="mt-2 text-xl text-fg-faint">{name}</p>
+          <p className="mt-1 font-['Geist'] text-sm text-[#c4c7c8]">{name}</p>
         </div>
       </div>
     );

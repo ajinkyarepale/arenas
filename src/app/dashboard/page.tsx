@@ -31,15 +31,12 @@ export default async function DashboardPage() {
       <SiteSidebar />
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 flex flex-col min-h-screen relative">
-        {/* TopNavBar */}
-        <header className="flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-40">
-          <div className="flex items-center gap-2 md:hidden">
-            <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
-          </div>
-          <div className="hidden md:block">
+      <main className="flex-1 md:ml-64 flex flex-col min-h-screen relative pt-16 md:pt-0">
+        {/* Desktop TopNavBar */}
+        <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-30">
+          <div>
             <span className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] tracking-wider uppercase">
-              USER PROFILE & DASHBOARD
+              USER PROFILE &amp; DASHBOARD
             </span>
           </div>
           <div className="flex items-center gap-4 ml-auto font-['Epilogue'] text-xs">

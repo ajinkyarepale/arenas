@@ -15,20 +15,8 @@ export function SiteNavAuth() {
   }
 
   if (session?.user) {
-    const isOrganizer =
-      session.user.role === 'ORGANIZER' || session.user.role === 'SUPERADMIN';
-
     return (
       <div className="flex items-center gap-3">
-        {isOrganizer && (
-          <Link
-            href="/admin"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#22C55E] text-xs font-['Epilogue'] font-bold hover:bg-[#22C55E]/20 transition-colors"
-          >
-            <span className="material-symbols-outlined text-[14px]">admin_panel_settings</span>
-            <span>Organizer</span>
-          </Link>
-        )}
         <Link
           href="/dashboard"
           className="flex items-center gap-2 text-sm font-semibold text-white hover:text-[#22C55E] transition-colors"

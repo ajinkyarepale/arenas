@@ -1,4 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@/generated/client';
+
+export * from '@/generated/client';
 
 // A single client per process. Next.js dev-mode hot reloading would otherwise
 // open a new pool on every recompile until Postgres refuses connections.

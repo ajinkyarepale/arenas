@@ -12,7 +12,7 @@ export interface AdminArenaSummary {
   name: string;
   asset: string;
   totalRounds: number;
-  status: 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED';
+  status: 'DRAFT' | 'LOBBY' | 'LIVE' | 'PAUSED' | 'ENDED' | 'ARCHIVED';
   resolvedOutcome: 'YES' | 'NO' | 'VOID' | null;
   resolvedAt: string | null;
   createdAt: string;

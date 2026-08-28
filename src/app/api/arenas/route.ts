@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@/generated/client';
 import { NextResponse } from 'next/server';
 
 import { requireUser } from '@/lib/api';
@@ -15,11 +15,12 @@ export const dynamic = 'force-dynamic';
  * Includes real YES/NO prediction ratios calculated directly from participant orders.
  */
 export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const query = url.searchParams.get('q')?.trim() ?? '';
-  const status = url.searchParams.get('status');
+  try {
+    const url = new URL(request.url);
+    const query = url.searchParams.get('q')?.trim() ?? '';
+    const status = url.searchParams.get('status');
 
-  const now = Date.now();
+    const now = Date.now();
 
   const events = await prisma.event.findMany({
     where: {
@@ -42,6 +43,9 @@ export async function GET(request: Request) {
       name: true,
       description: true,
       hostName: true,
+      marketCategory: true,
+      question: true,
+      resolutionCriteria: true,
       asset: true,
       roundDurationSec: true,
       totalRounds: true,
@@ -63,6 +67,7 @@ export async function GET(request: Request) {
         select: {
           id: true,
           roundNumber: true,
+          question: true,
           status: true,
           qYes: true,
           qNo: true,
@@ -86,8 +91,7 @@ export async function GET(request: Request) {
 
   const mapped = events.map((event) => {
     const isEndedByTime = event.endsAt ? new Date(event.endsAt).getTime() <= now : false;
-    const effectiveStatus: 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED' =
-      event.status === 'ENDED' || isEndedByTime ? 'ENDED' : event.status;
+    const effectiveStatus = event.status === 'ENDED' || isEndedByTime ? 'ENDED' : event.status;
 
     const latestRound = event.rounds[0] ?? null;
     const tradeCount = latestRound?._count.trades ?? 0;
@@ -113,6 +117,9 @@ export async function GET(request: Request) {
       name: event.name,
       description: event.description,
       host: event.hostName ?? event.organizer.name,
+      marketCategory: event.marketCategory,
+      question: latestRound?.question || event.question || null,
+      resolutionCriteria: event.resolutionCriteria || null,
       asset: event.asset,
       roundDurationSec: event.roundDurationSec,
       totalRounds: event.totalRounds,
@@ -145,7 +152,17 @@ export async function GET(request: Request) {
     ? mapped.filter((a) => (status === 'all' ? true : a.status === status))
     : mapped;
 
-  return NextResponse.json({
-    arenas: filtered,
-  });
+    return NextResponse.json({
+      arenas: filtered,
+    });
+  } catch (error) {
+    console.error('[/api/arenas] Failed to load arenas:', error);
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Failed to load arenas',
+        arenas: [],
+      },
+      { status: 500 },
+    );
+  }
 }

@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 datasource db {
@@ -11,36 +12,129 @@ datasource db {
 }
 
 // ---------------------------------------------------------------------------
-// Users & auth
+// 1. Users, Accounts & RBAC
 // ---------------------------------------------------------------------------
 
-enum Role {
-  PARTICIPANT
-  ORGANIZER
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+enum RoleType {
   SUPERADMIN
+  ADMIN
+  ORGANIZER
+  PARTICIPANT
 }
 
 model User {
-  id           String   @id @default(cuid())
+  id           String     @id @default(cuid())
   name         String
-  email        String   @unique
+  email        String     @unique
   passwordHash String
-  role         Role     @default(PARTICIPANT)
+  role         RoleType   @default(PARTICIPANT)
+  status       UserStatus @default(ACTIVE)
   image        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  lastLoginAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   accounts       Account[]
   sessions       Session[]
-  organizedEvent Event[]            @relation("EventOrganizer")
-  participations EventParticipant[]
-  trades         Trade[]
+  userPermissions UserPermission[]
 
+  organizedEvents Event[]            @relation("EventOrganizer")
+  participations  EventParticipant[]
+  trades          Trade[]
+  ledgerEntries   PointLedger[]      @relation("UserLedger")
+  performedAudits AuditLog[]         @relation("AuditActor")
+
+  organizerRequests         OrganizerRequest[] @relation("UserOrganizerRequests")
+  reviewedOrganizerRequests OrganizerRequest[] @relation("ReviewerOrganizerRequests")
+
+  @@index([role, status])
+  @@index([email])
+}
+
+// Granular System Permissions
+enum PermissionKey {
+  // User Management
+  USER_VIEW
+  USER_CREATE
+  USER_UPDATE
+  USER_SUSPEND
+  USER_DELETE
+
+  // Role & Admin Management
+  ADMIN_MANAGE
+  ROLE_ASSIGN
+
+  // Arena / Event Management
+  ARENA_VIEW_ALL
+  ARENA_CREATE
+  ARENA_MANAGE_OWN
+  ARENA_MANAGE_ALL
+  ARENA_DELETE_OWN
+  ARENA_DELETE_ALL
+
+  // Round Operations
+  ROUND_VIEW
+  ROUND_MANAGE_OWN
+  ROUND_MANAGE_ALL
+  ROUND_OVERRIDE
+
+  // Trading & Predictions
+  PREDICTION_VIEW
+  PREDICTION_SUBMIT
+
+  // Financial / Points Ledger
+  LEDGER_VIEW
+  POINTS_ADJUST
+
+  // System & Logs
+  ANALYTICS_VIEW
+  AUDIT_LOG_VIEW
+  SYSTEM_SETTINGS_VIEW
+  SYSTEM_SETTINGS_UPDATE
+}
+
+model Permission {
+  id          String        @id @default(cuid())
+  key         PermissionKey @unique
+  name        String
+  description String?
+  category    String
+
+  rolePermissions RolePermission[]
+  userPermissions UserPermission[]
+
+  createdAt DateTime @default(now())
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  role         RoleType
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([role, permissionId])
   @@index([role])
 }
 
-// Standard NextAuth tables (Prisma adapter). Sessions are JWT-based today,
-// but these are kept so OAuth providers can be dropped in without a migration.
+model UserPermission {
+  id           String     @id @default(cuid())
+  userId       String
+  permissionId String
+  granted      Boolean    @default(true)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permissionId])
+  @@index([userId])
+}
+
+// NextAuth tables
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -81,48 +175,96 @@ model VerificationToken {
 }
 
 // ---------------------------------------------------------------------------
-// Arenas (events)
+// 2. Arenas (events)
 // ---------------------------------------------------------------------------
+
+enum MarketCategory {
+  CRYPTO_PRICE
+  CAMPUS_EVENT
+  CUSTOM_TRIVIA
+}
 
 enum EventStatus {
   DRAFT
   LOBBY
   LIVE
+  PAUSED
   ENDED
+  ARCHIVED
 }
 
 model Event {
-  id              String      @id @default(cuid())
-  code            String      @unique
-  name            String
-  description     String?
-  hostName        String?
-  organizerId     String
-  asset           String      @default("BTCUSDT")
-  roundDurationSec Int        @default(300)
-  lockBufferSec   Int         @default(30)
-  totalRounds     Int         @default(12)
-  startingBalance Float       @default(1000)
-  liquidityParamB Float       @default(40)
-  maxStakePerTrade Float      @default(250)
-  status          EventStatus @default(DRAFT)
-  currentRound    Int         @default(0)
-  scheduledFor    DateTime?
-  startedAt       DateTime?
-  endsAt          DateTime?
-  resolvedOutcome Outcome?
-  resolvedAt      DateTime?
-  resolvedById    String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id                   String          @id @default(cuid())
+  code                 String          @unique
+  name                 String
+  description          String?
+  hostName             String?
+  organizerId          String
+  marketCategory       MarketCategory  @default(CRYPTO_PRICE)
+  question             String?
+  resolutionCriteria   String?
+  isManualResolution   Boolean         @default(false)
+  collegeName          String?
+  collegeLogoUrl       String?
+  themeColor           String?
+  enableBots           Boolean         @default(false)
+  botIntensity         String          @default("BALANCED")
+  asset                String          @default("BTCUSDT")
+  roundDurationSec     Int             @default(300)
+  lockBufferSec        Int             @default(30)
+  totalRounds          Int             @default(12)
+  startingBalance      Float           @default(1000)
+  liquidityParamB      Float           @default(40)
+  maxStakePerTrade     Float           @default(250)
+  status               EventStatus     @default(DRAFT)
+  currentRound         Int             @default(0)
+  scheduledFor         DateTime?
+  startedAt            DateTime?
+  endsAt               DateTime?
+  resolvedOutcome      Outcome?
+  resolvedAt           DateTime?
+  resolvedById         String?
+  tradesPerMinuteLimit Int?            @default(0)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
 
-  organizer    User               @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
-  participants EventParticipant[]
-  rounds       Round[]
-  trades       Trade[]
+  organizer     User               @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+  participants  EventParticipant[]
+  rounds        Round[]
+  trades        Trade[]
+  ledgerEntries PointLedger[]
 
   @@index([status, scheduledFor])
   @@index([organizerId])
+  @@index([code])
+}
+
+enum OrganizerRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model OrganizerRequest {
+  id              String                 @id @default(cuid())
+  userId          String
+  collegeName     String
+  clubName        String?
+  designation     String?
+  contactPhone    String?
+  eventDetails    String?
+  status          OrganizerRequestStatus @default(PENDING)
+  reviewedById    String?
+  reviewedAt      DateTime?
+  rejectionReason String?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  user     User  @relation("UserOrganizerRequests", fields: [userId], references: [id], onDelete: Cascade)
+  reviewer User? @relation("ReviewerOrganizerRequests", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([userId])
 }
 
 model EventParticipant {
@@ -133,16 +275,18 @@ model EventParticipant {
   joinedAt  DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  event  Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  trades Trade[]
+  event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades        Trade[]
+  ledgerEntries PointLedger[]
 
   @@unique([eventId, userId])
   @@index([eventId, balance])
+  @@index([userId])
 }
 
 // ---------------------------------------------------------------------------
-// Rounds
+// 3. Rounds
 // ---------------------------------------------------------------------------
 
 enum RoundStatus {
@@ -158,10 +302,17 @@ enum Outcome {
   VOID
 }
 
+enum SubmissionRuleMode {
+  UNLIMITED_WITH_BALANCE
+  TIME_LIMITED
+  RATE_LIMITED
+}
+
 model Round {
   id          String      @id @default(cuid())
   eventId     String
   roundNumber Int
+  question    String?
   openPrice   Float?
   closePrice  Float?
   outcome     Outcome?
@@ -176,6 +327,9 @@ model Round {
   resolvesAt DateTime?
   resolvedAt DateTime?
 
+  submissionMode     SubmissionRuleMode @default(UNLIMITED_WITH_BALANCE)
+  submissionClosesAt DateTime?
+
   voidReason String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -187,13 +341,23 @@ model Round {
   @@index([eventId, status])
 }
 
+// ---------------------------------------------------------------------------
+// 4. Trades & Predictions
+// ---------------------------------------------------------------------------
+
 enum Side {
   YES
   NO
 }
 
+enum TradeStatus {
+  FILLED
+  SETTLED
+  REFUNDED
+}
+
 model Trade {
-  id            String   @id @default(cuid())
+  id            String      @id @default(cuid())
   eventId       String
   roundId       String
   userId        String
@@ -203,16 +367,95 @@ model Trade {
   cost          Float
   priceAtFill   Float
   payout        Float?
+  status        TradeStatus @default(FILLED)
   settledAt     DateTime?
-  createdAt     DateTime @default(now())
+  createdAt     DateTime    @default(now())
 
-  event       Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  round       Round            @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  participant EventParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  event         Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  round         Round            @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  participant   EventParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  ledgerEntries PointLedger[]
 
-  @@unique([roundId, userId])
   @@index([roundId, createdAt])
   @@index([participantId])
   @@index([eventId, userId])
+}
+
+// ---------------------------------------------------------------------------
+// 5. Point Accounting Ledger
+// ---------------------------------------------------------------------------
+
+enum LedgerEntryType {
+  INITIAL_BALANCE
+  PREDICTION_STAKE
+  PREDICTION_PAYOUT
+  PREDICTION_REFUND
+  ADMIN_ADJUSTMENT
+  SYSTEM_CORRECTION
+}
+
+model PointLedger {
+  id            String          @id @default(cuid())
+  eventId       String
+  participantId String
+  userId        String
+  tradeId       String?
+  type          LedgerEntryType
+  amount        Float           // positive for credit, negative for debit
+  balanceBefore Float
+  balanceAfter  Float
+  reason        String?
+  actorId       String?         // Admin/System who authorized adjustment
+  createdAt     DateTime        @default(now())
+
+  event       Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  participant EventParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  user        User             @relation("UserLedger", fields: [userId], references: [id], onDelete: Cascade)
+  trade       Trade?           @relation(fields: [tradeId], references: [id], onDelete: SetNull)
+
+  @@index([participantId, createdAt])
+  @@index([eventId, createdAt])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// 6. Append-Only Audit Logging
+// ---------------------------------------------------------------------------
+
+enum AuditAction {
+  USER_LOGIN
+  USER_SUSPENDED
+  USER_ACTIVATED
+  ROLE_CHANGED
+  PERMISSIONS_UPDATED
+  ARENA_CREATED
+  ARENA_UPDATED
+  ARENA_DELETED
+  ARENA_STATUS_CHANGED
+  ROUND_STARTED
+  ROUND_LOCKED
+  ROUND_RESOLVED
+  POINTS_MANUALLY_ADJUSTED
+  SYSTEM_SETTINGS_UPDATED
+}
+
+model AuditLog {
+  id           String      @id @default(cuid())
+  actorId      String?
+  action       AuditAction
+  resourceType String
+  resourceId   String?
+  ipAddress    String?
+  userAgent    String?
+  previousData Json?
+  newData      Json?
+  metadata     Json?
+  createdAt    DateTime    @default(now())
+
+  actor User? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([resourceType, resourceId])
+  @@index([actorId, createdAt])
+  @@index([action, createdAt])
 }

@@ -1,5 +1,5 @@
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import type { Role } from '@prisma/client';
+import { RoleType, UserStatus } from '@/generated/client';
 import bcrypt from 'bcryptjs';
 import type { NextAuthOptions } from 'next-auth';
 import { getServerSession } from 'next-auth';
@@ -7,12 +7,8 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import type { Adapter } from 'next-auth/adapters';
 
 import { prisma } from '@/lib/prisma';
+import { createAuditLog } from '@/lib/audit';
 
-/**
- * bcrypt work factor. 12 is the floor stated in the security requirements;
- * raising it later only affects newly hashed passwords, and existing hashes
- * keep verifying because the cost is embedded in the hash itself.
- */
 export const BCRYPT_COST = 12;
 
 export function hashPassword(password: string): Promise<string> {
@@ -24,10 +20,7 @@ export function verifyPassword(password: string, hash: string): Promise<boolean>
 }
 
 export const authOptions: NextAuthOptions = {
-  // The adapter keeps the standard NextAuth tables in place so an OAuth
-  // provider can be added later without a schema change. Credentials logins
-  // themselves are necessarily JWT-backed.
-  adapter: PrismaAdapter(prisma) as Adapter,
+  adapter: PrismaAdapter(prisma as never) as Adapter,
   session: {
     strategy: 'jwt',
     maxAge: 60 * 60 * 24 * 30,
@@ -50,8 +43,6 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({ where: { email } });
 
-        // Always run a comparison, even when the account does not exist, so the
-        // response time does not reveal which emails are registered.
         const hash =
           user?.passwordHash ??
           '$2a$12$0000000000000000000000000000000000000000000000000000';
@@ -59,12 +50,30 @@ export const authOptions: NextAuthOptions = {
 
         if (!user || !valid) return null;
 
-        // Never return the hash — this object becomes the JWT payload seed.
+        // Block suspended or deactivated accounts from signing in
+        if (user.status === UserStatus.SUSPENDED || user.status === UserStatus.DEACTIVATED) {
+          return null;
+        }
+
+        // Track last login timestamp asynchronously
+        void prisma.user.update({
+          where: { id: user.id },
+          data: { lastLoginAt: new Date() },
+        }).catch(() => {});
+
+        void createAuditLog({
+          actorId: user.id,
+          action: 'USER_LOGIN',
+          resourceType: 'USER',
+          resourceId: user.id,
+        });
+
         return {
           id: user.id,
           name: user.name,
           email: user.email,
           role: user.role,
+          status: user.status,
         };
       },
     }),
@@ -73,19 +82,19 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as { role?: Role }).role ?? 'PARTICIPANT';
+        token.role = (user as { role?: RoleType }).role ?? RoleType.PARTICIPANT;
+        token.status = (user as { status?: UserStatus }).status ?? UserStatus.ACTIVE;
       }
 
-      // Refresh the role from the database when the client calls update(), so a
-      // promotion to ORGANIZER takes effect without forcing a re-login.
       if (trigger === 'update' && token.id) {
         const fresh = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true, name: true },
+          select: { role: true, name: true, status: true },
         });
         if (fresh) {
           token.role = fresh.role;
           token.name = fresh.name;
+          token.status = fresh.status;
         }
       }
 
@@ -94,7 +103,8 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.role = (token.role as Role) ?? 'PARTICIPANT';
+        session.user.role = (token.role as RoleType) ?? RoleType.PARTICIPANT;
+        session.user.status = (token.status as UserStatus) ?? UserStatus.ACTIVE;
       }
       return session;
     },
@@ -103,11 +113,10 @@ export const authOptions: NextAuthOptions = {
   debug: false,
 };
 
-/** Server-side session helper. Use this, never a client-side role check. */
 export function auth() {
   return getServerSession(authOptions);
 }
 
-export function isOrganizer(role: Role | undefined | null): boolean {
-  return role === 'ORGANIZER' || role === 'SUPERADMIN';
+export function isOrganizer(role: RoleType | undefined | null): boolean {
+  return role === RoleType.ORGANIZER || role === RoleType.ADMIN || role === RoleType.SUPERADMIN;
 }

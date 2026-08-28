@@ -19,7 +19,7 @@ export interface ProfileArena {
     code: string;
     name: string;
     asset: string;
-    status: 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED';
+    status: 'DRAFT' | 'LOBBY' | 'LIVE' | 'PAUSED' | 'ENDED' | 'ARCHIVED';
     resolvedOutcome: 'YES' | 'NO' | 'VOID' | null;
     totalRounds: number;
     currentRound: number;
@@ -37,7 +37,7 @@ export interface UserPredictionItem {
   arenaName: string;
   arenaCode: string;
   arenaAsset: string;
-  arenaStatus: 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED';
+  arenaStatus: 'DRAFT' | 'LOBBY' | 'LIVE' | 'PAUSED' | 'ENDED' | 'ARCHIVED';
   resolvedOutcome: 'YES' | 'NO' | 'VOID' | null;
   roundNumber: number;
   side: 'YES' | 'NO';
@@ -97,7 +97,7 @@ export async function getUserPredictions(userId: string): Promise<UserPrediction
     const isEndedByTime = trade.event.endsAt
       ? new Date(trade.event.endsAt).getTime() <= now
       : false;
-    const effectiveStatus: 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED' =
+    const effectiveStatus =
       trade.event.status === 'ENDED' || isEndedByTime ? 'ENDED' : trade.event.status;
 
     const roundResolved = trade.round.status === 'RESOLVED';

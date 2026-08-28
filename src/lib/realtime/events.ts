@@ -10,7 +10,7 @@
  */
 
 export type RoundStatusWire = 'PENDING' | 'TRADING' | 'LOCKED' | 'RESOLVED';
-export type EventStatusWire = 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED';
+export type EventStatusWire = 'DRAFT' | 'LOBBY' | 'LIVE' | 'PAUSED' | 'ENDED' | 'ARCHIVED';
 export type OutcomeWire = 'YES' | 'NO' | 'VOID';
 
 export interface PricePayload {
@@ -24,6 +24,7 @@ export interface RoundPayload {
   roundNumber: number;
   totalRounds: number;
   status: RoundStatusWire;
+  question?: string | null;
   openPrice: number | null;
   closePrice: number | null;
   outcome: OutcomeWire | null;

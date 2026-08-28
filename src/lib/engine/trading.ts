@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@/generated/client';
 
 import { withKeyedLock } from '@/lib/keyed-lock';
 import {
@@ -37,6 +37,7 @@ export type TradeFailure =
   | 'insufficient-balance'
   | 'stake-too-small'
   | 'stake-too-large'
+  | 'rate-limited'
   | 'contention';
 
 export interface TradeSuccess {
@@ -199,6 +200,33 @@ async function placeTradeUnlocked(input: PlaceTradeInput): Promise<TradeResult> 
     };
   }
 
+  if (participant.balance <= 0) {
+    return {
+      ok: false,
+      reason: 'insufficient-balance',
+      message: 'You have 0 points remaining. You cannot submit any more trades.',
+    };
+  }
+
+  // Check organizer-configured trades per minute limit
+  if (event.tradesPerMinuteLimit && event.tradesPerMinuteLimit > 0) {
+    const oneMinuteAgo = new Date(Date.now() - 60_000);
+    const recentTradesCount = await prisma.trade.count({
+      where: {
+        eventId,
+        userId,
+        createdAt: { gte: oneMinuteAgo },
+      },
+    });
+    if (recentTradesCount >= event.tradesPerMinuteLimit) {
+      return {
+        ok: false,
+        reason: 'rate-limited',
+        message: `Submission limit reached: Maximum ${event.tradesPerMinuteLimit} trades per minute allowed by organizer.`,
+      };
+    }
+  }
+
   for (let attempt = 0; attempt < MAX_CONTENTION_RETRIES; attempt += 1) {
     const round = await prisma.round.findUnique({
       where: { eventId_roundNumber: { eventId, roundNumber: event.currentRound } },
@@ -223,18 +251,6 @@ async function placeTradeUnlocked(input: PlaceTradeInput): Promise<TradeResult> 
         ok: false,
         reason: 'round-locked',
         message: 'Trading is closed for this round.',
-      };
-    }
-
-    // Lock Prediction: Check if this user already submitted a prediction in this round
-    const existingTrade = await prisma.trade.findFirst({
-      where: { roundId: round.id, userId },
-    });
-    if (existingTrade) {
-      return {
-        ok: false,
-        reason: 'round-locked',
-        message: 'Your prediction for this round is already submitted and locked.',
       };
     }
 
@@ -272,14 +288,6 @@ async function placeTradeUnlocked(input: PlaceTradeInput): Promise<TradeResult> 
     }
 
     const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      // Transactional anti-double-voting check
-      const duplicateInTx = await tx.trade.findFirst({
-        where: { roundId: round.id, userId },
-      });
-      if (duplicateInTx) {
-        return { kind: 'already-predicted' as const };
-      }
-
       // Balance is re-checked inside the transaction against the live row.
       const freshParticipant = await tx.eventParticipant.findUniqueOrThrow({
         where: { id: participant.id },
@@ -323,20 +331,27 @@ async function placeTradeUnlocked(input: PlaceTradeInput): Promise<TradeResult> 
         },
       });
 
+      // Record immutable double-entry ledger record
+      await tx.pointLedger.create({
+        data: {
+          eventId,
+          participantId: participant.id,
+          userId,
+          tradeId: trade.id,
+          type: 'PREDICTION_STAKE',
+          amount: -quote.cost,
+          balanceBefore: freshParticipant.balance,
+          balanceAfter: updatedParticipant.balance,
+          reason: `Staked ${quote.cost.toFixed(2)} pts on ${side}`,
+        },
+      });
+
       return {
         kind: 'filled' as const,
         trade,
         balance: updatedParticipant.balance,
       };
     });
-
-    if (result.kind === 'already-predicted') {
-      return {
-        ok: false,
-        reason: 'round-locked',
-        message: 'Your prediction for this round is already submitted and locked.',
-      };
-    }
 
     if (result.kind === 'insufficient') {
       return {

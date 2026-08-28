@@ -15,8 +15,19 @@ export default function LandingPage() {
     <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex flex-col antialiased">
       {/* TopNavBar */}
       <nav className="bg-[rgba(20,20,20,0.7)] backdrop-blur-xl border-b border-[#27272A] sticky top-0 flex justify-between items-center h-16 px-6 z-50">
-        <div className="flex items-center gap-4">
-          <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
+        <div className="flex items-center gap-6">
+          <Link href="/" className="font-['Geist'] text-2xl font-black text-white hover:text-white transition-colors">
+            Arenas
+          </Link>
+          <div className="hidden sm:flex items-center gap-4 text-xs font-['Epilogue'] font-bold">
+            <Link href="/markets" className="text-[#a1a1aa] hover:text-white transition-colors">
+              Explore Markets
+            </Link>
+            <Link href="/host" className="text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">
+              <span className="material-symbols-outlined text-[14px]">school</span>
+              Host on Campus
+            </Link>
+          </div>
         </div>
         <SiteNavAuth />
       </nav>
