@@ -34,7 +34,7 @@ export function Leaderboard({
   }
 
   return (
-    <ol className={cx('flex flex-col', isDisplay ? 'gap-2' : 'gap-1.5')}>
+    <ol className={cx('flex flex-col', isDisplay ? 'gap-1.5' : 'gap-1')}>
       {entries.map((entry) => (
         <LeaderboardRow
           key={entry.participantId}
@@ -65,8 +65,8 @@ function LeaderboardRow({
   return (
     <li
       className={cx(
-        'flex items-center gap-3 rounded border transition-colors',
-        isDisplay ? 'px-5 py-3.5' : 'px-3 py-2.5',
+        'flex items-center gap-2.5 rounded-lg border transition-colors',
+        isDisplay ? 'px-3.5 py-2' : 'px-2.5 py-1.5',
         highlighted
           ? 'border-accent/60 bg-accent/10 shadow-[0_0_20px_-8px_rgba(61,155,255,0.7)]'
           : medal
@@ -77,7 +77,7 @@ function LeaderboardRow({
       <span
         className={cx(
           'font-display tnum flex shrink-0 items-center justify-center rounded font-bold',
-          isDisplay ? 'h-11 w-11 text-2xl' : 'h-7 w-7 text-sm',
+          isDisplay ? 'h-7 w-7 text-xs' : 'h-6 w-6 text-xs',
           entry.rank === 1 && 'bg-warn/20 text-warn shadow-[0_0_14px_-4px_rgba(255,176,32,0.8)]',
           entry.rank === 2 && 'bg-fg-muted/20 text-fg-muted',
           entry.rank === 3 && 'bg-[#b06a3b]/25 text-[#d08a55]',
@@ -91,8 +91,8 @@ function LeaderboardRow({
 
       <span
         className={cx(
-          'min-w-0 flex-1 truncate font-semibold',
-          isDisplay ? 'text-3xl' : 'text-sm',
+          'min-w-0 flex-1 truncate font-["Geist"] font-semibold text-white',
+          isDisplay ? 'text-sm' : 'text-xs',
         )}
       >
         {entry.displayName}
@@ -101,8 +101,8 @@ function LeaderboardRow({
       {showPnl && entry.lastRoundPnl !== 0 ? (
         <span
           className={cx(
-            'tnum shrink-0 font-semibold',
-            isDisplay ? 'text-2xl' : 'text-xs',
+            'tnum shrink-0 font-semibold font-mono',
+            isDisplay ? 'text-xs' : 'text-[11px]',
             entry.lastRoundPnl > 0 ? 'text-yes' : 'text-no',
           )}
         >
@@ -112,11 +112,11 @@ function LeaderboardRow({
 
       <span
         className={cx(
-          'tnum shrink-0 font-bold tabular-nums',
-          isDisplay ? 'w-40 text-right text-3xl' : 'w-20 text-right text-sm',
+          'tnum shrink-0 font-bold tabular-nums font-mono',
+          isDisplay ? 'w-24 text-right text-sm text-white' : 'w-20 text-right text-xs',
         )}
       >
-        {formatPoints(entry.balance, isDisplay ? 0 : 2)}
+        {formatPoints(entry.balance, 0)}
       </span>
     </li>
   );

@@ -1,110 +1,100 @@
 'use client';
 
 /**
- * Switch Button with rotating sun icon and shimmer hover effect.
- * Built with React and Tailwind CSS.
+ * Switch Button — Sleek circular theme toggle icon button.
+ * Built with React, Lucide icons, and next-themes.
  */
 
-import { Sun } from 'lucide-react';
-import { useState } from 'react';
+import { Moon, Sun } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
 
 interface SwitchButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'minimal';
   size?: 'sm' | 'default' | 'lg';
   showLabel?: boolean;
 }
 
 export function SwitchButton({
   className,
-  variant = 'minimal',
   size = 'default',
-  showLabel = true,
+  showLabel = false,
   ...props
 }: SwitchButtonProps) {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const currentTheme = mounted ? (resolvedTheme || theme || 'dark') : 'dark';
+  const isDark = currentTheme === 'dark';
 
   const handleThemeToggle = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-    if (typeof document !== 'undefined') {
-      if (next === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    }
+    setTheme(isDark ? 'light' : 'dark');
   };
 
-  const variants = {
-    minimal: [
-      'rounded-lg',
-      'bg-gradient-to-b from-[#27272A] to-[#18181B]',
-      'hover:from-[#3f3f46] hover:to-[#27272A]',
-      'border border-[#3f3f46]',
-      'shadow-[0_1px_3px_rgb(0,0,0,0.4)]',
-      'hover:shadow-[0_2px_6px_rgb(0,0,0,0.6)]',
-      'transition-all duration-200 ease-out',
-      'backdrop-blur-sm',
-      'relative',
-    ],
+  const sizeClasses = {
+    sm: 'w-7 h-7',
+    default: 'w-8 h-8',
+    lg: 'w-9 h-9',
   };
 
-  const sizes = {
-    sm: 'h-8 px-3 text-xs',
-    default: 'h-9 px-4 text-xs',
-    lg: 'h-10 px-5 text-sm',
+  const iconSizes = {
+    sm: 'h-3.5 w-3.5',
+    default: 'h-4 w-4',
+    lg: 'h-4.5 w-4.5',
   };
+
+  if (!mounted) {
+    return (
+      <div
+        className={cn(
+          'rounded-full border border-[#27272A] bg-[#201f1f] opacity-50 shrink-0',
+          sizeClasses[size],
+          className
+        )}
+      />
+    );
+  }
 
   return (
     <button
       className={cn(
-        'group relative overflow-hidden inline-flex items-center justify-center font-["Epilogue"] font-bold cursor-pointer',
-        'transition-all duration-300 ease-out',
-        'text-[#c4c7c8]',
-        'hover:text-white',
-        variants[variant],
-        sizes[size],
+        'group relative rounded-full border border-[#27272A] bg-[#201f1f] hover:bg-[#2a2a2a] hover:border-[#3f3f46]',
+        'flex items-center justify-center cursor-pointer transition-all duration-300 shadow-sm shrink-0',
+        sizeClasses[size],
         className
       )}
       onClick={handleThemeToggle}
+      title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+      aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
       type="button"
       {...props}
     >
-      <div className="flex items-center gap-2 transition-all duration-300 ease-out z-10">
+      {isDark ? (
         <Sun
           className={cn(
-            'transition-all duration-700 ease-in-out',
-            size === 'sm' && 'h-3.5 w-3.5',
-            size === 'default' && 'h-4 w-4',
-            size === 'lg' && 'h-5 w-5',
-            'group-hover:rotate-[360deg] group-hover:scale-110',
-            theme === 'dark' ? 'rotate-180 text-[#22C55E]' : 'rotate-0 text-amber-400',
-            'transform-gpu'
+            'transition-all duration-500 ease-in-out text-amber-400 group-hover:rotate-90 group-hover:scale-110 transform-gpu',
+            iconSizes[size]
           )}
         />
-        {showLabel && (
-          <span className="relative font-medium capitalize transition-opacity duration-300 ease-out">
-            <span className="text-white">
-              {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
-            </span>
-          </span>
-        )}
-      </div>
+      ) : (
+        <Moon
+          className={cn(
+            'transition-all duration-500 ease-in-out text-blue-500 group-hover:-rotate-45 group-hover:scale-110 transform-gpu',
+            iconSizes[size]
+          )}
+        />
+      )}
 
-      <span
-        className={cn(
-          'absolute inset-0',
-          'bg-gradient-to-r from-transparent via-white/[0.08] to-transparent',
-          'translate-x-[-100%]',
-          'group-hover:translate-x-[100%]',
-          'transition-transform duration-500',
-          'ease-in-out',
-          'pointer-events-none',
-          'z-[1]'
-        )}
-      />
+      {showLabel && (
+        <span className="ml-2 text-xs font-semibold font-['Epilogue']">
+          {isDark ? 'Dark' : 'Light'}
+        </span>
+      )}
     </button>
   );
 }

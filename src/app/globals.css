@@ -17,24 +17,40 @@
 
   html {
     -webkit-text-size-adjust: 100%;
-    /* Stop iOS rubber-band scrolling from revealing white behind the app. */
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  html.dark {
     background-color: #04060d;
+    color-scheme: dark;
+  }
+
+  html:not(.dark) {
+    background-color: #f8fafc;
+    color-scheme: light;
   }
 
   body {
-    @apply bg-ink-950 text-fg antialiased;
+    @apply antialiased;
     font-family: var(--font-sans);
     /* Prevent the pull-to-refresh gesture from firing mid-round. */
     overscroll-behavior-y: none;
     position: relative;
   }
 
+  html.dark body {
+    @apply bg-ink-950 text-fg;
+  }
+
+  html:not(.dark) body {
+    background-color: #f8fafc;
+    color: #0f172a;
+  }
+
   /**
-   * Atmosphere. Two low-opacity radial glows break the flat black and give the
-   * canvas depth, so the glass planes above have something to float over.
-   * Fixed rather than scrolled — the light source stays put as content moves.
+   * Atmosphere. Low-opacity radial glows break the flat black and give depth.
    */
-  body::before {
+  html.dark body::before {
     content: '';
     position: fixed;
     inset: 0;
@@ -43,6 +59,95 @@
     background:
       radial-gradient(60rem 40rem at 82% 12%, rgba(61, 155, 255, 0.1), transparent 62%),
       radial-gradient(48rem 36rem at 12% 82%, rgba(0, 232, 150, 0.055), transparent 62%);
+  }
+
+  html:not(.dark) body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(60rem 40rem at 82% 12%, rgba(61, 155, 255, 0.08), transparent 62%),
+      radial-gradient(48rem 36rem at 12% 82%, rgba(0, 232, 150, 0.06), transparent 62%);
+  }
+
+  /* Universal Light Mode System Overrides */
+  html:not(.dark) {
+    color-scheme: light;
+  }
+
+  html:not(.dark) .bg-\[\#131313\],
+  html:not(.dark) .bg-\[\#141414\],
+  html:not(.dark) .bg-\[\#18181B\],
+  html:not(.dark) .bg-\[\#1c1b1b\],
+  html:not(.dark) .bg-ink-950,
+  html:not(.dark) .bg-ink-900,
+  html:not(.dark) .bg-ink-850 {
+    background-color: #ffffff !important;
+  }
+
+  html:not(.dark) .bg-\[\#201f1f\],
+  html:not(.dark) .bg-\[\#2a2a2a\],
+  html:not(.dark) .bg-ink-800,
+  html:not(.dark) .bg-ink-750 {
+    background-color: #f1f5f9 !important;
+  }
+
+  html:not(.dark) .bg-\[rgba\(20\,20\,20\,0\.7\)\],
+  html:not(.dark) .bg-\[rgba\(20\,20\,20\,0\.85\)\],
+  html:not(.dark) .bg-\[rgba\(20\,20\,20\,0\.9\)\],
+  html:not(.dark) .bg-\[rgba\(20\,20\,20\,0\.8\)\],
+  html:not(.dark) .bg-\[rgba\(19\,19\,19\,0\.95\)\],
+  html:not(.dark) .bg-\[rgba\(0\,0\,0\,0\.5\)\] {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(16px) !important;
+  }
+
+  html:not(.dark) .border-\[\#27272A\],
+  html:not(.dark) .border-\[\#3f3f46\],
+  html:not(.dark) .border-white\/\[0\.08\],
+  html:not(.dark) .border-white\/\[0\.1\],
+  html:not(.dark) .border-white\/\[0\.15\],
+  html:not(.dark) .border-white\/\[0\.2\] {
+    border-color: #e2e8f0 !important;
+  }
+
+  html:not(.dark) .text-white {
+    color: #0f172a !important;
+  }
+
+  html:not(.dark) .text-\[\#e5e2e1\],
+  html:not(.dark) .text-\[\#c4c7c8\],
+  html:not(.dark) .text-fg,
+  html:not(.dark) .text-fg-muted {
+    color: #334155 !important;
+  }
+
+  html:not(.dark) .text-\[\#8e9192\],
+  html:not(.dark) .text-\[\#a1a1aa\],
+  html:not(.dark) .text-\[\#71717a\],
+  html:not(.dark) .text-fg-faint {
+    color: #64748b !important;
+  }
+
+  html:not(.dark) input,
+  html:not(.dark) textarea,
+  html:not(.dark) select {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+
+  html:not(.dark) input::placeholder,
+  html:not(.dark) textarea::placeholder {
+    color: #94a3b8 !important;
+  }
+
+  html:not(.dark) .glass-panel {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
   }
 
   /* Tap targets should never flash a grey box on iOS. */

@@ -105,6 +105,16 @@ export function SignInForm() {
             Sign up
           </Link>
         </p>
+
+        <div className="text-center pt-3 mt-1 border-t border-[#27272A]">
+          <Link
+            href="/host"
+            className="font-['Epilogue'] text-xs text-[#a1a1aa] hover:text-white transition-colors inline-flex items-center gap-1.5 group"
+          >
+            <span>Are you an organizer?</span>
+            <span className="text-white font-bold group-hover:underline">Apply for Hosting Access →</span>
+          </Link>
+        </div>
       </form>
     </div>
   );
@@ -117,7 +127,6 @@ export function SignUpForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'PARTICIPANT' | 'ORGANIZER'>('PARTICIPANT');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -130,7 +139,7 @@ export function SignUpForm() {
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({ name, email, password, role: 'PARTICIPANT' }),
       });
 
       if (!res.ok) {
@@ -209,54 +218,6 @@ export function SignUpForm() {
           />
         </div>
 
-        {/* Role Selector */}
-        <div className="mt-2">
-          <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">
-            Select Role
-          </label>
-          <div className="flex flex-col gap-2">
-            {/* Participant Option */}
-            <label
-              onClick={() => setRole('PARTICIPANT')}
-              className={`relative flex cursor-pointer p-4 border rounded-lg bg-[#201f1f] hover:bg-[#2a2a2a] transition-colors group ${
-                role === 'PARTICIPANT' ? 'border-[#22C55E]' : 'border-[#27272A]'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
-                    role === 'PARTICIPANT' ? 'border-[#22C55E] border-[6px]' : 'border-[#8e9192]'
-                  }`}
-                />
-                <div>
-                  <p className="font-['Epilogue'] text-sm font-medium text-white mb-0.5">Participant</p>
-                  <p className="font-['Geist'] text-xs text-[#c4c7c8]">Join markets &amp; trade positions</p>
-                </div>
-              </div>
-            </label>
-
-            {/* Organizer Option */}
-            <label
-              onClick={() => setRole('ORGANIZER')}
-              className={`relative flex cursor-pointer p-4 border rounded-lg bg-[#201f1f] hover:bg-[#2a2a2a] transition-colors group ${
-                role === 'ORGANIZER' ? 'border-white' : 'border-[#27272A]'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
-                    role === 'ORGANIZER' ? 'border-white border-[6px]' : 'border-[#8e9192]'
-                  }`}
-                />
-                <div>
-                  <p className="font-['Epilogue'] text-sm font-medium text-white mb-0.5">Organizer</p>
-                  <p className="font-['Geist'] text-xs text-[#c4c7c8]">Host events &amp; manage liquidity</p>
-                </div>
-              </div>
-            </label>
-          </div>
-        </div>
-
         <ErrorNote>{error}</ErrorNote>
 
         <button
@@ -277,6 +238,16 @@ export function SignUpForm() {
             Sign in
           </Link>
         </p>
+
+        <div className="text-center pt-3 mt-1 border-t border-[#27272A]">
+          <Link
+            href="/host"
+            className="font-['Epilogue'] text-xs text-[#a1a1aa] hover:text-white transition-colors inline-flex items-center gap-1.5 group"
+          >
+            <span>Looking to host campus tournaments?</span>
+            <span className="text-white font-bold group-hover:underline">Apply as Organizer →</span>
+          </Link>
+        </div>
       </form>
     </div>
   );

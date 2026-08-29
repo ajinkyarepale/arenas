@@ -188,19 +188,16 @@ export function BeamsBackground({
   }, [intensity]);
 
   return (
-    <div
-      className={cn(
-        'relative w-full min-h-screen overflow-hidden bg-[#131313]',
-        className
-      )}
-    >
+    <div className="relative w-full min-h-screen overflow-hidden bg-[#131313]">
       {/* Ambient beams canvas */}
       <canvas
         className="pointer-events-none fixed inset-0 z-0 opacity-60"
         ref={canvasRef}
       />
 
-      <div className="relative z-10 w-full min-h-screen flex flex-col">{children}</div>
+      <div className={cn('relative z-10 w-full min-h-screen flex flex-col', className)}>
+        {children}
+      </div>
     </div>
   );
 }

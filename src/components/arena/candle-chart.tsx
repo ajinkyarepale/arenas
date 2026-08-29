@@ -10,19 +10,9 @@ import {
   type ISeriesApi,
   type UTCTimestamp,
 } from 'lightweight-charts';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { Candle } from '@/lib/price/binance';
-
-/**
- * Live candle chart.
- *
- * History comes from the server (which proxies Binance so 200 phones do not all
- * hit the public API), and the in-progress candle is then advanced locally from
- * the price ticks arriving over the socket. History is re-fetched periodically
- * so any drift in the locally-built candle is corrected rather than compounding
- * across a twelve-round event.
- */
 
 const INTERVAL_SECONDS: Record<string, number> = {
   '1m': 60,
@@ -35,112 +25,162 @@ const INTERVAL_SECONDS: Record<string, number> = {
 
 export interface CandleChartProps {
   code: string;
-  /** Round strike, drawn as a horizontal reference line. */
   openPrice?: number | null;
-  /** Latest price tick, used to advance the in-progress candle. */
   livePrice?: number | null;
   height?: number;
-  /** Big-screen mode: larger type, thicker lines, readable across a room. */
   variant?: 'compact' | 'display';
   candleLimit?: number;
+  defaultMode?: 'area' | 'candles';
 }
 
 export function CandleChart({
   code,
   openPrice,
   livePrice,
-  height = 220,
+  height,
   variant = 'compact',
   candleLimit = 90,
+  defaultMode = 'area',
 }: CandleChartProps) {
+  const [chartMode, setChartMode] = useState<'area' | 'candles'>(defaultMode);
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
+  const seriesRef = useRef<ISeriesApi<'Area'> | ISeriesApi<'Candlestick'> | null>(null);
   const priceLineRef = useRef<IPriceLine | null>(null);
   const intervalSecRef = useRef(60);
+  const rawCandlesRef = useRef<Candle[]>([]);
   const lastBarRef = useRef<Candle | null>(null);
 
   const isDisplay = variant === 'display';
+  const priceUp =
+    livePrice != null && openPrice != null ? livePrice >= openPrice : true;
 
-  // Create the chart once.
+  // Build / Re-build Chart & Active Series
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
+    const initialWidth = container.clientWidth || 500;
+    const initialHeight = container.clientHeight || height || 220;
+
     const chart = createChart(container, {
+      width: initialWidth,
+      height: initialHeight,
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
-        textColor: isDisplay ? '#c0c7d5' : '#8a919e',
-        fontSize: isDisplay ? 15 : 11,
-        fontFamily: 'var(--font-sans), system-ui, sans-serif',
+        textColor: isDisplay ? '#a1a1aa' : '#71717a',
+        fontSize: isDisplay ? 11 : 10,
+        fontFamily: "Geist, system-ui, sans-serif",
       },
       grid: {
-        vertLines: { color: 'rgba(61, 155, 255, 0.07)' },
-        horzLines: { color: 'rgba(61, 155, 255, 0.07)' },
+        vertLines: { color: 'rgba(255, 255, 255, 0.04)' },
+        horzLines: { color: 'rgba(255, 255, 255, 0.04)' },
       },
       rightPriceScale: {
-        borderColor: 'rgba(61,155,255,0.14)',
-        scaleMargins: { top: 0.12, bottom: 0.12 },
+        borderColor: 'rgba(255, 255, 255, 0.08)',
+        scaleMargins: { top: 0.15, bottom: 0.15 },
+        autoScale: true,
       },
       timeScale: {
-        borderColor: 'rgba(61,155,255,0.14)',
+        borderColor: 'rgba(255, 255, 255, 0.08)',
         timeVisible: true,
         secondsVisible: false,
-        rightOffset: 3,
+        rightOffset: 6,
       },
       crosshair: {
-        // No crosshair on the projector — nobody is pointing at it, and a
-        // stray touch should not leave a line across the display.
         mode: isDisplay ? CrosshairMode.Hidden : CrosshairMode.Normal,
-        vertLine: { color: '#3d9bff', width: 1, style: LineStyle.Dashed, labelBackgroundColor: '#3d9bff' },
-        horzLine: { color: '#3d9bff', width: 1, style: LineStyle.Dashed, labelBackgroundColor: '#3d9bff' },
+        vertLine: { color: '#22C55E', width: 1, style: LineStyle.Dashed, labelBackgroundColor: '#22C55E' },
+        horzLine: { color: '#22C55E', width: 1, style: LineStyle.Dashed, labelBackgroundColor: '#22C55E' },
       },
-      // Touch devices: let the page scroll rather than trapping the gesture in
-      // the chart. Participants need to scroll past this to reach the buttons.
       handleScroll: isDisplay ? false : { vertTouchDrag: false },
       handleScale: !isDisplay,
-      autoSize: false,
-      width: container.clientWidth,
-      height,
-    });
-
-    const series = chart.addCandlestickSeries({
-      upColor: '#00e896',
-      downColor: '#ff3d64',
-      borderUpColor: '#00e896',
-      borderDownColor: '#ff3d64',
-      wickUpColor: '#00b877',
-      wickDownColor: '#d92a4d',
-      priceLineVisible: false,
-      lastValueVisible: true,
     });
 
     chartRef.current = chart;
-    seriesRef.current = series;
 
-    const resize = () => {
-      if (!containerRef.current) return;
-      chart.applyOptions({
-        width: containerRef.current.clientWidth,
-        height,
+    // Create the appropriate series
+    if (chartMode === 'area') {
+      const area = chart.addAreaSeries({
+        topColor: priceUp ? 'rgba(34, 197, 94, 0.28)' : 'rgba(239, 68, 68, 0.28)',
+        bottomColor: 'rgba(0, 0, 0, 0.0)',
+        lineColor: priceUp ? '#22C55E' : '#EF4444',
+        lineWidth: 2,
+        priceLineVisible: true,
+        lastValueVisible: true,
       });
+      seriesRef.current = area;
+
+      if (rawCandlesRef.current.length > 0) {
+        area.setData(
+          rawCandlesRef.current.map((c) => ({
+            time: c.time as UTCTimestamp,
+            value: c.close,
+          })),
+        );
+        chart.timeScale().fitContent();
+      }
+    } else {
+      const candle = chart.addCandlestickSeries({
+        upColor: '#22C55E',
+        downColor: '#EF4444',
+        borderUpColor: '#22C55E',
+        borderDownColor: '#EF4444',
+        wickUpColor: '#16a34a',
+        wickDownColor: '#dc2626',
+        priceLineVisible: true,
+        lastValueVisible: true,
+      });
+      seriesRef.current = candle;
+
+      if (rawCandlesRef.current.length > 0) {
+        candle.setData(
+          rawCandlesRef.current.map((c) => ({
+            time: c.time as UTCTimestamp,
+            open: c.open,
+            high: c.high,
+            low: c.low,
+            close: c.close,
+          })),
+        );
+        chart.timeScale().fitContent();
+      }
+    }
+
+    // Attach strike price line
+    if (seriesRef.current && openPrice != null && Number.isFinite(openPrice)) {
+      priceLineRef.current = seriesRef.current.createPriceLine({
+        price: openPrice,
+        color: '#71717a',
+        lineWidth: 2,
+        lineStyle: LineStyle.Dashed,
+        axisLabelVisible: true,
+        title: 'OPEN · BEAT THIS',
+      });
+    }
+
+    // Resize observer
+    const handleResize = () => {
+      if (!containerRef.current || !chartRef.current) return;
+      const w = containerRef.current.clientWidth;
+      const h = containerRef.current.clientHeight || height || 200;
+      if (w > 0 && h > 0) {
+        chartRef.current.applyOptions({ width: w, height: h });
+      }
     };
 
-    const observer = new ResizeObserver(resize);
+    const observer = new ResizeObserver(handleResize);
     observer.observe(container);
-    window.addEventListener('orientationchange', resize);
 
     return () => {
       observer.disconnect();
-      window.removeEventListener('orientationchange', resize);
       chart.remove();
       chartRef.current = null;
       seriesRef.current = null;
       priceLineRef.current = null;
     };
-  }, [height, isDisplay]);
+  }, [chartMode, height, isDisplay]);
 
-  // Load (and periodically reload) history.
+  // Load candle history
   useEffect(() => {
     let cancelled = false;
 
@@ -152,42 +192,55 @@ export function CandleChart({
         );
         if (!res.ok) return;
         const data: { interval: string; candles: Candle[] } = await res.json();
-        if (cancelled || !seriesRef.current) return;
+        if (cancelled) return;
 
         intervalSecRef.current = INTERVAL_SECONDS[data.interval] ?? 60;
+        rawCandlesRef.current = data.candles;
         lastBarRef.current = data.candles[data.candles.length - 1] ?? null;
 
-        seriesRef.current.setData(
-          data.candles.map((candle) => ({
-            time: candle.time as UTCTimestamp,
-            open: candle.open,
-            high: candle.high,
-            low: candle.low,
-            close: candle.close,
-          })),
-        );
-        chartRef.current?.timeScale().fitContent();
+        const series = seriesRef.current;
+        if (series) {
+          if (chartMode === 'area') {
+            (series as ISeriesApi<'Area'>).setData(
+              data.candles.map((c) => ({
+                time: c.time as UTCTimestamp,
+                value: c.close,
+              })),
+            );
+          } else {
+            (series as ISeriesApi<'Candlestick'>).setData(
+              data.candles.map((c) => ({
+                time: c.time as UTCTimestamp,
+                open: c.open,
+                high: c.high,
+                low: c.low,
+                close: c.close,
+              })),
+            );
+          }
+          chartRef.current?.timeScale().fitContent();
+        }
       } catch {
-        // Chart history is cosmetic — the round still resolves off the server's
-        // own price sampling, so a failed fetch just leaves the chart sparse.
+        // Cosmetic history failover
       }
     };
 
     void load();
     const timer = setInterval(() => {
       if (document.visibilityState === 'visible') void load();
-    }, 30_000);
+    }, 20_000);
 
     return () => {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [code, candleLimit]);
+  }, [code, candleLimit, chartMode]);
 
-  // Advance the in-progress candle from live ticks.
+  // Advance live ticks
   useEffect(() => {
+    if (livePrice == null || !Number.isFinite(livePrice)) return;
     const series = seriesRef.current;
-    if (!series || livePrice == null || !Number.isFinite(livePrice)) return;
+    if (!series) return;
 
     const intervalSec = intervalSecRef.current;
     const bucket = Math.floor(Date.now() / 1000 / intervalSec) * intervalSec;
@@ -202,7 +255,13 @@ export function CandleChart({
         close: livePrice,
       };
       lastBarRef.current = bar;
-      series.update({ ...bar, time: bar.time as UTCTimestamp });
+      rawCandlesRef.current = [...rawCandlesRef.current, bar];
+
+      if (chartMode === 'area') {
+        (series as ISeriesApi<'Area'>).update({ time: bucket as UTCTimestamp, value: livePrice });
+      } else {
+        (series as ISeriesApi<'Candlestick'>).update({ ...bar, time: bar.time as UTCTimestamp });
+      }
       return;
     }
 
@@ -214,11 +273,16 @@ export function CandleChart({
         close: livePrice,
       };
       lastBarRef.current = bar;
-      series.update({ ...bar, time: bar.time as UTCTimestamp });
-    }
-  }, [livePrice]);
 
-  // The strike line: everything above it is a YES, everything at or below a NO.
+      if (chartMode === 'area') {
+        (series as ISeriesApi<'Area'>).update({ time: bucket as UTCTimestamp, value: livePrice });
+      } else {
+        (series as ISeriesApi<'Candlestick'>).update({ ...bar, time: bar.time as UTCTimestamp });
+      }
+    }
+  }, [livePrice, chartMode]);
+
+  // Strike line sync
   useEffect(() => {
     const series = seriesRef.current;
     if (!series) return;
@@ -231,16 +295,46 @@ export function CandleChart({
     if (openPrice != null && Number.isFinite(openPrice)) {
       priceLineRef.current = series.createPriceLine({
         price: openPrice,
-        color: '#3d9bff',
-        lineWidth: isDisplay ? 3 : 2,
+        color: '#71717a',
+        lineWidth: 2,
         lineStyle: LineStyle.Dashed,
         axisLabelVisible: true,
-        title: 'OPEN',
+        title: 'OPEN · BEAT THIS',
       });
     }
-  }, [openPrice, isDisplay]);
+  }, [openPrice]);
 
-  return <div ref={containerRef} className="w-full" style={{ height }} />;
+  return (
+    <div className="relative w-full h-full flex flex-col min-h-0">
+      {/* Mode Controls Bar */}
+      <div className="absolute top-2 right-2 z-20 flex items-center gap-1 bg-black/60 backdrop-blur-md border border-[#27272A] rounded-lg p-0.5">
+        <button
+          type="button"
+          onClick={() => setChartMode('area')}
+          className={`px-2 py-0.5 text-[10px] font-['Epilogue'] font-bold rounded transition-all ${
+            chartMode === 'area'
+              ? 'bg-[#27272A] text-white shadow-sm'
+              : 'text-[#8e9192] hover:text-white'
+          }`}
+        >
+          Line
+        </button>
+        <button
+          type="button"
+          onClick={() => setChartMode('candles')}
+          className={`px-2 py-0.5 text-[10px] font-['Epilogue'] font-bold rounded transition-all ${
+            chartMode === 'candles'
+              ? 'bg-[#27272A] text-white shadow-sm'
+              : 'text-[#8e9192] hover:text-white'
+          }`}
+        >
+          Candles
+        </button>
+      </div>
+
+      <div ref={containerRef} className="w-full flex-1 min-h-[160px]" />
+    </div>
+  );
 }
 
 export default CandleChart;

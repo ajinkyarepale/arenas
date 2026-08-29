@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { useState } from 'react';
 
-import { BeamsBackground, Spinner } from '@/components/ui';
+import { BeamsBackground, Spinner, SwitchButton } from '@/components/ui';
 
 export default function SignOutPage() {
   const router = useRouter();
@@ -33,19 +33,33 @@ export default function SignOutPage() {
   };
 
   return (
-    <BeamsBackground intensity="medium" className="min-h-screen flex items-center justify-center text-[#e5e2e1] font-['Geist'] text-sm py-12 px-4">
-      <div className="relative z-10 w-full max-w-md">
-        {/* Brand Header */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-block group">
-            <h1 className="font-['Geist'] text-4xl text-white font-bold tracking-tight group-hover:opacity-90 transition-opacity">
-              Arena
-            </h1>
-            <p className="font-['Geist'] text-xs uppercase tracking-widest text-[#c4c7c8] mt-1 font-semibold">
-              Live Prediction Platform
-            </p>
-          </Link>
-        </div>
+    <BeamsBackground intensity="medium" className="min-h-screen flex flex-col text-[#e5e2e1] font-['Geist'] text-sm">
+      {/* Top Header */}
+      <header className="w-full flex items-center justify-between p-6 z-20">
+        <Link
+          href="/"
+          className="font-['Geist'] text-xl font-black text-white hover:text-[#22C55E] transition-colors flex items-center gap-2"
+        >
+          <span>←</span>
+          <span>Arenas</span>
+        </Link>
+        <SwitchButton size="default" />
+      </header>
+
+      {/* Centered Card */}
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 my-auto">
+        <div className="relative z-10 w-full max-w-md">
+          {/* Brand Header */}
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-block group">
+              <h1 className="font-['Geist'] text-4xl text-white font-bold tracking-tight group-hover:opacity-90 transition-opacity">
+                Arena
+              </h1>
+              <p className="font-['Geist'] text-xs uppercase tracking-widest text-[#c4c7c8] mt-1 font-semibold">
+                Live Prediction Platform
+              </p>
+            </Link>
+          </div>
 
         {/* Card Container */}
         <div className="bg-[rgba(20,20,20,0.85)] backdrop-blur-2xl border border-[#27272A] rounded-2xl p-7 sm:p-8 shadow-2xl relative overflow-hidden">
@@ -173,6 +187,7 @@ export default function SignOutPage() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </BeamsBackground>
   );

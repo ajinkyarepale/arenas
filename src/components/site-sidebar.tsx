@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
+import { SwitchButton } from '@/components/ui';
 
 export function SiteSidebar() {
   const pathname = usePathname();
@@ -49,16 +50,19 @@ export function SiteSidebar() {
             Market
           </span>
         </Link>
-        <button
-          type="button"
-          onClick={() => setMobileOpen((prev) => !prev)}
-          className="p-2 rounded-lg text-[#c4c7c8] hover:text-white hover:bg-[#201f1f] border border-transparent hover:border-[#27272A] transition-colors flex items-center justify-center"
-          aria-label={mobileOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
-        >
-          <span className="material-symbols-outlined text-2xl">
-            {mobileOpen ? 'close' : 'menu'}
-          </span>
-        </button>
+        <div className="flex items-center gap-2">
+          <SwitchButton size="sm" showLabel={false} />
+          <button
+            type="button"
+            onClick={() => setMobileOpen((prev) => !prev)}
+            className="p-2 rounded-lg text-[#c4c7c8] hover:text-white hover:bg-[#201f1f] border border-transparent hover:border-[#27272A] transition-colors flex items-center justify-center"
+            aria-label={mobileOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
+          >
+            <span className="material-symbols-outlined text-2xl">
+              {mobileOpen ? 'close' : 'menu'}
+            </span>
+          </button>
+        </div>
       </header>
 
       {/* Mobile Backdrop Overlay */}
@@ -98,31 +102,27 @@ export function SiteSidebar() {
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
-            className="md:hidden p-1.5 rounded-lg text-[#c4c7c8] hover:text-white hover:bg-[#201f1f] transition-colors"
-            title="Close navigation"
+            className="md:hidden p-1 text-[#c4c7c8] hover:text-white"
+            aria-label="Close Sidebar"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            <span className="material-symbols-outlined text-xl">close</span>
           </button>
-
           <button
             type="button"
-            onClick={() => setCollapsed(!collapsed)}
-            className="hidden md:flex items-center justify-center p-1.5 rounded-lg text-[#c4c7c8] hover:text-white hover:bg-[#2a2a2a] transition-colors ml-auto"
+            onClick={() => setCollapsed((prev) => !prev)}
+            className="hidden md:flex p-1.5 rounded-lg text-[#c4c7c8] hover:text-white hover:bg-[#201f1f] border border-transparent hover:border-[#27272A] transition-colors"
             title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           >
-            <span className="material-symbols-outlined text-[20px]">
+            <span className="material-symbols-outlined text-sm">
               {collapsed ? 'chevron_right' : 'chevron_left'}
             </span>
           </button>
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 space-y-1.5">
+        <nav className="flex flex-col gap-1.5 flex-1">
           {navItems.map((item) => {
-            const active =
-              pathname === item.href ||
-              (item.href !== '/' && pathname.startsWith(`${item.href}/`));
-
+            const active = pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}

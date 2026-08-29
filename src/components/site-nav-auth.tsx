@@ -2,13 +2,15 @@
 
 import Link from 'next/link';
 import { signOut, useSession } from 'next-auth/react';
+import { SwitchButton } from '@/components/ui';
 
 export function SiteNavAuth() {
   const { data: session, status } = useSession();
 
   if (status === 'loading') {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+        <SwitchButton size="default" />
         <div className="w-16 h-8 rounded-full bg-[#201f1f] animate-pulse" />
       </div>
     );
@@ -17,6 +19,7 @@ export function SiteNavAuth() {
   if (session?.user) {
     return (
       <div className="flex items-center gap-3">
+        <SwitchButton size="default" />
         <Link
           href="/dashboard"
           className="flex items-center gap-2 text-sm font-semibold text-white hover:text-[#22C55E] transition-colors"
@@ -41,6 +44,7 @@ export function SiteNavAuth() {
 
   return (
     <div className="flex items-center gap-3">
+      <SwitchButton size="default" />
       <Link
         href="/signin"
         className="text-sm font-semibold text-[#c4c7c8] hover:text-white transition-colors"

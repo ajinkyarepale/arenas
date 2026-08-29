@@ -6,10 +6,10 @@ import { useEffect, useState } from 'react';
 import { Leaderboard } from '@/components/arena/leaderboard';
 import { ArenaQRCodeCard } from '@/components/arena/arena-share-modal';
 import { ProbabilityBar, ProbabilityTrace } from '@/components/arena/probability';
-import { RoundTimer, roundPhase } from '@/components/arena/round-timer';
+import { roundPhase } from '@/components/arena/round-timer';
 import { TradeTape } from '@/components/arena/trade-tape';
-import { useArena } from '@/hooks/use-arena';
-import { cx, formatPoints, formatPrice, formatProbability } from '@/lib/format';
+import { useArena, useCountdown } from '@/hooks/use-arena';
+import { cx, formatCountdown, formatPoints, formatPrice, formatProbability } from '@/lib/format';
 import type { ArenaPublicInfo } from '@/lib/engine/snapshot';
 
 const CandleChart = dynamic(
@@ -35,95 +35,101 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
   const status = arena?.status ?? info.status;
   const currentRound = arena?.currentRound ?? info.currentRound;
   const priceYes = round?.priceYes ?? 0.5;
-  const phase = roundPhase(round, Date.now() + clockOffsetMs);
 
   const priceUp =
-    price?.price != null && round?.openPrice != null ? price.price > round.openPrice : null;
-
+    price?.price != null && round?.openPrice != null ? price.price >= round.openPrice : null;
   const isCustomMarket = info.marketCategory !== 'CRYPTO_PRICE';
   const customQuestion = round?.question || info.question;
+  const delta =
+    price?.price != null && round?.openPrice != null ? price.price - round.openPrice : null;
 
   return (
-    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#131313] text-[#e5e2e1] font-['Geist'] p-4 xl:p-6 antialiased">
-      {/* Header */}
-      <header className="relative flex shrink-0 items-center justify-between gap-6 border-b border-[#27272A] pb-4">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#22C55E] tracking-widest uppercase">
+    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#0a0a0c] text-[#e5e2e1] font-['Geist'] p-3 xl:p-4 antialiased">
+      {/* Header with Centered Broadcast Countdown Timer */}
+      <header className="relative flex shrink-0 items-center justify-between gap-4 border-b border-[#27272A] pb-2.5 mb-1.5">
+        {/* Left: Event & Join Code Info */}
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#18181b] border border-[#27272A] font-['Epilogue'] text-[9px] font-bold text-[#22C55E] tracking-widest uppercase">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
               {isCustomMarket ? 'CAMPUS PREDICTION ARENA' : 'BIG SCREEN PROJECTOR VIEW'}
             </div>
             {info.collegeName && (
-              <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8] uppercase tracking-wider">
-                <span className="material-symbols-outlined text-[13px]">school</span>
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#18181b] border border-[#27272A] font-['Epilogue'] text-[9px] font-bold text-[#c4c7c8] uppercase tracking-wider">
+                <span className="material-symbols-outlined text-[11px]">school</span>
                 <span>{info.collegeName}</span>
               </div>
             )}
           </div>
-          <h1 className="font-['Geist'] truncate text-3xl font-bold tracking-tight text-white xl:text-5xl">
+          <h1 className="font-['Geist'] text-lg sm:text-xl font-black tracking-tight text-white xl:text-2xl truncate">
             {info.name}
           </h1>
-          <p className="mt-1 font-['Epilogue'] text-base text-[#c4c7c8] xl:text-xl">
-            {info.hostName ?? info.organizerName} · {isCustomMarket ? 'Custom Market' : info.asset} · Join Code:{' '}
-            <span className="font-mono font-bold text-[#22C55E] tracking-wider">{info.code}</span>
+          <p className="mt-0.5 font-['Epilogue'] text-[11px] text-[#a1a1aa]">
+            {info.hostName ?? info.organizerName} · {isCustomMarket ? 'Custom Market' : info.asset} · Code:{' '}
+            <span className="font-mono font-bold text-[#22C55E] tracking-wider text-xs">{info.code}</span>
           </p>
         </div>
 
-        <div className="flex shrink-0 items-center gap-8">
+        {/* Center: Broadcast Countdown Clock */}
+        <HeaderTimer round={round} clockOffsetMs={clockOffsetMs} />
+
+        {/* Right: Round Counter & Status */}
+        <div className="flex shrink-0 items-center justify-end gap-4 flex-1">
           <div className="text-right">
-            <div className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] uppercase tracking-wider">ROUND</div>
-            <div className="font-['Epilogue'] text-4xl font-bold text-white leading-none xl:text-6xl">
+            <div className="font-['Epilogue'] text-[10px] font-bold text-[#8e9192] uppercase tracking-wider">ROUND</div>
+            <div className="font-['Epilogue'] text-xl sm:text-2xl font-black text-white leading-none xl:text-3xl">
               {currentRound > 0 ? currentRound : '—'}
-              <span className="text-[#8e9192]"> / {info.totalRounds}</span>
+              <span className="text-[#71717a] text-sm xl:text-base font-normal"> / {info.totalRounds}</span>
             </div>
           </div>
           <StatusLamp status={status} connected={connected} />
         </div>
       </header>
 
-      {/* Main Grid */}
-      <main className="relative grid min-h-0 flex-1 grid-cols-1 gap-4 py-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] xl:gap-6">
-        {/* Chart / Question Spotlight Column */}
-        <section className="flex min-h-0 flex-col gap-4">
+      {/* Main Grid: Left Market Visuals (60%) | Right Leaderboard (40%) */}
+      <main className="relative grid min-h-0 flex-1 grid-cols-1 gap-3 py-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] xl:gap-3.5">
+        {/* Left Column: Live Chart + Probability Sentiment */}
+        <section className="flex min-h-0 flex-col gap-2.5 overflow-hidden">
           {isCustomMarket ? (
-            <div className="bg-[rgba(20,20,20,0.85)] border border-[#27272A] backdrop-blur-xl rounded-xl flex min-h-0 flex-1 flex-col justify-between p-6 sm:p-8 shadow-2xl">
-              <div className="flex flex-col gap-4">
+            <div className="bg-[#121215] border border-[#27272A] rounded-xl flex min-h-0 flex-1 flex-col justify-between p-5 shadow-lg">
+              <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full bg-[#201f1f] text-[#c4c7c8] border border-[#27272A] font-['Epilogue'] text-xs font-bold uppercase tracking-widest">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#1c1c20] text-[#c4c7c8] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold uppercase tracking-widest">
                     LIVE PREDICTION QUESTION
                   </span>
-                  <span className="font-['Epilogue'] text-sm text-[#a1a1aa]">
+                  <span className="font-['Epilogue'] text-xs text-[#a1a1aa]">
                     Round {currentRound > 0 ? currentRound : 1} of {info.totalRounds}
                   </span>
                 </div>
 
-                <h2 className="font-['Geist'] text-2xl sm:text-4xl font-extrabold text-white leading-tight mt-2">
+                <h2 className="font-['Geist'] text-xl sm:text-3xl font-extrabold text-white leading-tight mt-1">
                   {customQuestion || info.name}
                 </h2>
 
                 {info.resolutionCriteria && (
-                  <div className="p-4 bg-[#18181b] rounded-xl border border-[#27272a] text-sm text-[#a1a1aa] mt-2">
+                  <div className="p-3 bg-[#18181b] rounded-lg border border-[#27272a] text-xs text-[#a1a1aa]">
                     <strong className="text-white">Resolution Criteria:</strong> {info.resolutionCriteria}
                   </div>
                 )}
               </div>
 
               {/* Large Implied Probability Bar */}
-              <div className="flex flex-col gap-3 pt-6 border-t border-[#27272a]">
+              <div className="flex flex-col gap-2 pt-4 border-t border-[#27272a]">
                 <div className="flex justify-between items-end font-['Epilogue']">
                   <div>
-                    <span className="text-xs text-[#a1a1aa] uppercase font-bold block mb-1">YES ODDS</span>
-                    <span className="font-['Geist'] text-3xl sm:text-5xl font-extrabold text-[#22C55E]">
+                    <span className="text-[11px] text-[#a1a1aa] uppercase font-bold block mb-0.5">YES ODDS</span>
+                    <span className="font-['Geist'] text-2xl sm:text-4xl font-extrabold text-[#22C55E]">
                       {formatProbability(priceYes, 1)}
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs text-[#a1a1aa] uppercase font-bold block mb-1">NO ODDS</span>
-                    <span className="font-['Geist'] text-3xl sm:text-5xl font-extrabold text-[#EF4444]">
+                    <span className="text-[11px] text-[#a1a1aa] uppercase font-bold block mb-0.5">NO ODDS</span>
+                    <span className="font-['Geist'] text-2xl sm:text-4xl font-extrabold text-[#EF4444]">
                       {formatProbability(1 - priceYes, 1)}
                     </span>
                   </div>
                 </div>
-                <div className="h-6 w-full rounded-full bg-[#EF4444]/30 overflow-hidden flex p-1 border border-[#27272a]">
+                <div className="h-4 w-full rounded-full bg-[#EF4444]/30 overflow-hidden flex p-0.5 border border-[#27272a]">
                   <div
                     className="h-full bg-[#22C55E] transition-all duration-500 rounded-full"
                     style={{ width: `${Math.max(5, Math.min(95, priceYes * 100))}%` }}
@@ -132,97 +138,117 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
               </div>
             </div>
           ) : (
-            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl flex min-h-0 flex-1 flex-col p-4">
-              <div className="mb-2 flex items-baseline justify-between">
-                <span className="font-['Epilogue'] text-xs font-bold text-white bg-[#201f1f] px-2.5 py-1 rounded border border-[#27272A]">
-                  {info.asset}
-                </span>
-                <div className="flex items-baseline gap-5 font-['Epilogue']">
-                  <span className="text-sm text-[#c4c7c8]">
-                    Open:{' '}
-                    <span className="font-semibold text-white font-mono">
-                      {formatPrice(round?.openPrice)}
-                    </span>
+            <div className="bg-[#121215] border border-[#27272A] rounded-xl flex min-h-0 flex-[1.15] flex-col p-3 shadow-lg overflow-hidden">
+              {/* Omnibook Style Compact Header */}
+              <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1.5 shrink-0 border-b border-[#27272A]/80 pb-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="font-['Epilogue'] text-xs font-bold text-white bg-[#1c1c20] px-2 py-0.5 rounded border border-[#27272A]">
+                    {info.asset}
                   </span>
+                  <span className="text-[11px] text-[#8e9192] font-['Epilogue']">
+                    Open: <strong className="text-white font-mono">{formatPrice(round?.openPrice)}</strong>
+                  </span>
+                  {delta != null && (
+                    <span
+                      className={cx(
+                        'font-["Epilogue"] text-[10px] px-2 py-0.5 rounded-full font-bold',
+                        priceUp
+                          ? 'bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30'
+                          : 'bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30',
+                      )}
+                    >
+                      {priceUp
+                        ? `YES winning (+${delta.toFixed(2)})`
+                        : `NO winning (-${Math.abs(delta).toFixed(2)})`}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-baseline gap-1.5 font-mono ml-auto">
+                  <span className="text-[10px] text-[#71717a]">Live:</span>
                   <span
                     className={cx(
-                      'font-mono text-3xl font-bold xl:text-4xl',
+                      'text-lg xl:text-xl font-black tracking-tight',
                       priceUp === true ? 'text-[#22C55E]' : priceUp === false ? 'text-[#ef4444]' : 'text-white',
                     )}
                   >
                     {formatPrice(price?.price)}
                   </span>
+                  {delta != null && (
+                    <span
+                      className={cx(
+                        'text-[10px] font-bold font-mono px-1 py-0.5 rounded',
+                        priceUp ? 'text-[#22C55E] bg-[#22C55E]/10' : 'text-[#EF4444] bg-[#EF4444]/10',
+                      )}
+                    >
+                      {priceUp ? `+${delta.toFixed(2)}` : `${delta.toFixed(2)}`}
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="min-h-0 flex-1 rounded-lg overflow-hidden border border-[#27272A] bg-[#141414]">
+
+              {/* Chart Body */}
+              <div className="min-h-0 flex-1 rounded-lg overflow-hidden border border-[#27272A]/70 bg-[#09090b]">
                 <ChartFill code={code} openPrice={round?.openPrice ?? null} livePrice={price?.price ?? null} />
               </div>
             </div>
           )}
 
-          <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl shrink-0 p-4">
-            <div className="mb-2 flex items-center justify-between font-['Epilogue'] text-xs">
+          {/* Probability & Market Sentiment Bottom Card */}
+          <div className="bg-[#121215] border border-[#27272A] rounded-xl p-3 shadow-lg flex min-h-0 flex-1 flex-col justify-between gap-1.5 overflow-hidden">
+            <div className="flex items-center justify-between font-['Epilogue'] text-[11px] border-b border-[#27272A]/80 pb-1 shrink-0">
               <span className="font-bold text-[#c4c7c8] uppercase tracking-wider">
-                Implied Probability This Round
+                Implied Probability Trend
               </span>
-              <span className="text-[#8e9192]">
-                {formatPoints(round?.volume ?? 0, 0)} pts traded · {round?.tradeCount ?? 0} trades
+              <span className="text-[#8e9192] text-[10px]">
+                {formatPoints(round?.volume ?? 0, 0)} pts volume · {round?.tradeCount ?? 0} trades
               </span>
             </div>
-            <ProbabilityTrace value={priceYes} roundId={round?.id ?? null} height={90} />
+
+            {/* Probability Trace Curve */}
+            <div className="min-h-0 flex-1 w-full overflow-hidden flex items-center">
+              <ProbabilityTrace value={priceYes} roundId={round?.id ?? null} height={80} />
+            </div>
+
+            {/* Chance Bar at the bottom */}
+            <div className="flex flex-col gap-1 shrink-0 pt-1 border-t border-[#27272A]/60">
+              <div className="flex justify-between text-[11px] font-['Epilogue'] font-bold">
+                <span className="text-[#22C55E]">YES {formatProbability(priceYes, 1)}</span>
+                <span className="text-[#EF4444]">NO {formatProbability(1 - priceYes, 1)}</span>
+              </div>
+              <div className="h-3 w-full rounded-full bg-[#EF4444]/30 overflow-hidden flex p-0.5 border border-[#27272a]">
+                <div
+                  className="h-full bg-[#22C55E] transition-all duration-300 rounded-full"
+                  style={{ width: `${Math.max(5, Math.min(95, priceYes * 100))}%` }}
+                />
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Numbers + Leaderboard Column */}
-        <section className="flex min-h-0 flex-col gap-4">
-          <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl p-5 flex flex-col gap-2">
-            <div className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] uppercase tracking-wider">
-              Chance It Closes UP (YES)
+        {/* Right Column: Full-Height Live Leaderboard + Tape */}
+        <section className="flex min-h-0 flex-col gap-2.5 overflow-hidden">
+          {/* Leaderboard Card */}
+          <div className="bg-[#121215] border border-[#27272A] rounded-xl flex min-h-0 flex-1 flex-col p-3.5 shadow-lg">
+            <div className="mb-2 flex shrink-0 items-center justify-between font-['Epilogue'] text-xs border-b border-[#27272A]/80 pb-2">
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-white uppercase tracking-wider text-xs">TOURNAMENT LEADERBOARD</span>
+                <span className="px-1.5 py-0.5 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#22C55E] text-[9px] font-bold">LIVE</span>
+              </div>
+              <span className="text-[#8e9192] font-mono text-[11px]">{leaderboard?.participantCount ?? 0} traders</span>
             </div>
-            {round && (round.tradeCount > 0 || round.qYes > 0 || round.qNo > 0) ? (
-              <>
-                <div
-                  className={`font-['Geist'] text-5xl font-bold tracking-tight ${
-                    priceYes >= 0.5 ? 'text-[#22C55E]' : 'text-[#ef4444]'
-                  }`}
-                >
-                  {formatProbability(priceYes, 1)}
-                </div>
-                <div className="mt-2">
-                  <ProbabilityBar value={priceYes} variant="display" />
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="font-['Geist'] text-3xl font-bold text-[#8e9192]">
-                  No predictions yet
-                </div>
-                <div className="mt-2">
-                  <ProbabilityBar value={null} tradeCount={0} variant="display" />
-                </div>
-              </>
-            )}
+            <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+              <Leaderboard data={leaderboard} limit={12} variant="display" />
+            </div>
           </div>
 
-          <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl p-5">
-            <RoundTimer round={round} clockOffsetMs={clockOffsetMs} variant="display" />
-          </div>
-
-          <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl max-h-36 overflow-hidden p-4">
-            <div className="mb-2 font-['Epilogue'] text-xs font-bold text-[#c4c7c8] uppercase tracking-wider">
-              Live Order Tape
+          {/* Compact Live Order Tape */}
+          <div className="bg-[#121215] border border-[#27272A] rounded-xl max-h-28 overflow-hidden p-2.5 shrink-0 shadow-md">
+            <div className="mb-1 font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8] uppercase tracking-wider flex items-center justify-between">
+              <span>Live Order Tape</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
             </div>
             <TradeTape lastTrade={lastTrade} variant="display" />
-          </div>
-
-          <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] backdrop-blur-xl rounded-xl flex min-h-0 flex-1 flex-col p-5">
-            <div className="mb-3 flex shrink-0 items-center justify-between font-['Epilogue'] text-xs">
-              <span className="font-bold text-[#c4c7c8] uppercase tracking-wider">Leaderboard</span>
-              <span className="text-[#8e9192]">{leaderboard?.participantCount ?? 0} traders</span>
-            </div>
-            <div className="min-h-0 flex-1 overflow-hidden">
-              <Leaderboard data={leaderboard} limit={10} variant="display" />
-            </div>
           </div>
         </section>
       </main>
@@ -237,6 +263,43 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
   );
 }
 
+function HeaderTimer({ round, clockOffsetMs }: { round: any; clockOffsetMs: number }) {
+  const now = Date.now() + clockOffsetMs;
+  const phase = roundPhase(round, now);
+  const target =
+    phase === 'locked' || phase === 'resolved'
+      ? (round?.resolvesAt ?? null)
+      : (round?.locksAt ?? null);
+  const remaining = useCountdown(target, clockOffsetMs);
+
+  const phaseLabels: Record<string, string> = {
+    waiting: 'Next round',
+    trading: 'Trading closes in',
+    closing: 'Closing soon',
+    locked: 'Locked — resolving',
+    resolved: 'Round settled',
+  };
+
+  const isUrgent = phase === 'closing' || phase === 'locked';
+
+  return (
+    <div className="flex flex-col items-center justify-center px-5 py-1 rounded-xl bg-[#18181b] border border-[#27272A] shadow-lg backdrop-blur-xl">
+      <span className={cx(
+        'font-["Epilogue"] text-[10px] font-bold uppercase tracking-widest',
+        isUrgent ? 'text-[#EF4444] animate-pulse' : 'text-[#c4c7c8]'
+      )}>
+        {phaseLabels[phase] || 'Trading Closes In'}
+      </span>
+      <span className={cx(
+        'font-mono text-2xl sm:text-3xl font-black tracking-widest tabular-nums leading-none mt-0.5',
+        isUrgent ? 'text-[#EF4444]' : 'text-white'
+      )}>
+        {phase === 'resolved' ? '--:--' : formatCountdown(remaining)}
+      </span>
+    </div>
+  );
+}
+
 function ChartFill({
   code,
   openPrice,
@@ -246,26 +309,12 @@ function ChartFill({
   openPrice: number | null;
   livePrice: number | null;
 }) {
-  const [height, setHeight] = useState(360);
-  const [node, setNode] = useState<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!node) return;
-    const observer = new ResizeObserver(([entry]) => {
-      const next = Math.max(200, Math.floor(entry.contentRect.height));
-      setHeight(next);
-    });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [node]);
-
   return (
-    <div ref={setNode} className="h-full w-full">
+    <div className="h-full w-full min-h-0">
       <CandleChart
         code={code}
         openPrice={openPrice}
         livePrice={livePrice}
-        height={height}
         variant="display"
         candleLimit={120}
       />
