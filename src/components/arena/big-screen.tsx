@@ -363,6 +363,12 @@ function IdleOverlay({
   code: string;
   name: string;
 }) {
+  const [origin, setOrigin] = useState('');
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
   if (status === 'ENDED') {
     return (
       <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-[#131313]/90 backdrop-blur-md">
@@ -380,7 +386,6 @@ function IdleOverlay({
   }
 
   if (status === 'LOBBY' || status === 'DRAFT') {
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const joinUrl = origin ? `${origin}/arenas/${code}` : `/arenas/${code}`;
 
     return (
@@ -395,7 +400,7 @@ function IdleOverlay({
                 {code}
               </div>
               <div className="mt-3 font-['Geist'] text-xs text-[#c4c7c8]">
-                Scan QR or navigate to <span className="underline font-mono text-white">{origin || 'arenas'}</span>
+                Scan QR or navigate to <span suppressHydrationWarning className="underline font-mono text-white">{origin || 'arenas'}</span>
               </div>
             </div>
             <div className="pointer-events-auto shrink-0 p-3 bg-white rounded-xl shadow-lg">

@@ -42,7 +42,7 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-4 ml-auto font-['Epilogue'] text-xs">
             <span className="text-[#c4c7c8]">{session.user.email}</span>
             <Link
-              href="/api/auth/signout"
+              href="/signout"
               className="text-white hover:underline font-bold transition-colors"
             >
               Sign out

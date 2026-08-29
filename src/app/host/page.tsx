@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 import { BeamsBackground, ErrorNote, Spinner } from '@/components/ui';
 
@@ -20,6 +21,7 @@ interface HostStatus {
 
 export default function HostPage() {
   const router = useRouter();
+  const { data: session, status: authStatus } = useSession();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<HostStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +36,13 @@ export default function HostPage() {
   const [eventDetails, setEventDetails] = useState('');
 
   const loadStatus = async () => {
+    if (authStatus === 'unauthenticated') {
+      setLoading(false);
+      return;
+    }
+    if (authStatus === 'loading') {
+      return;
+    }
     try {
       const res = await fetch('/api/host/apply', { cache: 'no-store' });
       if (res.status === 401) {
@@ -51,11 +60,17 @@ export default function HostPage() {
   };
 
   useEffect(() => {
-    void loadStatus();
-  }, []);
+    if (authStatus !== 'loading') {
+      void loadStatus();
+    }
+  }, [authStatus]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (authStatus === 'unauthenticated') {
+      router.push('/signin?callbackUrl=/host');
+      return;
+    }
     if (!collegeName.trim()) {
       setError('Please enter your college or institution name.');
       return;

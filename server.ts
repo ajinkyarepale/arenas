@@ -1,5 +1,8 @@
+import { loadEnvConfig } from '@next/env';
 import { createServer } from 'node:http';
 import { parse } from 'node:url';
+
+loadEnvConfig(process.cwd());
 
 import next from 'next';
 import { Server as SocketIoServer } from 'socket.io';

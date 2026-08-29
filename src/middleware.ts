@@ -34,6 +34,7 @@ export default withAuth(
     },
     pages: {
       signIn: '/signin',
+      signOut: '/signout',
     },
   },
 );

@@ -27,6 +27,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/signin',
+    signOut: '/signout',
     error: '/signin',
   },
   providers: [

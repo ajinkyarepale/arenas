@@ -49,7 +49,7 @@ async function start() {
   }
 
   console.log('\n  Postgres is running.');
-  console.log(`  DATABASE_URL="postgresql://arenas:arenas@localhost:5432/arenas?schema=public"`);
+  console.log(`  DATABASE_URL="postgresql://arenas:arenas@127.0.0.1:5432/arenas?schema=public"`);
   console.log('\n  Leave this running. In another terminal:');
   console.log('    npm run db:push');
   console.log('    npm run db:seed');
