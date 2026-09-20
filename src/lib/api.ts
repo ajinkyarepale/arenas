@@ -50,7 +50,8 @@ export async function requireOrganizer() {
 export async function requireSuperAdmin() {
   const user = await requireUser();
   if (!user) return { user: null, allowed: false } as const;
-  const allowed = user.role === RoleType.SUPERADMIN || user.role === RoleType.ADMIN;
+  const roleStr = user.role as string;
+  const allowed = roleStr === RoleType.SUPERADMIN || roleStr === RoleType.ADMIN;
   return { user, allowed } as const;
 }
 

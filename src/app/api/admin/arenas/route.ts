@@ -10,6 +10,7 @@ import { createArenaSchema } from '@/lib/validation';
 import { PermissionKey } from '@/generated/client';
 import { can } from '@/lib/auth/rbac';
 import { createAuditLog } from '@/lib/audit';
+import { ensureDemoParticipants } from '@/lib/engine/demo-controller';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,8 +118,15 @@ export async function POST(request: Request) {
       collegeName: input.collegeName || null,
       collegeLogoUrl: input.collegeLogoUrl || null,
       themeColor: input.themeColor || null,
-      enableBots: Boolean(input.enableBots),
+      enableBots: Boolean(input.enableBots || input.botsEnabled),
+      botsEnabled: Boolean(input.botsEnabled || input.enableBots),
+      botStartingBalance: input.botStartingBalance ?? 1000,
+      botMaxExposure: input.botMaxExposure ?? 500,
+      botStrategy: input.botStrategy ?? 'BALANCED',
+      botStatus: 'ACTIVE',
       botIntensity: input.botIntensity || 'BALANCED',
+      mode: input.isDemoMode ? 'DEMO' : 'LIVE',
+      demoStatus: input.isDemoMode ? 'ACTIVE' : 'STOPPED',
       asset: isCustom ? (input.asset || 'CUSTOM') : input.asset,
       roundDurationSec: input.roundDurationSec,
       lockBufferSec: input.lockBufferSec,
@@ -141,8 +149,16 @@ export async function POST(request: Request) {
       collegeName: true,
       collegeLogoUrl: true,
       enableBots: true,
+      botsEnabled: true,
+      botStrategy: true,
+      mode: true,
+      startingBalance: true,
     },
   });
+
+  if (input.isDemoMode) {
+    await ensureDemoParticipants(arena.id, input.demoParticipantCount ?? 60, arena.startingBalance);
+  }
 
   void createAuditLog({
     actorId: user.id,

@@ -29,6 +29,14 @@ interface AdminArena {
   isManualResolution?: boolean;
   collegeName?: string | null;
   enableBots?: boolean;
+  botsEnabled?: boolean;
+  botStartingBalance?: number;
+  botMaxExposure?: number;
+  botStrategy?: string;
+  botStatus?: 'ACTIVE' | 'PAUSED' | 'STOPPED';
+  botLastTradeAt?: string | null;
+  mode?: string;
+  demoStatus?: string;
   status: 'DRAFT' | 'LOBBY' | 'LIVE' | 'ENDED';
   resolvedOutcome?: 'YES' | 'NO' | 'VOID' | null;
   resolvedAt?: string | null;
@@ -228,6 +236,50 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
       window.location.href = '/admin';
     } catch {
       setError('Network error while deleting arena.');
+      setBusy(null);
+    }
+  };
+
+  const botControl = async (action: 'PAUSE' | 'RESUME' | 'STOP') => {
+    setBusy('bot');
+    setError(null);
+    try {
+      const res = await fetch(`/api/arenas/${data?.arena.code}/bot`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(body.error ?? 'Could not update bot state.');
+        return;
+      }
+      await load();
+    } catch {
+      setError('Network problem — please try again.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const demoControl = async (action: 'START' | 'PAUSE' | 'RESUME' | 'STOP' | 'RESET') => {
+    setBusy('demo');
+    setError(null);
+    try {
+      const res = await fetch(`/api/arenas/${data?.arena.code}/demo`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(body.error ?? 'Could not update demo state.');
+        return;
+      }
+      await load();
+    } catch {
+      setError('Network problem — please try again.');
+    } finally {
       setBusy(null);
     }
   };
@@ -485,6 +537,133 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
           </div>
         </div>
       </div>
+
+      {/* Automated Liquidity Bot Panel */}
+      {(arena.botsEnabled || arena.enableBots) && (
+        <div className="bg-[rgba(20,20,20,0.85)] border border-[#27272A] border-l-4 border-l-[#22C55E] backdrop-blur-xl rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2">
+              <span className="font-['Geist'] text-base font-bold text-white flex items-center gap-2">
+                🤖 Automated Liquidity Bot
+              </span>
+              <span
+                className={`px-2.5 py-0.5 rounded-full text-[10px] font-['Epilogue'] font-bold uppercase tracking-wider ${
+                  arena.botStatus === 'ACTIVE'
+                    ? 'bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30'
+                    : arena.botStatus === 'PAUSED'
+                    ? 'bg-[#EAB308]/15 text-[#EAB308] border border-[#EAB308]/30'
+                    : 'bg-red-500/15 text-red-400 border border-red-500/30'
+                }`}
+              >
+                {arena.botStatus ?? 'ACTIVE'}
+              </span>
+            </div>
+            <p className="font-['Epilogue'] text-xs text-[#a1a1aa] flex flex-wrap items-center gap-2">
+              <span>Strategy: <strong className="text-white">{arena.botStrategy ?? 'BALANCED'}</strong></span>
+              <span>·</span>
+              <span>Max Exposure: <strong className="text-white font-mono">{formatPoints(arena.botMaxExposure ?? 500)}</strong></span>
+              <span>·</span>
+              <span>Starting Balance: <strong className="text-white font-mono">{formatPoints(arena.botStartingBalance ?? 1000)}</strong></span>
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {arena.botStatus === 'PAUSED' && (
+              <button
+                type="button"
+                onClick={() => void botControl('RESUME')}
+                disabled={busy !== null}
+                className="bg-[#22C55E] text-black font-['Epilogue'] text-xs font-bold px-4 py-2 rounded-full hover:bg-[#1ea750] transition-all shadow flex items-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-[16px]">play_arrow</span>
+                <span>{busy === 'bot' ? 'Updating...' : 'Resume Bot'}</span>
+              </button>
+            )}
+
+            {arena.botStatus !== 'PAUSED' && arena.botStatus !== 'STOPPED' && (
+              <button
+                type="button"
+                onClick={() => void botControl('PAUSE')}
+                disabled={busy !== null}
+                className="bg-[#201f1f] text-white border border-[#27272A] hover:bg-[#2e2e33] font-['Epilogue'] text-xs font-bold px-4 py-2 rounded-full transition-all flex items-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-[16px]">pause</span>
+                <span>{busy === 'bot' ? 'Updating...' : 'Pause Bot'}</span>
+              </button>
+            )}
+
+            {arena.botStatus !== 'STOPPED' && (
+              <button
+                type="button"
+                onClick={() => void botControl('STOP')}
+                disabled={busy !== null}
+                className="border border-red-500/30 bg-red-950/20 text-red-400 hover:bg-red-950/40 px-4 py-2 rounded-full font-['Epilogue'] text-xs font-bold transition-all flex items-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-[16px]">stop</span>
+                <span>{busy === 'bot' ? 'Updating...' : 'Stop Bot'}</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Demo Simulation Controller Panel */}
+      {arena.mode === 'DEMO' && (
+        <div className="bg-[rgba(20,20,20,0.85)] border border-[#27272A] border-l-4 border-l-[#3b82f6] backdrop-blur-xl rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2">
+              <span className="font-['Geist'] text-base font-bold text-white flex items-center gap-2">
+                🎮 Demo Room Controller (60 Virtual Traders)
+              </span>
+              <span
+                className={`px-2.5 py-0.5 rounded-full text-[10px] font-['Epilogue'] font-bold uppercase tracking-wider ${
+                  arena.demoStatus === 'ACTIVE'
+                    ? 'bg-[#3b82f6]/15 text-[#60a5fa] border border-[#3b82f6]/30'
+                    : arena.demoStatus === 'PAUSED'
+                    ? 'bg-[#EAB308]/15 text-[#EAB308] border border-[#EAB308]/30'
+                    : 'bg-[#27272A] text-[#a1a1aa] border border-[#3f3f46]'
+                }`}
+              >
+                {arena.demoStatus ?? 'STOPPED'}
+              </span>
+            </div>
+            <p className="font-['Epilogue'] text-xs text-[#a1a1aa]">
+              Simulates concurrent crowd trading across 7 strategies (Momentum, Contrarian, Large/Small, Balanced).
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {arena.demoStatus === 'ACTIVE' ? (
+              <button
+                type="button"
+                onClick={() => void demoControl('PAUSE')}
+                disabled={busy !== null}
+                className="bg-[#201f1f] text-white border border-[#27272A] hover:bg-[#2e2e33] font-['Epilogue'] text-xs font-bold px-4 py-2 rounded-full transition-all"
+              >
+                {busy === 'demo' ? 'Updating...' : 'Pause Demo'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => void demoControl('START')}
+                disabled={busy !== null}
+                className="bg-[#3b82f6] text-white font-['Epilogue'] text-xs font-bold px-4 py-2 rounded-full hover:bg-[#2563eb] transition-all shadow"
+              >
+                {busy === 'demo' ? 'Starting...' : 'Run Demo Simulation'}
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => void demoControl('RESET')}
+              disabled={busy !== null}
+              className="border border-[#3f3f46] bg-[#201f1f] text-[#c4c7c8] hover:text-white px-4 py-2 rounded-full font-['Epilogue'] text-xs font-bold transition-all"
+            >
+              Reset Room
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 1-Click Settlement Card for Custom Markets only */}
       {isCustomMarket && (

@@ -101,7 +101,32 @@ export const createArenaSchema = z
     collegeLogoUrl: z.string().trim().url().optional().or(z.literal('')),
     themeColor: z.string().trim().max(30).optional().or(z.literal('')),
     enableBots: z.boolean().optional().default(false),
+    botsEnabled: z.boolean().optional().default(false),
+    botStartingBalance: z
+      .number()
+      .positive('Bot starting balance must be positive')
+      .max(1_000_000)
+      .optional()
+      .default(1000),
+    botMaxExposure: z
+      .number()
+      .positive('Bot max exposure must be positive')
+      .max(1_000_000)
+      .optional()
+      .default(500),
+    botStrategy: z
+      .enum(['CONSERVATIVE', 'BALANCED', 'ADAPTIVE'])
+      .optional()
+      .default('BALANCED'),
     botIntensity: z.enum(['LOW', 'BALANCED', 'AGGRESSIVE']).optional().default('BALANCED'),
+    isDemoMode: z.boolean().optional().default(false),
+    demoParticipantCount: z
+      .number()
+      .int()
+      .min(1, 'At least 1 virtual participant is required')
+      .max(200, 'Maximum 200 virtual participants')
+      .optional()
+      .default(60),
     asset: z
       .string()
       .trim()
@@ -150,6 +175,10 @@ export const createArenaSchema = z
   .refine((data) => data.maxStakePerTrade <= data.startingBalance, {
     message: 'Maximum stake cannot exceed the starting balance',
     path: ['maxStakePerTrade'],
+  })
+  .refine((data) => !(data.botsEnabled || data.enableBots) || (data.botMaxExposure ?? 500) <= (data.botStartingBalance ?? 1000), {
+    message: 'Bot maximum exposure cannot exceed bot starting balance',
+    path: ['botMaxExposure'],
   });
 export type CreateArenaInput = z.infer<typeof createArenaSchema>;
 

@@ -7,6 +7,8 @@ import {
   resolveRound,
   twapWindowMs,
 } from '@/lib/engine/round-engine';
+import { evaluateLiquidityBot } from '@/lib/bot/liquidity-bot';
+import { evaluateDemoRoom } from '@/lib/engine/demo-controller';
 import { executeBotMicroTrade } from '@/lib/engine/bot-trader';
 import { getPrice } from '@/lib/price/binance';
 import { prisma } from '@/lib/prisma';
@@ -71,8 +73,13 @@ async function advanceArena(event: Event, now: number): Promise<void> {
 
   if (round.status === 'TRADING' && round.locksAt && now >= round.locksAt.getTime()) {
     await lockRound(round.id);
-  } else if (round.status === 'TRADING' && event.enableBots && Math.random() < 0.12) {
-    void executeBotMicroTrade(event.id, round.id);
+  } else if (round.status === 'TRADING') {
+    if (event.botsEnabled || event.enableBots) {
+      void evaluateLiquidityBot(event.id, now);
+    }
+    if (event.mode === 'DEMO' && event.demoStatus === 'ACTIVE') {
+      void evaluateDemoRoom(event.id);
+    }
   }
 
   if (round.status !== 'RESOLVED' && round.resolvesAt) {

@@ -18,6 +18,12 @@ interface FormState {
   collegeName: string;
   collegeLogoUrl: string;
   enableBots: boolean;
+  botsEnabled: boolean;
+  botStartingBalance: number;
+  botMaxExposure: number;
+  botStrategy: 'CONSERVATIVE' | 'BALANCED' | 'ADAPTIVE';
+  isDemoMode: boolean;
+  demoParticipantCount: number;
   asset: string;
   roundDurationSec: number;
   lockBufferSec: number;
@@ -38,6 +44,12 @@ const DEFAULTS: FormState = {
   collegeName: '',
   collegeLogoUrl: '',
   enableBots: false,
+  botsEnabled: false,
+  botStartingBalance: 1000,
+  botMaxExposure: 500,
+  botStrategy: 'BALANCED',
+  isDemoMode: false,
+  demoParticipantCount: 60,
   asset: 'BTCUSDT',
   roundDurationSec: 300, // 5 mins default
   lockBufferSec: 30,
@@ -543,35 +555,159 @@ export function CreateArenaForm() {
               </div>
             </div>
 
-            {/* AI NOISE TRADER BOTS TOGGLE */}
-            <div className="p-4 bg-[#18181B] border border-[#27272A] rounded-xl flex items-center justify-between gap-4">
-              <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="font-['Epilogue'] text-xs font-bold text-white uppercase">
-                    AI Noise Traders & Market Makers
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full bg-[#27272A] text-[#c4c7c8] border border-[#3f3f46] text-[9px] font-bold uppercase font-['Epilogue']">
-                    Autonomous
-                  </span>
+            {/* AI NOISE TRADER & LIQUIDITY BOT TOGGLE */}
+            <div className="p-4 bg-[#18181B] border border-[#27272A] rounded-xl flex flex-col gap-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col gap-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-['Epilogue'] text-xs font-bold text-white uppercase">
+                      🤖 Liquidity Bot & Market Maker
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-[#27272A] text-[#c4c7c8] border border-[#3f3f46] text-[9px] font-bold uppercase font-['Epilogue']">
+                      LMSR Adaptive
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#a1a1aa] leading-relaxed">
+                    Automated two-sided market maker to improve liquidity, counter extreme skew, and seed order flow.
+                  </p>
                 </div>
-                <p className="text-[11px] text-[#a1a1aa] leading-relaxed">
-                  Automated micro-traders place realistic trades during live rounds to seed initial liquidity before crowd participation surges.
-                </p>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !(form.enableBots || form.botsEnabled);
+                    set('enableBots', next);
+                    set('botsEnabled', next);
+                  }}
+                  className={`w-12 h-6 rounded-full transition-colors relative shrink-0 p-0.5 ${
+                    form.enableBots || form.botsEnabled ? 'bg-[#22C55E]' : 'bg-[#27272A]'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                      form.enableBots || form.botsEnabled ? 'translate-x-6' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
               </div>
 
-              <button
-                type="button"
-                onClick={() => set('enableBots', !form.enableBots)}
-                className={`w-12 h-6 rounded-full transition-colors relative shrink-0 p-0.5 ${
-                  form.enableBots ? 'bg-[#22C55E]' : 'bg-[#27272A]'
-                }`}
-              >
-                <div
-                  className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                    form.enableBots ? 'translate-x-6' : 'translate-x-0'
+              {(form.enableBots || form.botsEnabled) && (
+                <div className="flex flex-col gap-4 pt-3 border-t border-[#27272A]">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-['Epilogue'] font-bold uppercase tracking-wider text-[#a1a1aa]">
+                        Bot Starting Balance
+                      </label>
+                      <input
+                        type="number"
+                        min={100}
+                        value={form.botStartingBalance}
+                        onChange={(e) => set('botStartingBalance', Number(e.target.value))}
+                        className="w-full bg-[#121214] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-mono text-xs focus:border-white focus:outline-none"
+                      />
+                      <span className="text-[10px] text-[#71717a]">Dedicated points budget for liquidity</span>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-['Epilogue'] font-bold uppercase tracking-wider text-[#a1a1aa]">
+                        Bot Max Exposure
+                      </label>
+                      <input
+                        type="number"
+                        min={50}
+                        value={form.botMaxExposure}
+                        onChange={(e) => set('botMaxExposure', Number(e.target.value))}
+                        className="w-full bg-[#121214] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-mono text-xs focus:border-white focus:outline-none"
+                      />
+                      <span className="text-[10px] text-[#71717a]">Maximum net round risk headroom</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[11px] font-['Epilogue'] font-bold uppercase tracking-wider text-[#a1a1aa]">
+                      Strategy Mode
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['CONSERVATIVE', 'BALANCED', 'ADAPTIVE'] as const).map((strat) => (
+                        <button
+                          key={strat}
+                          type="button"
+                          onClick={() => set('botStrategy', strat)}
+                          className={`py-2 px-3 rounded-lg text-xs font-['Epilogue'] font-bold uppercase tracking-wider transition-all border ${
+                            form.botStrategy === strat
+                              ? 'bg-white text-black border-white shadow-sm'
+                              : 'bg-[#18181B] text-[#a1a1aa] border-[#27272A] hover:border-[#3f3f46]'
+                          }`}
+                        >
+                          {strat}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-[#121214] border border-[#27272A] text-[11px] text-[#a1a1aa]">
+                      {form.botStrategy === 'CONSERVATIVE' && '🛡️ Triggers only at heavy imbalance (>=70% skew). Small conservative stake sizes.'}
+                      {form.botStrategy === 'BALANCED' && '⚖️ Triggers at moderate imbalance (>=60% skew). Balanced stake sizes.'}
+                      {form.botStrategy === 'ADAPTIVE' && '⚡ Dynamic stakes based on book depth, implied probability delta, and round volatility.'}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* DEMO ARENA MODE TOGGLE */}
+            <div className="p-4 bg-[#18181B] border border-[#27272A] rounded-xl flex flex-col gap-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col gap-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-['Epilogue'] text-xs font-bold text-white uppercase">
+                      🎮 Demo Arena Mode (Virtual Participants)
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-[#3b82f6]/10 text-[#60a5fa] border border-[#3b82f6]/30 text-[9px] font-bold uppercase font-['Epilogue']">
+                      Simulation
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#a1a1aa] leading-relaxed">
+                    Spawns virtual traders to simulate high-concurrency order flow across 7 strategies against the live LMSR engine.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => set('isDemoMode', !form.isDemoMode)}
+                  className={`w-12 h-6 rounded-full transition-colors relative shrink-0 p-0.5 ${
+                    form.isDemoMode ? 'bg-[#3b82f6]' : 'bg-[#27272A]'
                   }`}
-                />
-              </button>
+                >
+                  <div
+                    className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                      form.isDemoMode ? 'translate-x-6' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {form.isDemoMode && (
+                <div className="flex flex-col gap-3 pt-3 border-t border-[#27272A]">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] font-['Epilogue'] font-bold uppercase tracking-wider text-[#a1a1aa]">
+                      Number of Virtual Participants
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="number"
+                        min={1}
+                        max={200}
+                        value={form.demoParticipantCount}
+                        onChange={(e) => set('demoParticipantCount', Number(e.target.value))}
+                        className="w-32 bg-[#121214] border border-[#27272A] rounded-xl px-4 py-2 text-white font-mono text-xs focus:border-white focus:outline-none"
+                      />
+                      <span className="text-xs text-[#a1a1aa] font-['Geist']">virtual traders provisioned (DEMO_001 to DEMO_xxx)</span>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-[#3b82f6]/10 border border-[#3b82f6]/20 text-[11px] text-[#93c5fd]">
+                    ✨ <strong>Active Demo Mode:</strong> Provisioned traders trade with varied profiles (Momentum, Contrarian, Large/Small, Balanced) to showcase realistic market dynamics and depth.
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -594,9 +730,14 @@ export function CreateArenaForm() {
                     <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-['Epilogue'] font-bold uppercase tracking-wider bg-[#201f1f] text-[#c4c7c8] border border-[#27272A]">
                       {form.marketCategory === 'CRYPTO_PRICE' ? 'Live Crypto Oracle' : 'Campus / Custom Prediction'}
                     </span>
-                    {form.enableBots && (
-                      <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] text-[#c4c7c8] text-[10px] font-['Epilogue'] font-bold uppercase">
-                        AI Noise Traders Active
+                    {(form.enableBots || form.botsEnabled) && (
+                      <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] text-[#22C55E] text-[10px] font-['Epilogue'] font-bold uppercase flex items-center gap-1">
+                        🤖 Bot ({form.botStrategy})
+                      </span>
+                    )}
+                    {form.isDemoMode && (
+                      <span className="px-2 py-0.5 rounded-full bg-[#3b82f6]/20 border border-[#3b82f6]/40 text-[#93c5fd] text-[10px] font-['Epilogue'] font-bold uppercase flex items-center gap-1">
+                        🎮 Demo ({form.demoParticipantCount} traders)
                       </span>
                     )}
                   </div>

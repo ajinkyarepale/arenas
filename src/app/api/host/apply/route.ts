@@ -47,7 +47,8 @@ export async function POST(request: Request) {
     }
 
     // If user is already an organizer or admin
-    if (user.role === 'ORGANIZER' || user.role === 'SUPERADMIN' || user.role === 'ADMIN') {
+    const roleStr = user.role as string;
+    if (roleStr === 'ORGANIZER' || roleStr === 'SUPERADMIN' || roleStr === 'ADMIN') {
       return NextResponse.json(
         { message: 'You already have organizer privileges.', role: user.role },
         { status: 200 }

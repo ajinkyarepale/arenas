@@ -15,7 +15,7 @@ export async function GET() {
     }
 
     const hasAccess = await can(user, PermissionKey.ADMIN_MANAGE);
-    if (!hasAccess && user.role !== 'SUPERADMIN' && user.role !== 'ADMIN') {
+    if (!hasAccess && (user.role as string) !== 'SUPERADMIN' && (user.role as string) !== 'ADMIN') {
       return NextResponse.json({ error: 'SuperAdmin permission required' }, { status: 403 });
     }
 

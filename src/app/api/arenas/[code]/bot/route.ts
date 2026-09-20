@@ -24,7 +24,7 @@ export async function GET(
     return NextResponse.json({ error: 'Arena not found' }, { status: 404 });
   }
 
-  if (user.role !== RoleType.SUPERADMIN && user.role !== RoleType.ADMIN && event.organizerId !== user.id) {
+  if ((user.role as string) !== RoleType.SUPERADMIN && (user.role as string) !== RoleType.ADMIN && event.organizerId !== user.id) {
     return forbidden('You do not own this arena.');
   }
 
@@ -99,7 +99,7 @@ export async function POST(
     return NextResponse.json({ error: 'Arena not found' }, { status: 404 });
   }
 
-  if (user.role !== RoleType.SUPERADMIN && user.role !== RoleType.ADMIN && event.organizerId !== user.id) {
+  if ((user.role as string) !== RoleType.SUPERADMIN && (user.role as string) !== RoleType.ADMIN && event.organizerId !== user.id) {
     return forbidden('You do not own this arena.');
   }
 

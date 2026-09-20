@@ -42,7 +42,7 @@ export async function GET(
     // Check permission
     const hasGlobalAccess = await can(user, PermissionKey.ARENA_MANAGE_ALL);
     const isOwner = arena.organizerId === user.id;
-    if (!hasGlobalAccess && !isOwner && user.role !== 'SUPERADMIN' && user.role !== 'ADMIN') {
+    if (!hasGlobalAccess && !isOwner && (user.role as string) !== 'SUPERADMIN' && (user.role as string) !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized to export standings' }, { status: 403 });
     }
 

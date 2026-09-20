@@ -139,7 +139,10 @@ export async function computeLeaderboard(
   const { limit, commitRanks = false } = options;
 
   const participants = await prisma.eventParticipant.findMany({
-    where: { eventId },
+    where: {
+      eventId,
+      user: { isBot: false },
+    },
     orderBy: [{ balance: 'desc' }, { joinedAt: 'asc' }],
     select: {
       id: true,
