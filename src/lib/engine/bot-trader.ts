@@ -12,42 +12,55 @@ const BOT_NAMES = [
   'ByteTrader',
 ];
 
+const cachedBotParticipants = new Map<string, string[]>();
+
 /**
- * Ensures a system bot user exists in the database and is registered as a participant in the event.
+ * Ensures system bot users exist in the database and are registered as participants in the event.
  */
-async function getOrCreateBotParticipant(eventId: string, startingBalance: number): Promise<string> {
-  const botName = BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
-  const email = `bot_${botName.toLowerCase().replace(/[^a-z0-9]/g, '')}@arenas.internal`;
+async function getBotParticipants(eventId: string, startingBalance: number): Promise<string[]> {
+  const cached = cachedBotParticipants.get(eventId);
+  if (cached && cached.length >= BOT_NAMES.length) {
+    return cached;
+  }
 
-  const user = await prisma.user.upsert({
-    where: { email },
-    update: {},
-    create: {
-      name: `${botName} [AI]`,
-      email,
-      passwordHash: 'BOT_SYSTEM_ACCOUNT',
-      role: 'PARTICIPANT',
-    },
-    select: { id: true },
-  });
+  const ids: string[] = [];
+  for (const botName of BOT_NAMES) {
+    const email = `bot_${botName.toLowerCase().replace(/[^a-z0-9]/g, '')}@arenas.internal`;
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: {},
+      create: {
+        name: `${botName} [AI]`,
+        email,
+        passwordHash: 'BOT_SYSTEM_ACCOUNT',
+        role: 'PARTICIPANT',
+        isBot: true,
+        botPersona: 'NOISE_BOT',
+      },
+      select: { id: true },
+    });
 
-  await prisma.eventParticipant.upsert({
-    where: { eventId_userId: { eventId, userId: user.id } },
-    update: {},
-    create: {
-      eventId,
-      userId: user.id,
-      balance: startingBalance,
-    },
-  });
+    await prisma.eventParticipant.upsert({
+      where: { eventId_userId: { eventId, userId: user.id } },
+      update: {},
+      create: {
+        eventId,
+        userId: user.id,
+        balance: startingBalance,
+      },
+    });
 
-  return user.id;
+    ids.push(user.id);
+  }
+
+  cachedBotParticipants.set(eventId, ids);
+  return ids;
 }
 
 /**
- * Executes an automated micro-trade from an AI noise trader on an active round.
+ * Executes an automated micro-trade from AI noise traders on an active round.
  */
-export async function executeBotMicroTrade(eventId: string, roundId: string): Promise<boolean> {
+export async function executeBotMicroTrade(eventId: string, roundId: string, count: number = 2): Promise<boolean> {
   try {
     const event = await prisma.event.findUnique({
       where: { id: eventId },
@@ -59,35 +72,41 @@ export async function executeBotMicroTrade(eventId: string, roundId: string): Pr
       },
     });
 
-    if (!event || !event.enableBots || event.rounds.length === 0) {
+    if (!event || (!event.enableBots && !event.botsEnabled) || event.rounds.length === 0) {
       return false;
     }
 
     const round = event.rounds[0];
     if (round.status !== 'TRADING') return false;
 
-    const botUserId = await getOrCreateBotParticipant(event.id, event.startingBalance);
+    const botUserIds = await getBotParticipants(event.id, event.startingBalance);
+    if (botUserIds.length === 0) return false;
 
-    // Randomize micro-stake (10 to 40 pts, capped at maxStakePerTrade / 5)
-    const maxBotStake = Math.min(40, event.maxStakePerTrade);
-    const stake = Math.floor(Math.random() * (maxBotStake - 10 + 1)) + 10;
+    let anySuccess = false;
+    const tradesToExecute = Math.min(count, 4);
 
-    // Randomize side (slight trend bias based on current inventory)
-    const diff = round.qYes - round.qNo;
-    let side: 'YES' | 'NO' = Math.random() > 0.5 ? 'YES' : 'NO';
-    if (Math.random() < 0.3) {
-      side = diff >= 0 ? 'YES' : 'NO';
+    for (let i = 0; i < tradesToExecute; i++) {
+      const botUserId = botUserIds[Math.floor(Math.random() * botUserIds.length)];
+      const maxBotStake = Math.min(40, event.maxStakePerTrade);
+      const stake = Math.floor(Math.random() * (maxBotStake - 10 + 1)) + 10;
+
+      const diff = round.qYes - round.qNo;
+      let side: 'YES' | 'NO' = Math.random() > 0.5 ? 'YES' : 'NO';
+      if (Math.random() < 0.3) {
+        side = diff >= 0 ? 'YES' : 'NO';
+      }
+
+      const result = await placeTrade({
+        eventId: event.id,
+        userId: botUserId,
+        side,
+        stake,
+      });
+
+      if (result.ok) anySuccess = true;
     }
 
-    // Place trade using the core trading engine
-    const result = await placeTrade({
-      eventId: event.id,
-      userId: botUserId,
-      side,
-      stake,
-    });
-
-    return result.ok;
+    return anySuccess;
   } catch (error) {
     console.error(`[executeBotMicroTrade] Failed bot trade for event ${eventId}:`, error);
     return false;

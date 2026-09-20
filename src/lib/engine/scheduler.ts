@@ -76,8 +76,9 @@ async function advanceArena(event: Event, now: number): Promise<void> {
   } else if (round.status === 'TRADING') {
     if (event.botsEnabled || event.enableBots) {
       void evaluateLiquidityBot(event.id, now);
+      void executeBotMicroTrade(event.id, round.id, 2);
     }
-    if (event.mode === 'DEMO' && event.demoStatus === 'ACTIVE') {
+    if (event.mode === 'DEMO' || event.demoStatus === 'ACTIVE' || event.demoStatus === 'RUNNING') {
       void evaluateDemoRoom(event.id);
     }
   }

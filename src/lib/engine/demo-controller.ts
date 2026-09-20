@@ -30,6 +30,7 @@ const DEFAULT_CONFIG: DemoConfig = {
 
 const demoEvaluatingEvents = new Set<string>();
 const demoMetricsMap = new Map<string, { attempts: number; success: number; rejected: number; volume: number; latencies: number[] }>();
+const participantsMemoryCache = new Map<string, any[]>();
 
 export type DemoStrategy = 'YES_MOMENTUM' | 'NO_MOMENTUM' | 'CONTRARIAN' | 'RANDOM' | 'SMALL_TRADER' | 'LARGE_TRADER' | 'BALANCED';
 
@@ -45,49 +46,56 @@ const STRATEGIES: DemoStrategy[] = [
 
 /**
  * Ensure exactly 60 virtual demo participants exist for a demo arena.
- * Virtual demo users have `isBot: true` and `botPersona: 'DEMO_BOT'`.
+ * Cached in memory so subsequent evaluation ticks execute instantaneously.
  */
 export async function ensureDemoParticipants(eventId: string, count = 60, startingBalance = 1000) {
-  const participants = [];
-
-  for (let i = 1; i <= count; i++) {
-    const numStr = String(i).padStart(3, '0');
-    const email = `demo_${numStr}@arenas.internal`;
-    const name = `DEMO_${numStr}`;
-
-    let user = await prisma.user.findFirst({
-      where: { email },
-    });
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email,
-          name,
-          passwordHash: 'DEMO_SYSTEM_ACCOUNT',
-          isBot: true,
-          botPersona: 'DEMO_BOT',
-        },
-      });
-    }
-
-    let participant = await prisma.eventParticipant.findUnique({
-      where: { eventId_userId: { eventId, userId: user.id } },
-    });
-
-    if (!participant) {
-      participant = await prisma.eventParticipant.create({
-        data: {
-          eventId,
-          userId: user.id,
-          balance: startingBalance,
-        },
-      });
-    }
-
-    participants.push({ user, participant, strategy: STRATEGIES[i % STRATEGIES.length] });
+  const cached = participantsMemoryCache.get(eventId);
+  if (cached && cached.length >= count) {
+    return cached;
   }
 
+  const indices = Array.from({ length: count }, (_, i) => i + 1);
+  const participants = await Promise.all(
+    indices.map(async (i) => {
+      const numStr = String(i).padStart(3, '0');
+      const email = `demo_${numStr}@arenas.internal`;
+      const name = `DEMO_${numStr}`;
+
+      let user = await prisma.user.findFirst({
+        where: { email },
+      });
+
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email,
+            name,
+            passwordHash: 'DEMO_SYSTEM_ACCOUNT',
+            isBot: true,
+            botPersona: 'DEMO_BOT',
+          },
+        });
+      }
+
+      let participant = await prisma.eventParticipant.findUnique({
+        where: { eventId_userId: { eventId, userId: user.id } },
+      });
+
+      if (!participant) {
+        participant = await prisma.eventParticipant.create({
+          data: {
+            eventId,
+            userId: user.id,
+            balance: startingBalance,
+          },
+        });
+      }
+
+      return { user, participant, strategy: STRATEGIES[i % STRATEGIES.length] };
+    }),
+  );
+
+  participantsMemoryCache.set(eventId, participants);
   return participants;
 }
 
@@ -162,7 +170,11 @@ export async function evaluateDemoRoom(
 
   try {
     const event = await prisma.event.findUnique({ where: { id: eventId } });
-    if (!event || event.mode !== 'DEMO' || event.demoStatus !== 'ACTIVE' || event.status !== 'LIVE') {
+    if (!event || event.status !== 'LIVE') {
+      return;
+    }
+    const isDemoActive = event.mode === 'DEMO' || event.demoStatus === 'ACTIVE' || event.demoStatus === 'RUNNING';
+    if (!isDemoActive) {
       return;
     }
 
@@ -181,9 +193,9 @@ export async function evaluateDemoRoom(
 
     const priceYes = lmsrPriceYes({ qYes: round.qYes, qNo: round.qNo }, event.liquidityParamB);
 
-    // Determine burst size: simulate 3 to 12 concurrent trades in this tick
+    // Determine burst size: simulate 3 to 10 active trades in this tick
     const isBurst = Math.random() < fullConfig.burstProbability;
-    const activeCount = isBurst ? Math.floor(6 + Math.random() * 8) : Math.floor(2 + Math.random() * 3);
+    const activeCount = isBurst ? Math.floor(5 + Math.random() * 6) : Math.floor(2 + Math.random() * 4);
 
     // Shuffle and pick active participants
     const shuffled = [...demoParticipants].sort(() => Math.random() - 0.5);
@@ -195,8 +207,8 @@ export async function evaluateDemoRoom(
       demoMetricsMap.set(eventId, metrics);
     }
 
-    const tradePromises = selected.map(async (item) => {
-      if (item.participant.balance < 1.0) return;
+    for (const item of selected) {
+      if (item.participant.balance < 1.0) continue;
 
       const { side, stake } = chooseSideAndStake(
         item.strategy,
@@ -206,7 +218,7 @@ export async function evaluateDemoRoom(
         fullConfig.largeTradeProbability,
       );
 
-      metrics!.attempts++;
+      metrics.attempts++;
       const t0 = performance.now();
 
       const result = await placeTrade({
@@ -217,17 +229,15 @@ export async function evaluateDemoRoom(
       });
 
       const latency = performance.now() - t0;
-      metrics!.latencies.push(latency);
+      metrics.latencies.push(latency);
 
       if (result.ok) {
-        metrics!.success++;
-        metrics!.volume += stake;
+        metrics.success++;
+        metrics.volume += stake;
       } else {
-        metrics!.rejected++;
+        metrics.rejected++;
       }
-    });
-
-    await Promise.all(tradePromises);
+    }
   } catch (error) {
     console.error(`[demo-controller] Error executing demo tick for event ${eventId}:`, error);
   } finally {
@@ -259,8 +269,9 @@ export async function resetDemoRoom(eventId: string): Promise<void> {
     data: { balance: event.startingBalance },
   });
 
-  // Clear metrics
+  // Clear metrics & cached participants
   demoMetricsMap.delete(eventId);
+  participantsMemoryCache.delete(eventId);
 }
 
 export function getDemoMetrics(eventId: string): DemoMetrics {

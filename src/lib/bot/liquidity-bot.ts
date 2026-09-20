@@ -3,7 +3,7 @@ import { priceYes as lmsrPriceYes } from '@/lib/lmsr';
 import { prisma } from '@/lib/prisma';
 import type { Side } from '@/lib/lmsr';
 
-const BOT_COOLDOWN_MS = 4000;
+const BOT_COOLDOWN_MS = 1000;
 const BOT_EMAIL = 'liquidity-bot@arenas.internal';
 
 // Guard against recursive or overlapping bot executions for the same arena
