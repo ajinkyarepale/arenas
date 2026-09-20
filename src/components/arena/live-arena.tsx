@@ -56,27 +56,27 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
     } catch {}
   }, [code]);
 
+  // Load initial recent trades snapshot once on mount
   useEffect(() => {
     void loadTrades();
-    const interval = setInterval(() => {
-      if (document.visibilityState === 'visible') void loadTrades();
-    }, 4000);
-    return () => clearInterval(interval);
   }, [loadTrades]);
 
-  // When a new trade arrives over socket, update trades state
+  // When a new trade arrives over socket, smoothly append to bounded sliding buffer (max 50)
   useEffect(() => {
     if (lastTrade) {
-      setTrades((prev) => [
-        ...prev,
-        {
-          id: `sock-${Date.now()}-${Math.random()}`,
-          side: lastTrade.side,
-          shares: lastTrade.shares,
-          cost: lastTrade.cost,
-          at: lastTrade.at,
-        },
-      ]);
+      setTrades((prev) => {
+        const next = [
+          ...prev.slice(-49),
+          {
+            id: `sock-${Date.now()}-${Math.random()}`,
+            side: lastTrade.side,
+            shares: lastTrade.shares,
+            cost: lastTrade.cost,
+            at: lastTrade.at,
+          },
+        ];
+        return next;
+      });
     }
   }, [lastTrade]);
 
@@ -103,9 +103,12 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
   const currentRoundNum = arena?.currentRound ?? info.currentRound;
   const totalRounds = info.totalRounds;
 
-  // Calculate remaining seconds in current round
-  const closesAt = round?.locksAt ? new Date(round.locksAt).getTime() : now;
-  const remainingMs = Math.max(0, closesAt - now);
+  // Calculate remaining seconds in current round or 30s intermission
+  const targetMs =
+    phase === 'resolved'
+      ? (round?.settledAt ? new Date(round.settledAt).getTime() + 30_000 : now)
+      : (round?.locksAt ? new Date(round.locksAt).getTime() : now);
+  const remainingMs = Math.max(0, targetMs - now);
   const remainingSec = Math.floor(remainingMs / 1000);
   const timerMin = String(Math.floor(remainingSec / 60)).padStart(2, '0');
   const timerSec = String(remainingSec % 60).padStart(2, '0');
@@ -263,17 +266,19 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
 
               <div className="flex items-center gap-4 bg-[#201f1f] px-4 py-2.5 rounded-xl border border-[#27272A]">
                 <div className="text-right">
-                  <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">ROUND ENDS IN</div>
+                  <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">
+                    {phase === 'resolved' ? 'NEXT ROUND IN' : 'ROUND ENDS IN'}
+                  </div>
                   <div className="font-['Epilogue'] text-lg font-bold text-white flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
+                    <span className={cx('w-2 h-2 rounded-full', phase === 'resolved' ? 'bg-[#38bdf8]' : 'bg-[#22C55E]', 'animate-pulse')} />
                     {timerMin}:{timerSec}
                   </div>
                 </div>
                 <div className="h-8 w-px bg-[#27272A]" />
                 <div>
                   <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">STATUS</div>
-                  <div className="font-['Epilogue'] text-xs font-bold text-[#22C55E]">
-                    {tradingOpen ? 'TRADING' : status}
+                  <div className={cx('font-["Epilogue"] text-xs font-bold', phase === 'resolved' ? 'text-[#38bdf8]' : 'text-[#22C55E]')}>
+                    {phase === 'resolved' ? 'RESOLVED' : tradingOpen ? 'TRADING' : status}
                   </div>
                 </div>
               </div>

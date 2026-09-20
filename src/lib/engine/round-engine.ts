@@ -97,6 +97,7 @@ export function buildRoundPayload(
     opensAt: round.opensAt?.toISOString() ?? null,
     locksAt: round.locksAt?.toISOString() ?? null,
     resolvesAt: round.resolvesAt?.toISOString() ?? null,
+    settledAt: round.resolvedAt?.toISOString() ?? null,
     serverTime: new Date().toISOString(),
   };
 }
@@ -138,10 +139,16 @@ export async function computeLeaderboard(
 ): Promise<LeaderboardPayload> {
   const { limit, commitRanks = false } = options;
 
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    select: { mode: true, enableBots: true, botsEnabled: true },
+  });
+  const includeBots = event?.mode === 'DEMO' || Boolean(event?.enableBots) || Boolean(event?.botsEnabled);
+
   const participants = await prisma.eventParticipant.findMany({
     where: {
       eventId,
-      user: { isBot: false },
+      ...(includeBots ? {} : { user: { isBot: false } }),
     },
     orderBy: [{ balance: 'desc' }, { joinedAt: 'asc' }],
     select: {

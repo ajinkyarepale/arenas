@@ -32,7 +32,7 @@ const PHASE_LABEL: Record<RoundPhase, string> = {
   trading: 'Trading closes in',
   closing: 'Closing',
   locked: 'Locked — resolving in',
-  resolved: 'Round settled',
+  resolved: 'Next round starts in',
 };
 
 export function RoundTimer({
@@ -49,11 +49,15 @@ export function RoundTimer({
   const now = Date.now() + clockOffsetMs;
   const phase = roundPhase(round, now);
 
-  // Before lock we count down to lock; after lock, to resolution.
+  // Before lock we count down to lock; during lock, to resolution; during 30s intermission, to next round.
   const target =
-    phase === 'locked' || phase === 'resolved'
-      ? (round?.resolvesAt ?? null)
-      : (round?.locksAt ?? null);
+    phase === 'resolved'
+      ? (round?.settledAt
+          ? new Date(new Date(round.settledAt).getTime() + 30_000).toISOString()
+          : null)
+      : phase === 'locked'
+        ? (round?.resolvesAt ?? null)
+        : (round?.locksAt ?? null);
 
   const remaining = useCountdown(target, clockOffsetMs);
   const isDisplay = variant === 'display';

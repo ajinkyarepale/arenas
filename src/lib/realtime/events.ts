@@ -38,6 +38,7 @@ export interface RoundPayload {
   opensAt: string | null;
   locksAt: string | null;
   resolvesAt: string | null;
+  settledAt?: string | null;
   /** Server clock at send time, so clients can correct for drift. */
   serverTime: string;
 }

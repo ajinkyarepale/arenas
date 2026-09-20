@@ -34,9 +34,11 @@ export async function GET(
     return NextResponse.json({ trades: [] });
   }
 
+  // Fetch only the latest 50 trades to keep response times sub-5ms and prevent memory bloat
   const trades = await prisma.trade.findMany({
     where: { roundId: round.id },
-    orderBy: { createdAt: 'asc' },
+    orderBy: { createdAt: 'desc' },
+    take: 50,
     select: {
       id: true,
       side: true,
@@ -46,8 +48,11 @@ export async function GET(
     },
   });
 
+  // Reverse so the client receives them in chronological order
+  const chronological = [...trades].reverse();
+
   return NextResponse.json({
-    trades: trades.map((t) => ({
+    trades: chronological.map((t) => ({
       id: t.id,
       side: t.side,
       shares: t.shares,

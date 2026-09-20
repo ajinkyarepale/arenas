@@ -282,9 +282,13 @@ function HeaderTimer({
   const now = Date.now() + clockOffsetMs;
   const phase = roundPhase(round, now);
   const target =
-    phase === 'locked' || phase === 'resolved'
-      ? (round?.resolvesAt ?? null)
-      : (round?.locksAt ?? null);
+    phase === 'resolved'
+      ? (round?.settledAt
+          ? new Date(new Date(round.settledAt).getTime() + 30_000).toISOString()
+          : null)
+      : phase === 'locked'
+        ? (round?.resolvesAt ?? null)
+        : (round?.locksAt ?? null);
   const remaining = useCountdown(target, clockOffsetMs);
 
   const phaseLabels: Record<string, string> = {
@@ -292,7 +296,7 @@ function HeaderTimer({
     trading: 'Trading closes in',
     closing: 'Closing soon',
     locked: 'Locked — resolving',
-    resolved: 'Round settled',
+    resolved: 'Next round in',
   };
 
   const isUrgent = phase === 'closing' || phase === 'locked';
@@ -317,7 +321,7 @@ function HeaderTimer({
             isUrgent ? 'text-[#EF4444]' : 'text-white',
           )}
         >
-          {phase === 'resolved' ? '--:--' : formatCountdown(remaining)}
+          {formatCountdown(remaining)}
         </span>
       </div>
 

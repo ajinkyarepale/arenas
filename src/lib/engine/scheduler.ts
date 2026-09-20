@@ -100,24 +100,43 @@ async function advanceArena(event: Event, now: number): Promise<void> {
       await resolveRound(round.id);
       // Resolution takes a few seconds; re-read before deciding what is next.
       const fresh = await prisma.event.findUnique({ where: { id: event.id } });
-      if (fresh && fresh.status === 'LIVE') {
-        await advanceAfterResolve(fresh);
+      const freshRound = await prisma.round.findUnique({ where: { id: round.id } });
+      if (fresh && fresh.status === 'LIVE' && freshRound) {
+        await advanceAfterResolve(fresh, freshRound, now);
       }
       return;
     }
   }
 
   if (round.status === 'RESOLVED') {
-    await advanceAfterResolve(event);
+    await advanceAfterResolve(event, round, now);
   }
 }
 
-async function advanceAfterResolve(event: Event): Promise<void> {
+/** 30-second lock-in period after round ends for backend calculations, payouts, and leaderboard inspection */
+const ROUND_INTERMISSION_MS = 30_000;
+
+async function advanceAfterResolve(
+  event: Event,
+  round: { resolvedAt?: Date | null; resolvesAt?: Date | null },
+  now: number,
+): Promise<void> {
+  const settledAtMs = round.resolvedAt
+    ? round.resolvedAt.getTime()
+    : round.resolvesAt
+      ? round.resolvesAt.getTime()
+      : now;
+
+  // Enforce 30s lock-in period: keep round locked and let backend settle
+  if (now - settledAtMs < ROUND_INTERMISSION_MS) {
+    return;
+  }
+
   if (event.currentRound >= event.totalRounds) {
     await endEvent(event.id);
     return;
   }
-  await tryOpen(event, Date.now());
+  await tryOpen(event, now);
 }
 
 async function tryOpen(event: Event, now: number): Promise<void> {
