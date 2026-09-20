@@ -1,6 +1,7 @@
 import type { Event } from '@/generated/client';
 
 import {
+  broadcastLeaderboard,
   endEvent,
   lockRound,
   openNextRound,
@@ -32,7 +33,7 @@ import { emitToArena } from '@/lib/realtime/bus';
  * things correct, but the duplicated work is pointless.
  */
 
-const TICK_INTERVAL_MS = 1000;
+const TICK_INTERVAL_MS = Number(process.env.TICK_INTERVAL_MS ?? 500);
 const OPEN_RETRY_BACKOFF_MS = 3000;
 
 interface SchedulerHandle {
@@ -48,6 +49,8 @@ const globalForScheduler = globalThis as unknown as {
 const inFlight = new Set<string>();
 /** Backoff for arenas whose price feed is refusing to give an opening price. */
 const openRetryAfter = new Map<string, number>();
+/** Throttle live leaderboard broadcasts during active trading rounds. */
+const lastLeaderboardAt = new Map<string, number>();
 
 async function advanceArena(event: Event, now: number): Promise<void> {
   // If the arena has reached its scheduled end time, end it cleanly.
@@ -80,6 +83,12 @@ async function advanceArena(event: Event, now: number): Promise<void> {
     }
     if (event.mode === 'DEMO' || event.demoStatus === 'ACTIVE' || event.demoStatus === 'RUNNING') {
       void evaluateDemoRoom(event.id);
+    }
+    // Broadcast live standings every 2 seconds during active trading
+    const lastLb = lastLeaderboardAt.get(event.id) ?? 0;
+    if (now - lastLb >= 2000) {
+      lastLeaderboardAt.set(event.id, now);
+      void broadcastLeaderboard(event.id);
     }
   }
 
@@ -206,7 +215,7 @@ export function startScheduler(): void {
 
   const priceIntervalMs = Math.max(
     250,
-    Number(process.env.PRICE_POLL_INTERVAL_MS ?? 1000),
+    Number(process.env.PRICE_POLL_INTERVAL_MS ?? 350),
   );
 
   globalForScheduler.__arenasScheduler = {

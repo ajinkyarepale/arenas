@@ -142,11 +142,20 @@ export interface PlaceTradeInput {
  * which is unusable during a live round. Each trade is a short transaction, so
  * the queue drains in milliseconds. Different arenas never block each other.
  */
-export async function placeTrade(input: PlaceTradeInput): Promise<TradeResult> {
-  return withKeyedLock(`trade:${input.eventId}`, () => placeTradeUnlocked(input));
-}
+const roundAggregateCache = new Map<string, { volume: number; tradeCount: number }>();
+const userNameCache = new Map<string, string>();
 
-async function placeTradeUnlocked(input: PlaceTradeInput): Promise<TradeResult> {
+/**
+ * Place a trade.
+ *
+ * Trades against a single arena are serialised during the atomic pricing and
+ * transaction commit so that concurrent orders queue smoothly rather than
+ * colliding or experiencing contention retries. As soon as the transaction commits,
+ * the mutex is released so that queued orders can immediately proceed. Heavy
+ * post-fill operations (aggregations, user lookups, and websocket fanouts)
+ * happen outside the lock using in-memory caches.
+ */
+export async function placeTrade(input: PlaceTradeInput): Promise<TradeResult> {
   const { eventId, userId, side, stake, shares: requestedShares } = input;
 
   const byShares = requestedShares !== undefined;
@@ -227,193 +236,227 @@ async function placeTradeUnlocked(input: PlaceTradeInput): Promise<TradeResult> 
     }
   }
 
-  for (let attempt = 0; attempt < MAX_CONTENTION_RETRIES; attempt += 1) {
-    const round = await prisma.round.findUnique({
-      where: { eventId_roundNumber: { eventId, roundNumber: event.currentRound } },
-    });
-
-    if (!round) {
-      return {
-        ok: false,
-        reason: 'no-active-round',
-        message: 'No round is open right now.',
-      };
-    }
-    if (round.status !== 'TRADING') {
-      return {
-        ok: false,
-        reason: 'round-locked',
-        message: 'Trading is closed for this round.',
-      };
-    }
-    if (round.locksAt && Date.now() >= round.locksAt.getTime()) {
-      return {
-        ok: false,
-        reason: 'round-locked',
-        message: 'Trading is closed for this round.',
-      };
-    }
-
-    // Price against exactly the state we just read.
-    const bookBefore = { qYes: round.qYes, qNo: round.qNo };
-    const quote = byShares
-      ? quoteByShares(
-          bookBefore,
-          side,
-          quantiseShares(requestedShares!),
-          event.liquidityParamB,
-        )
-      : quoteByBudget(bookBefore, side, stake!, event.liquidityParamB);
-
-    if (quote.shares <= 0) {
-      return {
-        ok: false,
-        reason: 'stake-too-small',
-        message: byShares
-          ? 'That is too few shares to buy.'
-          : 'That stake is too small to buy any shares.',
-      };
-    }
-
-    // The per-trade cap is a points cap, so a share order is measured by what
-    // it actually costs at the current book.
-    if (byShares && quote.cost > event.maxStakePerTrade) {
-      return {
-        ok: false,
-        reason: 'stake-too-large',
-        message:
-          `That many shares would cost ${quote.cost.toFixed(2)} points, above this ` +
-          `arena's limit of ${event.maxStakePerTrade} per trade.`,
-      };
-    }
-
-    let result;
-    try {
-      result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-        // Balance is re-checked inside the transaction against the live row.
-        const freshParticipant = await tx.eventParticipant.findUniqueOrThrow({
-          where: { id: participant.id },
-          select: { balance: true },
-        });
-
-        if (freshParticipant.balance + 1e-9 < quote.cost) {
-          return { kind: 'insufficient' as const, balance: freshParticipant.balance };
-        }
-
-        // The guard: only commit if the book is still where we priced it.
-        const moved = await tx.round.updateMany({
-          where: {
-            id: round.id,
-            status: 'TRADING',
-            qYes: bookBefore.qYes,
-            qNo: bookBefore.qNo,
-          },
-          data: { qYes: quote.state.qYes, qNo: quote.state.qNo },
-        });
-
-        if (moved.count === 0) {
-          return { kind: 'contention' as const };
-        }
-
-        const updatedParticipant = await tx.eventParticipant.update({
-          where: { id: participant.id },
-          data: { balance: { decrement: quote.cost } },
-        });
-
-        const trade = await tx.trade.create({
-          data: {
-            eventId,
-            roundId: round.id,
-            userId,
-            participantId: participant.id,
-            side,
-            shares: quote.shares,
-            cost: quote.cost,
-            priceAtFill: quote.avgPrice,
-          },
-        });
-
-        // Record immutable double-entry ledger record
-        await tx.pointLedger.create({
-          data: {
-            eventId,
-            participantId: participant.id,
-            userId,
-            tradeId: trade.id,
-            type: 'PREDICTION_STAKE',
-            amount: -quote.cost,
-            balanceBefore: freshParticipant.balance,
-            balanceAfter: updatedParticipant.balance,
-            reason: `Staked ${quote.cost.toFixed(2)} pts on ${side}`,
-          },
-        });
-
-        return {
-          kind: 'filled' as const,
-          trade,
-          balance: updatedParticipant.balance,
-        };
+  // Execute atomic pricing and transaction under the keyed lock.
+  // The lock is released IMMEDIATELY after transaction commit, unlocking next orders.
+  const execution = await withKeyedLock(`trade:${eventId}`, async () => {
+    for (let attempt = 0; attempt < MAX_CONTENTION_RETRIES; attempt += 1) {
+      const round = await prisma.round.findUnique({
+        where: { eventId_roundNumber: { eventId, roundNumber: event.currentRound } },
       });
-    } catch {
-      continue;
-    }
 
-    if (result.kind === 'insufficient') {
+      if (!round) {
+        return {
+          ok: false as const,
+          reason: 'no-active-round' as const,
+          message: 'No round is open right now.',
+        };
+      }
+      if (round.status !== 'TRADING') {
+        return {
+          ok: false as const,
+          reason: 'round-locked' as const,
+          message: 'Trading is closed for this round.',
+        };
+      }
+      if (round.locksAt && Date.now() >= round.locksAt.getTime()) {
+        return {
+          ok: false as const,
+          reason: 'round-locked' as const,
+          message: 'Trading is closed for this round.',
+        };
+      }
+
+      // Price against exactly the state we just read.
+      const bookBefore = { qYes: round.qYes, qNo: round.qNo };
+      const quote = byShares
+        ? quoteByShares(
+            bookBefore,
+            side,
+            quantiseShares(requestedShares!),
+            event.liquidityParamB,
+          )
+        : quoteByBudget(bookBefore, side, stake!, event.liquidityParamB);
+
+      if (quote.shares <= 0) {
+        return {
+          ok: false as const,
+          reason: 'stake-too-small' as const,
+          message: byShares
+            ? 'That is too few shares to buy.'
+            : 'That stake is too small to buy any shares.',
+        };
+      }
+
+      // The per-trade cap is a points cap, so a share order is measured by what
+      // it actually costs at the current book.
+      if (byShares && quote.cost > event.maxStakePerTrade) {
+        return {
+          ok: false as const,
+          reason: 'stake-too-large' as const,
+          message:
+            `That many shares would cost ${quote.cost.toFixed(2)} points, above this ` +
+            `arena's limit of ${event.maxStakePerTrade} per trade.`,
+        };
+      }
+
+      let result;
+      try {
+        result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+          // Balance is re-checked inside the transaction against the live row.
+          const freshParticipant = await tx.eventParticipant.findUniqueOrThrow({
+            where: { id: participant.id },
+            select: { balance: true },
+          });
+
+          if (freshParticipant.balance + 1e-9 < quote.cost) {
+            return { kind: 'insufficient' as const, balance: freshParticipant.balance };
+          }
+
+          // The guard: only commit if the book is still where we priced it.
+          const moved = await tx.round.updateMany({
+            where: {
+              id: round.id,
+              status: 'TRADING',
+              qYes: bookBefore.qYes,
+              qNo: bookBefore.qNo,
+            },
+            data: { qYes: quote.state.qYes, qNo: quote.state.qNo },
+          });
+
+          if (moved.count === 0) {
+            return { kind: 'contention' as const };
+          }
+
+          const updatedParticipant = await tx.eventParticipant.update({
+            where: { id: participant.id },
+            data: { balance: { decrement: quote.cost } },
+          });
+
+          const trade = await tx.trade.create({
+            data: {
+              eventId,
+              roundId: round.id,
+              userId,
+              participantId: participant.id,
+              side,
+              shares: quote.shares,
+              cost: quote.cost,
+              priceAtFill: quote.avgPrice,
+            },
+          });
+
+          // Record immutable double-entry ledger record
+          await tx.pointLedger.create({
+            data: {
+              eventId,
+              participantId: participant.id,
+              userId,
+              tradeId: trade.id,
+              type: 'PREDICTION_STAKE',
+              amount: -quote.cost,
+              balanceBefore: freshParticipant.balance,
+              balanceAfter: updatedParticipant.balance,
+              reason: `Staked ${quote.cost.toFixed(2)} pts on ${side}`,
+            },
+          });
+
+          return {
+            kind: 'filled' as const,
+            trade,
+            balance: updatedParticipant.balance,
+          };
+        });
+      } catch {
+        continue;
+      }
+
+      if (result.kind === 'insufficient') {
+        return {
+          ok: false as const,
+          reason: 'insufficient-balance' as const,
+          message: `Not enough points — you have ${result.balance.toFixed(2)}.`,
+        };
+      }
+
+      if (result.kind === 'contention') {
+        continue;
+      }
+
       return {
-        ok: false,
-        reason: 'insufficient-balance',
-        message: `Not enough points — you have ${result.balance.toFixed(2)}.`,
+        ok: true as const,
+        trade: result.trade,
+        balance: result.balance,
+        quote,
+        round,
       };
     }
-
-    if (result.kind === 'contention') {
-      // Someone filled ahead of us. Re-read and re-price.
-      continue;
-    }
-
-    const [position, aggregate, user] = await Promise.all([
-      getPosition(round.id, participant.id),
-      aggregateRound(round.id),
-      prisma.user.findUnique({ where: { id: userId }, select: { name: true } }),
-    ]);
-
-    const newPriceYes = lmsrPriceYes(quote.state, event.liquidityParamB);
-
-    emitToArena(eventId, 'market', {
-      roundId: round.id,
-      priceYes: newPriceYes,
-      qYes: quote.state.qYes,
-      qNo: quote.state.qNo,
-      volume: aggregate.volume,
-      tradeCount: aggregate.tradeCount,
-      lastTrade: {
-        side,
-        shares: quote.shares,
-        cost: quote.cost,
-        displayName: user?.name ?? 'Trader',
-        at: result.trade.createdAt.toISOString(),
-      },
-    });
 
     return {
-      ok: true,
-      trade: {
-        id: result.trade.id,
-        side,
-        shares: quote.shares,
-        cost: quote.cost,
-        priceAtFill: quote.avgPrice,
-      },
-      balance: result.balance,
-      priceYes: newPriceYes,
-      roundId: round.id,
-      position,
+      ok: false as const,
+      reason: 'contention' as const,
+      message: 'The market moved while your order was pricing. Try again.',
     };
+  });
+
+  if (!execution.ok) {
+    return execution;
   }
 
+  const { trade, balance, quote, round } = execution;
+
+  // In-memory aggregate cache maintenance for ultra-fast fills without O(N) table scans
+  let currentAgg = roundAggregateCache.get(round.id);
+  if (!currentAgg) {
+    currentAgg = await aggregateRound(round.id);
+  } else {
+    currentAgg = {
+      volume: Math.round((currentAgg.volume + quote.cost) * 100) / 100,
+      tradeCount: currentAgg.tradeCount + 1,
+    };
+  }
+  roundAggregateCache.set(round.id, currentAgg);
+
+  let displayName = userNameCache.get(userId);
+  if (!displayName) {
+    const u = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
+    displayName = u?.name ?? 'Trader';
+    userNameCache.set(userId, displayName);
+  }
+
+  const [position] = await Promise.all([
+    getPosition(round.id, participant.id),
+  ]);
+
+  const newPriceYes = lmsrPriceYes(quote.state, event.liquidityParamB);
+
+  emitToArena(eventId, 'market', {
+    roundId: round.id,
+    priceYes: newPriceYes,
+    qYes: quote.state.qYes,
+    qNo: quote.state.qNo,
+    volume: currentAgg.volume,
+    tradeCount: currentAgg.tradeCount,
+    lastTrade: {
+      side,
+      shares: quote.shares,
+      cost: quote.cost,
+      displayName,
+      at: trade.createdAt.toISOString(),
+    },
+  });
+
   return {
-    ok: false,
-    reason: 'contention',
-    message: 'The market moved while your order was pricing. Try again.',
+    ok: true,
+    trade: {
+      id: trade.id,
+      side,
+      shares: quote.shares,
+      cost: quote.cost,
+      priceAtFill: quote.avgPrice,
+    },
+    balance,
+    priceYes: newPriceYes,
+    roundId: round.id,
+    position,
   };
 }
