@@ -174,6 +174,8 @@ export async function evaluateDemoRoom(
   eventId: string,
   config: Partial<DemoConfig> = {},
   now: number = Date.now(),
+  loadedEvent?: any,
+  loadedRound?: any,
 ): Promise<void> {
   if (demoEvaluatingEvents.has(eventId)) {
     return;
@@ -181,7 +183,7 @@ export async function evaluateDemoRoom(
   demoEvaluatingEvents.add(eventId);
 
   try {
-    const event = await prisma.event.findUnique({ where: { id: eventId } });
+    const event = loadedEvent ?? (await prisma.event.findUnique({ where: { id: eventId } }));
     if (!event || event.status !== 'LIVE') {
       return;
     }
@@ -192,9 +194,11 @@ export async function evaluateDemoRoom(
 
     if (event.currentRound <= 0) return;
 
-    const round = await prisma.round.findUnique({
-      where: { eventId_roundNumber: { eventId: event.id, roundNumber: event.currentRound } },
-    });
+    const round =
+      loadedRound ??
+      (await prisma.round.findUnique({
+        where: { eventId_roundNumber: { eventId: event.id, roundNumber: event.currentRound } },
+      }));
 
     // Requirement 13: Halt trading during LOCKED, RESOLVING, RESOLVED, or near locksAt
     if (!round || round.status !== 'TRADING') return;
@@ -242,6 +246,9 @@ export async function evaluateDemoRoom(
 
       const latency = performance.now() - t0;
       metrics.latencies.push(latency);
+      if (metrics.latencies.length > 200) {
+        metrics.latencies.shift();
+      }
 
       if (result.ok) {
         metrics.success++;

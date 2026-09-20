@@ -353,13 +353,9 @@ export function CandleChart({
     };
 
     void load();
-    const timer = setInterval(() => {
-      if (document.visibilityState === 'visible') void load();
-    }, 15_000);
 
     return () => {
       cancelled = true;
-      clearInterval(timer);
     };
   }, [code, candleLimit, timeframe, chartMode]);
 

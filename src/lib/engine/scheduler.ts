@@ -78,11 +78,11 @@ async function advanceArena(event: Event, now: number): Promise<void> {
     await lockRound(round.id);
   } else if (round.status === 'TRADING') {
     if (event.botsEnabled || event.enableBots) {
-      void evaluateLiquidityBot(event.id, now);
-      void executeBotMicroTrade(event.id, round.id, 2);
+      void evaluateLiquidityBot(event.id, now, event, round);
+      void executeBotMicroTrade(event.id, round.id, 2, event, round);
     }
     if (event.mode === 'DEMO' || event.demoStatus === 'ACTIVE' || event.demoStatus === 'RUNNING') {
-      void evaluateDemoRoom(event.id);
+      void evaluateDemoRoom(event.id, {}, now, event, round);
     }
     // Broadcast live standings every 2 seconds during active trading
     const lastLb = lastLeaderboardAt.get(event.id) ?? 0;

@@ -63,16 +63,23 @@ export interface RoundAggregate {
   tradeCount: number;
 }
 
+export const roundAggregateCache = new Map<string, RoundAggregate>();
+
 export async function aggregateRound(roundId: string): Promise<RoundAggregate> {
+  const cached = roundAggregateCache.get(roundId);
+  if (cached) return cached;
+
   const result = await prisma.trade.aggregate({
     where: { roundId },
     _sum: { cost: true },
     _count: { _all: true },
   });
-  return {
+  const agg = {
     volume: result._sum.cost ?? 0,
     tradeCount: result._count._all ?? 0,
   };
+  roundAggregateCache.set(roundId, agg);
+  return agg;
 }
 
 export function buildRoundPayload(
@@ -412,43 +419,63 @@ export async function settleRound(
       });
 
       const creditByParticipant = new Map<string, number>();
+      const tradeUpdates: Array<{ id: string; payout: number }> = [];
 
       for (const trade of trades) {
         const payout = payoutForTrade(trade.side, trade.shares, outcome, trade.cost);
-        await tx.trade.update({
-          where: { id: trade.id },
-          data: { payout, settledAt },
-        });
+        tradeUpdates.push({ id: trade.id, payout });
         creditByParticipant.set(
           trade.participantId,
           (creditByParticipant.get(trade.participantId) ?? 0) + payout,
         );
       }
 
-      for (const [participantId, credit] of creditByParticipant) {
-        if (credit === 0) continue;
-        const participantBefore = await tx.eventParticipant.findUniqueOrThrow({
-          where: { id: participantId },
-          select: { balance: true, userId: true },
-        });
+      // Concurrently execute trade updates in batches of 50
+      const BATCH_SIZE = 50;
+      for (let i = 0; i < tradeUpdates.length; i += BATCH_SIZE) {
+        const chunk = tradeUpdates.slice(i, i + BATCH_SIZE);
+        await Promise.all(
+          chunk.map((t) =>
+            tx.trade.update({
+              where: { id: t.id },
+              data: { payout: t.payout, settledAt },
+            }),
+          ),
+        );
+      }
 
-        const updated = await tx.eventParticipant.update({
-          where: { id: participantId },
-          data: { balance: { increment: credit } },
-        });
+      const participantCredits = Array.from(creditByParticipant.entries()).filter(([, credit]) => credit > 0);
+      for (let i = 0; i < participantCredits.length; i += BATCH_SIZE) {
+        const chunk = participantCredits.slice(i, i + BATCH_SIZE);
+        await Promise.all(
+          chunk.map(async ([participantId, credit]) => {
+            const participantBefore = await tx.eventParticipant.findUniqueOrThrow({
+              where: { id: participantId },
+              select: { balance: true, userId: true },
+            });
 
-        await tx.pointLedger.create({
-          data: {
-            eventId: current.eventId,
-            participantId,
-            userId: participantBefore.userId,
-            type: outcome === 'VOID' ? 'PREDICTION_REFUND' : 'PREDICTION_PAYOUT',
-            amount: credit,
-            balanceBefore: participantBefore.balance,
-            balanceAfter: updated.balance,
-            reason: outcome === 'VOID' ? `Round ${current.roundNumber} refund` : `Round ${current.roundNumber} payout (${outcome})`,
-          },
-        });
+            const updated = await tx.eventParticipant.update({
+              where: { id: participantId },
+              data: { balance: { increment: credit } },
+            });
+
+            await tx.pointLedger.create({
+              data: {
+                eventId: current.eventId,
+                participantId,
+                userId: participantBefore.userId,
+                type: outcome === 'VOID' ? 'PREDICTION_REFUND' : 'PREDICTION_PAYOUT',
+                amount: credit,
+                balanceBefore: participantBefore.balance,
+                balanceAfter: updated.balance,
+                reason:
+                  outcome === 'VOID'
+                    ? `Round ${current.roundNumber} refund`
+                    : `Round ${current.roundNumber} payout (${outcome})`,
+              },
+            });
+          }),
+        );
       }
 
       const resolved = await tx.round.update({

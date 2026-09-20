@@ -8,42 +8,50 @@ const BOT_EMAIL = 'liquidity-bot@arenas.internal';
 
 // Guard against recursive or overlapping bot executions for the same arena
 const evaluatingEvents = new Set<string>();
+let cachedBotUser: any = null;
 
 export async function ensureBotParticipant(eventId: string, startingBalance: number) {
-  let botUser = await prisma.user.findFirst({
-    where: { isBot: true },
-  });
-
-  if (!botUser) {
-    botUser = await prisma.user.create({
-      data: {
-        email: BOT_EMAIL,
-        name: 'Liquidity Bot',
-        passwordHash: 'BOT_SYSTEM_ACCOUNT',
-        isBot: true,
-        botPersona: 'LIQUIDITY_BOT',
-      },
+  if (!cachedBotUser) {
+    cachedBotUser = await prisma.user.findFirst({
+      where: { isBot: true },
     });
+
+    if (!cachedBotUser) {
+      cachedBotUser = await prisma.user.create({
+        data: {
+          email: BOT_EMAIL,
+          name: 'Liquidity Bot',
+          passwordHash: 'BOT_SYSTEM_ACCOUNT',
+          isBot: true,
+          botPersona: 'LIQUIDITY_BOT',
+        },
+      });
+    }
   }
 
   let participant = await prisma.eventParticipant.findUnique({
-    where: { eventId_userId: { eventId, userId: botUser.id } },
+    where: { eventId_userId: { eventId, userId: cachedBotUser.id } },
   });
 
   if (!participant) {
     participant = await prisma.eventParticipant.create({
       data: {
         eventId,
-        userId: botUser.id,
+        userId: cachedBotUser.id,
         balance: startingBalance,
       },
     });
   }
 
-  return { botUser, participant };
+  return { botUser: cachedBotUser, participant };
 }
 
-export async function evaluateLiquidityBot(eventId: string, now: number = Date.now()): Promise<void> {
+export async function evaluateLiquidityBot(
+  eventId: string,
+  now: number = Date.now(),
+  loadedEvent?: any,
+  loadedRound?: any,
+): Promise<void> {
   // Requirement 9: Prevent recursive or concurrent bot evaluation for the same event
   if (evaluatingEvents.has(eventId)) {
     return;
@@ -51,7 +59,7 @@ export async function evaluateLiquidityBot(eventId: string, now: number = Date.n
   evaluatingEvents.add(eventId);
 
   try {
-    const event = await prisma.event.findUnique({ where: { id: eventId } });
+    const event = loadedEvent ?? (await prisma.event.findUnique({ where: { id: eventId } }));
     if (!event || (!event.botsEnabled && !event.enableBots) || event.botStatus !== 'ACTIVE' || event.status !== 'LIVE') {
       return;
     }
@@ -63,9 +71,11 @@ export async function evaluateLiquidityBot(eventId: string, now: number = Date.n
 
     if (event.currentRound <= 0) return;
 
-    const round = await prisma.round.findUnique({
-      where: { eventId_roundNumber: { eventId, roundNumber: event.currentRound } },
-    });
+    const round =
+      loadedRound ??
+      (await prisma.round.findUnique({
+        where: { eventId_roundNumber: { eventId, roundNumber: event.currentRound } },
+      }));
 
     // Requirement 3 & 4: Obey trading state and stop BEFORE lock window.
     // round.locksAt marks when trading locks (e.g. 30s before resolution).

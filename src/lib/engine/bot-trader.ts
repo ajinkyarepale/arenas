@@ -60,24 +60,35 @@ async function getBotParticipants(eventId: string, startingBalance: number): Pro
 /**
  * Executes an automated micro-trade from AI noise traders on an active round.
  */
-export async function executeBotMicroTrade(eventId: string, roundId: string, count: number = 2): Promise<boolean> {
+export async function executeBotMicroTrade(
+  eventId: string,
+  roundId: string,
+  count: number = 2,
+  loadedEvent?: any,
+  loadedRound?: any,
+): Promise<boolean> {
   try {
-    const event = await prisma.event.findUnique({
-      where: { id: eventId },
-      include: {
-        rounds: {
-          where: { id: roundId, status: 'TRADING' },
-          take: 1,
-        },
-      },
-    });
+    let event = loadedEvent;
+    let round = loadedRound;
 
-    if (!event || (!event.enableBots && !event.botsEnabled) || event.rounds.length === 0) {
-      return false;
+    if (!event || !round) {
+      const fetched = await prisma.event.findUnique({
+        where: { id: eventId },
+        include: {
+          rounds: {
+            where: { id: roundId, status: 'TRADING' },
+            take: 1,
+          },
+        },
+      });
+      if (!fetched || fetched.rounds.length === 0) return false;
+      event = fetched;
+      round = fetched.rounds[0];
     }
 
-    const round = event.rounds[0];
-    if (round.status !== 'TRADING') return false;
+    if (!event || (!event.enableBots && !event.botsEnabled) || !round || round.status !== 'TRADING') {
+      return false;
+    }
 
     const botUserIds = await getBotParticipants(event.id, event.startingBalance);
     if (botUserIds.length === 0) return false;

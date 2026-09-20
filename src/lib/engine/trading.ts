@@ -10,7 +10,7 @@ import {
 } from '@/lib/lmsr';
 import { prisma } from '@/lib/prisma';
 import { emitToArena } from '@/lib/realtime/bus';
-import { aggregateRound } from '@/lib/engine/round-engine';
+import { aggregateRound, roundAggregateCache } from '@/lib/engine/round-engine';
 
 /**
  * Placing a trade.
@@ -103,15 +103,23 @@ export function summarisePosition(
   };
 }
 
+const participantPositionCache = new Map<string, PositionSummary>();
+
 export async function getPosition(
   roundId: string,
   participantId: string,
 ): Promise<PositionSummary> {
+  const cacheKey = `${roundId}:${participantId}`;
+  const cached = participantPositionCache.get(cacheKey);
+  if (cached) return cached;
+
   const trades = await prisma.trade.findMany({
     where: { roundId, participantId },
     select: { side: true, shares: true, cost: true },
   });
-  return summarisePosition(trades);
+  const summary = summarisePosition(trades);
+  participantPositionCache.set(cacheKey, summary);
+  return summary;
 }
 
 const MAX_CONTENTION_RETRIES = 12;
@@ -142,7 +150,6 @@ export interface PlaceTradeInput {
  * which is unusable during a live round. Each trade is a short transaction, so
  * the queue drains in milliseconds. Different arenas never block each other.
  */
-const roundAggregateCache = new Map<string, { volume: number; tradeCount: number }>();
 const userNameCache = new Map<string, string>();
 
 /**
@@ -423,9 +430,28 @@ export async function placeTrade(input: PlaceTradeInput): Promise<TradeResult> {
     userNameCache.set(userId, displayName);
   }
 
-  const [position] = await Promise.all([
-    getPosition(round.id, participant.id),
-  ]);
+  const posCacheKey = `${round.id}:${participant.id}`;
+  let position = participantPositionCache.get(posCacheKey);
+  if (!position) {
+    position = await getPosition(round.id, participant.id);
+  } else {
+    const isYes = side === 'YES';
+    const newYesShares = isYes ? position.yesShares + quote.shares : position.yesShares;
+    const newYesCost = isYes ? position.yesCost + quote.cost : position.yesCost;
+    const newNoShares = !isYes ? position.noShares + quote.shares : position.noShares;
+    const newNoCost = !isYes ? position.noCost + quote.cost : position.noCost;
+
+    position = {
+      yesShares: newYesShares,
+      noShares: newNoShares,
+      yesCost: newYesCost,
+      noCost: newNoCost,
+      yesAvgPrice: newYesShares > 0 ? newYesCost / newYesShares : null,
+      noAvgPrice: newNoShares > 0 ? newNoCost / newNoShares : null,
+      totalStaked: newYesCost + newNoCost,
+    };
+    participantPositionCache.set(posCacheKey, position);
+  }
 
   const newPriceYes = lmsrPriceYes(quote.state, event.liquidityParamB);
 
