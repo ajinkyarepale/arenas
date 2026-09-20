@@ -9,6 +9,7 @@ import { Server as SocketIoServer } from 'socket.io';
 
 import { buildSnapshot, findArenaByCode } from './src/lib/engine/snapshot';
 import { startScheduler, stopScheduler } from './src/lib/engine/scheduler';
+import { startPriceStream, stopPriceStream } from './src/lib/price/binance-stream';
 import { registerBroadcaster } from './src/lib/realtime/bus';
 import {
   arenaRoom,
@@ -128,6 +129,7 @@ async function main(): Promise<void> {
   });
 
   startScheduler();
+  startPriceStream();
 
   httpServer.listen(port, hostname, () => {
     console.log(`\n  Arenas ready on http://localhost:${port}`);
@@ -138,6 +140,7 @@ async function main(): Promise<void> {
   const shutdown = async (signal: string) => {
     console.log(`\n[server] ${signal} received, shutting down`);
     stopScheduler();
+    stopPriceStream();
     io.close();
     httpServer.close();
     await prisma.$disconnect();

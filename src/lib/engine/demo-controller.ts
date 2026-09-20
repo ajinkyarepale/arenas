@@ -66,32 +66,44 @@ export async function ensureDemoParticipants(eventId: string, count = 60, starti
       });
 
       if (!user) {
-        user = await prisma.user.create({
-          data: {
-            email,
-            name,
-            passwordHash: 'DEMO_SYSTEM_ACCOUNT',
-            isBot: true,
-            botPersona: 'DEMO_BOT',
-          },
-        });
+        try {
+          user = await prisma.user.create({
+            data: {
+              email,
+              name,
+              passwordHash: 'DEMO_SYSTEM_ACCOUNT',
+              isBot: true,
+              botPersona: 'DEMO_BOT',
+            },
+          });
+        } catch {
+          user = await prisma.user.findFirst({
+            where: { email },
+          });
+        }
       }
 
       let participant = await prisma.eventParticipant.findUnique({
-        where: { eventId_userId: { eventId, userId: user.id } },
+        where: { eventId_userId: { eventId, userId: user!.id } },
       });
 
       if (!participant) {
-        participant = await prisma.eventParticipant.create({
-          data: {
-            eventId,
-            userId: user.id,
-            balance: startingBalance,
-          },
-        });
+        try {
+          participant = await prisma.eventParticipant.create({
+            data: {
+              eventId,
+              userId: user!.id,
+              balance: startingBalance,
+            },
+          });
+        } catch {
+          participant = await prisma.eventParticipant.findUnique({
+            where: { eventId_userId: { eventId, userId: user!.id } },
+          });
+        }
       }
 
-      return { user, participant, strategy: STRATEGIES[i % STRATEGIES.length] };
+      return { user: user!, participant: participant!, strategy: STRATEGIES[i % STRATEGIES.length] };
     }),
   );
 

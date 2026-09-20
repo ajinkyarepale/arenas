@@ -10,7 +10,7 @@ import { TradePanel } from '@/components/arena/trade-panel';
 import { SiteSidebar } from '@/components/site-sidebar';
 import { useArena } from '@/hooks/use-arena';
 import type { ArenaPublicInfo } from '@/lib/engine/snapshot';
-import { formatPoints, formatTime } from '@/lib/format';
+import { cx, formatPoints, formatPrice, formatTime } from '@/lib/format';
 import { roundPhase } from '@/components/arena/round-timer';
 
 const CandleChart = dynamic(
@@ -229,19 +229,52 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
               </p>
             </div>
 
-            <div className="flex items-center gap-4 bg-[#201f1f] px-4 py-2.5 rounded-xl border border-[#27272A]">
-              <div className="text-right">
-                <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">ROUND ENDS IN</div>
-                <div className="font-['Epilogue'] text-lg font-bold text-white flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
-                  {timerMin}:{timerSec}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Real-time Winning Price Indicator Beside Timer */}
+              {price?.price != null && round?.openPrice != null ? (
+                (() => {
+                  const delta = price.price - round.openPrice;
+                  const isYesWinning = delta >= 0;
+                  return (
+                    <div
+                      className={cx(
+                        'flex flex-col items-start justify-center px-3.5 py-2 rounded-xl border shadow-lg backdrop-blur-xl transition-all duration-150',
+                        isYesWinning
+                          ? 'bg-[#22C55E]/15 border-[#22C55E]/40 text-[#22C55E]'
+                          : 'bg-[#EF4444]/15 border-[#EF4444]/40 text-[#EF4444]',
+                      )}
+                    >
+                      <div className="flex items-center gap-1.5 font-['Epilogue'] text-[10px] font-black uppercase tracking-wider">
+                        <span className="w-2 h-2 rounded-full animate-pulse bg-current" />
+                        <span>{isYesWinning ? 'YES WINNING' : 'NO WINNING'}</span>
+                      </div>
+                      <div className="flex items-baseline gap-1.5 mt-0.5">
+                        <span className="font-mono text-base font-black text-white">
+                          {formatPrice(price.price)}
+                        </span>
+                        <span className="font-mono text-[11px] font-bold">
+                          {isYesWinning ? `+${delta.toFixed(2)}` : delta.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()
+              ) : null}
+
+              <div className="flex items-center gap-4 bg-[#201f1f] px-4 py-2.5 rounded-xl border border-[#27272A]">
+                <div className="text-right">
+                  <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">ROUND ENDS IN</div>
+                  <div className="font-['Epilogue'] text-lg font-bold text-white flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
+                    {timerMin}:{timerSec}
+                  </div>
                 </div>
-              </div>
-              <div className="h-8 w-px bg-[#27272A]" />
-              <div>
-                <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">STATUS</div>
-                <div className="font-['Epilogue'] text-xs font-bold text-[#22C55E]">
-                  {tradingOpen ? 'TRADING' : status}
+                <div className="h-8 w-px bg-[#27272A]" />
+                <div>
+                  <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">STATUS</div>
+                  <div className="font-['Epilogue'] text-xs font-bold text-[#22C55E]">
+                    {tradingOpen ? 'TRADING' : status}
+                  </div>
                 </div>
               </div>
             </div>

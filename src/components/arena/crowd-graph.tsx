@@ -206,8 +206,20 @@ export function CrowdGraph({
           labelBackgroundColor: '#0284c7',
         },
       },
-      handleScroll: { vertTouchDrag: false },
-      handleScale: true,
+      handleScroll: {
+        mouseWheel: true,
+        pressedMouseMove: true,
+        horzTouchDrag: true,
+        vertTouchDrag: true,
+      },
+      handleScale: {
+        axisPressedMouseMove: {
+          time: true,
+          price: true,
+        },
+        mouseWheel: true,
+        pinch: true,
+      },
       autoSize: false,
       width: container.clientWidth,
       height,

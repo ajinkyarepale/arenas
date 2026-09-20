@@ -32,7 +32,11 @@ export async function GET(
     Math.max(Number.parseInt(url.searchParams.get('limit') ?? '90', 10) || 90, 10),
     300,
   );
-  const interval = intervalForRoundDuration(event.roundDurationSec);
+  const requestedInterval = url.searchParams.get('interval');
+  const validIntervals = ['1m', '3m', '5m', '15m', '30m', '1h'];
+  const interval = (requestedInterval && validIntervals.includes(requestedInterval))
+    ? requestedInterval
+    : intervalForRoundDuration(event.roundDurationSec);
 
   try {
     const candles = await getCandles(event.asset, interval, limit);

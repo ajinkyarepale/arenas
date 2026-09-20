@@ -11,6 +11,8 @@
  *     not get enough data so the round can be voided instead of guessed.
  */
 
+import { getStreamPrice } from '@/lib/price/binance-stream';
+
 export interface PriceTick {
   symbol: string;
   price: number;
@@ -35,7 +37,7 @@ export class PriceFeedError extends Error {
 
 const BASE = process.env.BINANCE_REST_BASE?.replace(/\/$/, '') || 'https://api.binance.com';
 const REQUEST_TIMEOUT_MS = 6_000;
-const CACHE_TTL_MS = 750;
+const CACHE_TTL_MS = 250;
 
 const priceCache = new Map<string, PriceTick>();
 
@@ -64,9 +66,14 @@ async function binanceFetch<T>(path: string): Promise<T> {
   }
 }
 
-/** Latest trade price, served from a sub-second cache. */
+/** Latest trade price, served from stream or sub-second cache. */
 export async function getPrice(symbol: string, maxAgeMs = CACHE_TTL_MS): Promise<PriceTick> {
   const sym = normaliseSymbol(symbol);
+  const streamTick = getStreamPrice(sym);
+  if (streamTick && Date.now() - streamTick.at < 5000) {
+    return streamTick;
+  }
+
   const cached = priceCache.get(sym);
   const now = Date.now();
   if (cached && now - cached.at < maxAgeMs) return cached;
@@ -86,7 +93,8 @@ export async function getPrice(symbol: string, maxAgeMs = CACHE_TTL_MS): Promise
 
 /** Last known price without touching the network. Used by the socket layer. */
 export function getCachedPrice(symbol: string): PriceTick | undefined {
-  return priceCache.get(normaliseSymbol(symbol));
+  const sym = normaliseSymbol(symbol);
+  return getStreamPrice(sym) ?? priceCache.get(sym);
 }
 
 /** Confirm a symbol exists before an organizer commits to it. */

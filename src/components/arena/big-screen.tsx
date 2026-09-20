@@ -70,8 +70,13 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
           </p>
         </div>
 
-        {/* Center: Broadcast Countdown Clock */}
-        <HeaderTimer round={round} clockOffsetMs={clockOffsetMs} />
+        {/* Center: Broadcast Countdown Clock with Live Winning Indicator */}
+        <HeaderTimer
+          round={round}
+          clockOffsetMs={clockOffsetMs}
+          openPrice={round?.openPrice ?? null}
+          livePrice={price?.price ?? null}
+        />
 
         {/* Right: Round Counter & Status */}
         <div className="flex shrink-0 items-center justify-end gap-4 flex-1">
@@ -263,7 +268,17 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
   );
 }
 
-function HeaderTimer({ round, clockOffsetMs }: { round: any; clockOffsetMs: number }) {
+function HeaderTimer({
+  round,
+  clockOffsetMs,
+  openPrice,
+  livePrice,
+}: {
+  round: any;
+  clockOffsetMs: number;
+  openPrice?: number | null;
+  livePrice?: number | null;
+}) {
   const now = Date.now() + clockOffsetMs;
   const phase = roundPhase(round, now);
   const target =
@@ -281,21 +296,55 @@ function HeaderTimer({ round, clockOffsetMs }: { round: any; clockOffsetMs: numb
   };
 
   const isUrgent = phase === 'closing' || phase === 'locked';
+  const delta = livePrice != null && openPrice != null ? livePrice - openPrice : null;
+  const isYesWinning = delta != null ? delta >= 0 : true;
 
   return (
-    <div className="flex flex-col items-center justify-center px-5 py-1 rounded-xl bg-[#18181b] border border-[#27272A] shadow-lg backdrop-blur-xl">
-      <span className={cx(
-        'font-["Epilogue"] text-[10px] font-bold uppercase tracking-widest',
-        isUrgent ? 'text-[#EF4444] animate-pulse' : 'text-[#c4c7c8]'
-      )}>
-        {phaseLabels[phase] || 'Trading Closes In'}
-      </span>
-      <span className={cx(
-        'font-mono text-2xl sm:text-3xl font-black tracking-widest tabular-nums leading-none mt-0.5',
-        isUrgent ? 'text-[#EF4444]' : 'text-white'
-      )}>
-        {phase === 'resolved' ? '--:--' : formatCountdown(remaining)}
-      </span>
+    <div className="flex items-center gap-2.5">
+      {/* Broadcast Countdown Clock */}
+      <div className="flex flex-col items-center justify-center px-4 sm:px-5 py-1 rounded-xl bg-[#18181b] border border-[#27272A] shadow-lg backdrop-blur-xl">
+        <span
+          className={cx(
+            'font-["Epilogue"] text-[9px] sm:text-[10px] font-bold uppercase tracking-widest',
+            isUrgent ? 'text-[#EF4444] animate-pulse' : 'text-[#c4c7c8]',
+          )}
+        >
+          {phaseLabels[phase] || 'Trading Closes In'}
+        </span>
+        <span
+          className={cx(
+            'font-mono text-xl sm:text-3xl font-black tracking-widest tabular-nums leading-none mt-0.5',
+            isUrgent ? 'text-[#EF4444]' : 'text-white',
+          )}
+        >
+          {phase === 'resolved' ? '--:--' : formatCountdown(remaining)}
+        </span>
+      </div>
+
+      {/* Real-time Winning Price Indicator Beside Timer */}
+      {livePrice != null && openPrice != null ? (
+        <div
+          className={cx(
+            'hidden sm:flex flex-col items-start justify-center px-3.5 py-1.5 rounded-xl border shadow-lg backdrop-blur-xl transition-all duration-150',
+            isYesWinning
+              ? 'bg-[#22C55E]/15 border-[#22C55E]/40 text-[#22C55E]'
+              : 'bg-[#EF4444]/15 border-[#EF4444]/40 text-[#EF4444]',
+          )}
+        >
+          <div className="flex items-center gap-1.5 font-['Epilogue'] text-[9px] font-black uppercase tracking-wider">
+            <span className="w-2 h-2 rounded-full animate-pulse bg-current" />
+            <span>{isYesWinning ? 'YES WINNING' : 'NO WINNING'}</span>
+          </div>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="font-mono text-base xl:text-lg font-black tracking-tight text-white">
+              {formatPrice(livePrice)}
+            </span>
+            <span className="font-mono text-[11px] font-bold">
+              {isYesWinning ? `+${delta!.toFixed(2)}` : delta!.toFixed(2)}
+            </span>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
