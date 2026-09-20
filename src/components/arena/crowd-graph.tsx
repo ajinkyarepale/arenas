@@ -10,7 +10,8 @@ import {
   type ISeriesApi,
   type UTCTimestamp,
 } from 'lightweight-charts';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { Maximize2, ZoomIn, ZoomOut } from 'lucide-react';
 import { formatPoints, formatPrice } from '@/lib/format';
 
 export interface CrowdTradeItem {
@@ -45,11 +46,41 @@ export function CrowdGraph({
   className = '',
 }: CrowdGraphProps) {
   const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
+  const [isPanned, setIsPanned] = useState(false);
+  const [hoverProb, setHoverProb] = useState<number | null>(null);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const areaSeriesRef = useRef<ISeriesApi<'Area'> | null>(null);
   const openLineRef = useRef<IPriceLine | null>(null);
+
+  const handleZoomIn = useCallback(() => {
+    const ts = chartRef.current?.timeScale();
+    if (!ts) return;
+    const range = ts.getVisibleLogicalRange();
+    if (!range) return;
+    const span = range.to - range.from;
+    const delta = span * 0.18;
+    ts.setVisibleLogicalRange({ from: range.from + delta, to: range.to - delta });
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    const ts = chartRef.current?.timeScale();
+    if (!ts) return;
+    const range = ts.getVisibleLogicalRange();
+    if (!range) return;
+    const span = range.to - range.from;
+    const delta = span * 0.22;
+    ts.setVisibleLogicalRange({ from: range.from - delta, to: range.to + delta });
+  }, []);
+
+  const handleReset = useCallback(() => {
+    chartRef.current?.timeScale().fitContent();
+    const activeSeries = chartType === 'bar' ? candleSeriesRef.current : areaSeriesRef.current;
+    activeSeries?.priceScale().applyOptions({ autoScale: true });
+    setIsPanned(false);
+  }, [chartType]);
 
   // Compute trade statistics
   const stats = useMemo(() => {
@@ -276,6 +307,29 @@ export function CrowdGraph({
     // Fit content
     chart.timeScale().fitContent();
 
+    // Subscribe to crosshair movement for live probability readout
+    chart.subscribeCrosshairMove((param) => {
+      if (!param.time || !param.seriesData) {
+        setHoverProb(null);
+        return;
+      }
+      const activeSeries = chartType === 'bar' ? candleSeries : areaSeries;
+      const data = param.seriesData.get(activeSeries) as any;
+      if (!data) {
+        setHoverProb(null);
+        return;
+      }
+      const val = 'close' in data ? data.close : ('value' in data ? data.value : null);
+      setHoverProb(val != null && Number.isFinite(val) ? val : null);
+    });
+
+    const ts = chart.timeScale();
+    ts.subscribeVisibleLogicalRangeChange(() => {
+      const logical = ts.getVisibleLogicalRange();
+      if (!logical || candleData.length === 0) return;
+      setIsPanned(logical.to < candleData.length - 2);
+    });
+
     // Resize observer
     const handleResize = () => {
       if (!containerRef.current || !chartRef.current) return;
@@ -327,42 +381,80 @@ export function CrowdGraph({
             <span className="text-[#c4c7c8] text-xs font-mono">YES / NO Candle</span>
           </div>
 
-          {/* Switcher Toggle */}
-          <div className="flex items-center bg-[#141414] border border-[#27272A] rounded-lg p-0.5">
-            <button
-              type="button"
-              onClick={() => setChartType('bar')}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-['Epilogue'] font-semibold transition-all ${
-                chartType === 'bar'
-                  ? 'bg-[#22C55E] text-[#131313] shadow font-bold'
-                  : 'text-[#c4c7c8] hover:text-white'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[14px]">candlestick_chart</span>
-              <span>Bar Graph</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setChartType('line')}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-['Epilogue'] font-semibold transition-all ${
-                chartType === 'line'
-                  ? 'bg-[#22C55E] text-[#131313] shadow font-bold'
-                  : 'text-[#c4c7c8] hover:text-white'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[14px]">show_chart</span>
-              <span>Line Graph</span>
-            </button>
+          {/* Switcher Toggle & Zoom Controls */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center bg-[#141414] border border-[#27272A] rounded-lg p-0.5">
+              <button
+                type="button"
+                onClick={() => setChartType('bar')}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-['Epilogue'] font-semibold transition-all ${
+                  chartType === 'bar'
+                    ? 'bg-[#22C55E] text-[#131313] shadow font-bold'
+                    : 'text-[#c4c7c8] hover:text-white'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[14px]">candlestick_chart</span>
+                <span>Bar Graph</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setChartType('line')}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-['Epilogue'] font-semibold transition-all ${
+                  chartType === 'line'
+                    ? 'bg-[#22C55E] text-[#131313] shadow font-bold'
+                    : 'text-[#c4c7c8] hover:text-white'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[14px]">show_chart</span>
+                <span>Line Graph</span>
+              </button>
+            </div>
+
+            {/* Zoom In, Zoom Out, Reset Buttons */}
+            <div className="flex items-center gap-1 bg-[#141414] border border-[#27272A] rounded-lg p-0.5">
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                title="Zoom In"
+                className="p-1 text-[#a1a1aa] hover:text-white hover:bg-[#27272A] rounded transition-colors"
+              >
+                <ZoomIn className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                title="Zoom Out"
+                className="p-1 text-[#a1a1aa] hover:text-white hover:bg-[#27272A] rounded transition-colors"
+              >
+                <ZoomOut className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={handleReset}
+                title="Fit to Screen"
+                className="p-1 text-[#a1a1aa] hover:text-white hover:bg-[#27272A] rounded transition-colors"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Live Probability & Price Indicator */}
         <div className="flex items-center gap-4 font-['Epilogue'] text-xs">
           <div className="text-right">
-            <span className="text-[#8e9192] mr-1.5">Live Implied YES:</span>
-            <span className={`font-mono text-sm font-bold ${stats.yesPercent >= 50 ? 'text-[#22C55E]' : 'text-[#ef4444]'}`}>
-              {stats.yesPercent.toFixed(1)}%
-            </span>
+            {hoverProb !== null ? (
+              <span className="font-mono text-xs font-bold text-[#38bdf8]">
+                Hover: YES {hoverProb.toFixed(1)}% · NO {(100 - hoverProb).toFixed(1)}%
+              </span>
+            ) : (
+              <>
+                <span className="text-[#8e9192] mr-1.5">Live Implied YES:</span>
+                <span className={`font-mono text-sm font-bold ${stats.yesPercent >= 50 ? 'text-[#22C55E]' : 'text-[#ef4444]'}`}>
+                  {stats.yesPercent.toFixed(1)}%
+                </span>
+              </>
+            )}
           </div>
           {livePrice !== null && (
             <div className="hidden sm:block text-right border-l border-[#27272A] pl-3">
@@ -383,6 +475,18 @@ export function CrowdGraph({
             TV
           </div>
         </div>
+
+        {/* Floating Snap to Live Button */}
+        {isPanned && (
+          <button
+            type="button"
+            onClick={handleReset}
+            className="absolute bottom-4 right-4 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#18181b]/95 border border-[#27272A] text-[11px] font-['Epilogue'] font-bold text-[#22C55E] shadow-xl hover:bg-[#27272A] transition-all"
+          >
+            <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
+            Snap to Live
+          </button>
+        )}
       </div>
 
       {/* Real Trade Volume Distribution Summary */}
