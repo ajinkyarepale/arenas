@@ -287,71 +287,76 @@ async function placeTradeUnlocked(input: PlaceTradeInput): Promise<TradeResult> 
       };
     }
 
-    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      // Balance is re-checked inside the transaction against the live row.
-      const freshParticipant = await tx.eventParticipant.findUniqueOrThrow({
-        where: { id: participant.id },
-        select: { balance: true },
+    let result;
+    try {
+      result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        // Balance is re-checked inside the transaction against the live row.
+        const freshParticipant = await tx.eventParticipant.findUniqueOrThrow({
+          where: { id: participant.id },
+          select: { balance: true },
+        });
+
+        if (freshParticipant.balance + 1e-9 < quote.cost) {
+          return { kind: 'insufficient' as const, balance: freshParticipant.balance };
+        }
+
+        // The guard: only commit if the book is still where we priced it.
+        const moved = await tx.round.updateMany({
+          where: {
+            id: round.id,
+            status: 'TRADING',
+            qYes: bookBefore.qYes,
+            qNo: bookBefore.qNo,
+          },
+          data: { qYes: quote.state.qYes, qNo: quote.state.qNo },
+        });
+
+        if (moved.count === 0) {
+          return { kind: 'contention' as const };
+        }
+
+        const updatedParticipant = await tx.eventParticipant.update({
+          where: { id: participant.id },
+          data: { balance: { decrement: quote.cost } },
+        });
+
+        const trade = await tx.trade.create({
+          data: {
+            eventId,
+            roundId: round.id,
+            userId,
+            participantId: participant.id,
+            side,
+            shares: quote.shares,
+            cost: quote.cost,
+            priceAtFill: quote.avgPrice,
+          },
+        });
+
+        // Record immutable double-entry ledger record
+        await tx.pointLedger.create({
+          data: {
+            eventId,
+            participantId: participant.id,
+            userId,
+            tradeId: trade.id,
+            type: 'PREDICTION_STAKE',
+            amount: -quote.cost,
+            balanceBefore: freshParticipant.balance,
+            balanceAfter: updatedParticipant.balance,
+            reason: `Staked ${quote.cost.toFixed(2)} pts on ${side}`,
+          },
+        });
+
+        return {
+          kind: 'filled' as const,
+          trade,
+          balance: updatedParticipant.balance,
+        };
       });
-
-      if (freshParticipant.balance + 1e-9 < quote.cost) {
-        return { kind: 'insufficient' as const, balance: freshParticipant.balance };
-      }
-
-      // The guard: only commit if the book is still where we priced it.
-      const moved = await tx.round.updateMany({
-        where: {
-          id: round.id,
-          status: 'TRADING',
-          qYes: bookBefore.qYes,
-          qNo: bookBefore.qNo,
-        },
-        data: { qYes: quote.state.qYes, qNo: quote.state.qNo },
-      });
-
-      if (moved.count === 0) {
-        return { kind: 'contention' as const };
-      }
-
-      const updatedParticipant = await tx.eventParticipant.update({
-        where: { id: participant.id },
-        data: { balance: { decrement: quote.cost } },
-      });
-
-      const trade = await tx.trade.create({
-        data: {
-          eventId,
-          roundId: round.id,
-          userId,
-          participantId: participant.id,
-          side,
-          shares: quote.shares,
-          cost: quote.cost,
-          priceAtFill: quote.avgPrice,
-        },
-      });
-
-      // Record immutable double-entry ledger record
-      await tx.pointLedger.create({
-        data: {
-          eventId,
-          participantId: participant.id,
-          userId,
-          tradeId: trade.id,
-          type: 'PREDICTION_STAKE',
-          amount: -quote.cost,
-          balanceBefore: freshParticipant.balance,
-          balanceAfter: updatedParticipant.balance,
-          reason: `Staked ${quote.cost.toFixed(2)} pts on ${side}`,
-        },
-      });
-
-      return {
-        kind: 'filled' as const,
-        trade,
-        balance: updatedParticipant.balance,
-      };
-    });
+    } catch {
+      continue;
+    }
 
     if (result.kind === 'insufficient') {
       return {

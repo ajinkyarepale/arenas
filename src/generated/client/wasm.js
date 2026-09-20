@@ -130,6 +130,8 @@ exports.Prisma.UserScalarFieldEnum = {
   role: 'role',
   status: 'status',
   image: 'image',
+  isBot: 'isBot',
+  botPersona: 'botPersona',
   lastLoginAt: 'lastLoginAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -200,7 +202,15 @@ exports.Prisma.EventScalarFieldEnum = {
   collegeLogoUrl: 'collegeLogoUrl',
   themeColor: 'themeColor',
   enableBots: 'enableBots',
+  botsEnabled: 'botsEnabled',
+  botStartingBalance: 'botStartingBalance',
+  botMaxExposure: 'botMaxExposure',
+  botStrategy: 'botStrategy',
+  botStatus: 'botStatus',
+  botLastTradeAt: 'botLastTradeAt',
   botIntensity: 'botIntensity',
+  mode: 'mode',
+  demoStatus: 'demoStatus',
   asset: 'asset',
   roundDurationSec: 'roundDurationSec',
   lockBufferSec: 'lockBufferSec',
@@ -280,6 +290,7 @@ exports.Prisma.TradeScalarFieldEnum = {
   priceAtFill: 'priceAtFill',
   payout: 'payout',
   status: 'status',
+  actorType: 'actorType',
   settledAt: 'settledAt',
   createdAt: 'createdAt'
 };

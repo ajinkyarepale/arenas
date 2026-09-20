@@ -36,6 +36,8 @@ model User {
   role         RoleType   @default(PARTICIPANT)
   status       UserStatus @default(ACTIVE)
   image        String?
+  isBot        Boolean    @default(false)
+  botPersona   String?
   lastLoginAt  DateTime?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
@@ -55,6 +57,7 @@ model User {
 
   @@index([role, status])
   @@index([email])
+  @@index([isBot])
 }
 
 // Granular System Permissions
@@ -208,7 +211,15 @@ model Event {
   collegeLogoUrl       String?
   themeColor           String?
   enableBots           Boolean        @default(false)
+  botsEnabled          Boolean        @default(false)
+  botStartingBalance   Float          @default(1000)
+  botMaxExposure       Float          @default(500)
+  botStrategy          String         @default("BALANCED")
+  botStatus            String         @default("ACTIVE")
+  botLastTradeAt       DateTime?
   botIntensity         String         @default("BALANCED")
+  mode                 String         @default("LIVE") @map("event_mode")
+  demoStatus           String         @default("STOPPED")
   asset                String         @default("BTCUSDT")
   roundDurationSec     Int            @default(300)
   lockBufferSec        Int            @default(30)
@@ -368,6 +379,7 @@ model Trade {
   priceAtFill   Float
   payout        Float?
   status        TradeStatus @default(FILLED)
+  actorType     String      @default("USER")
   settledAt     DateTime?
   createdAt     DateTime    @default(now())
 

@@ -2504,6 +2504,8 @@ export namespace Prisma {
     role: $Enums.RoleType | null
     status: $Enums.UserStatus | null
     image: string | null
+    isBot: boolean | null
+    botPersona: string | null
     lastLoginAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2517,6 +2519,8 @@ export namespace Prisma {
     role: $Enums.RoleType | null
     status: $Enums.UserStatus | null
     image: string | null
+    isBot: boolean | null
+    botPersona: string | null
     lastLoginAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2530,6 +2534,8 @@ export namespace Prisma {
     role: number
     status: number
     image: number
+    isBot: number
+    botPersona: number
     lastLoginAt: number
     createdAt: number
     updatedAt: number
@@ -2545,6 +2551,8 @@ export namespace Prisma {
     role?: true
     status?: true
     image?: true
+    isBot?: true
+    botPersona?: true
     lastLoginAt?: true
     createdAt?: true
     updatedAt?: true
@@ -2558,6 +2566,8 @@ export namespace Prisma {
     role?: true
     status?: true
     image?: true
+    isBot?: true
+    botPersona?: true
     lastLoginAt?: true
     createdAt?: true
     updatedAt?: true
@@ -2571,6 +2581,8 @@ export namespace Prisma {
     role?: true
     status?: true
     image?: true
+    isBot?: true
+    botPersona?: true
     lastLoginAt?: true
     createdAt?: true
     updatedAt?: true
@@ -2657,6 +2669,8 @@ export namespace Prisma {
     role: $Enums.RoleType
     status: $Enums.UserStatus
     image: string | null
+    isBot: boolean
+    botPersona: string | null
     lastLoginAt: Date | null
     createdAt: Date
     updatedAt: Date
@@ -2687,6 +2701,8 @@ export namespace Prisma {
     role?: boolean
     status?: boolean
     image?: boolean
+    isBot?: boolean
+    botPersona?: boolean
     lastLoginAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2711,6 +2727,8 @@ export namespace Prisma {
     role?: boolean
     status?: boolean
     image?: boolean
+    isBot?: boolean
+    botPersona?: boolean
     lastLoginAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2724,6 +2742,8 @@ export namespace Prisma {
     role?: boolean
     status?: boolean
     image?: boolean
+    isBot?: boolean
+    botPersona?: boolean
     lastLoginAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2766,6 +2786,8 @@ export namespace Prisma {
       role: $Enums.RoleType
       status: $Enums.UserStatus
       image: string | null
+      isBot: boolean
+      botPersona: string | null
       lastLoginAt: Date | null
       createdAt: Date
       updatedAt: Date
@@ -3179,6 +3201,8 @@ export namespace Prisma {
     readonly role: FieldRef<"User", 'RoleType'>
     readonly status: FieldRef<"User", 'UserStatus'>
     readonly image: FieldRef<"User", 'String'>
+    readonly isBot: FieldRef<"User", 'Boolean'>
+    readonly botPersona: FieldRef<"User", 'String'>
     readonly lastLoginAt: FieldRef<"User", 'DateTime'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
@@ -9369,6 +9393,8 @@ export namespace Prisma {
   }
 
   export type EventAvgAggregateOutputType = {
+    botStartingBalance: number | null
+    botMaxExposure: number | null
     roundDurationSec: number | null
     lockBufferSec: number | null
     totalRounds: number | null
@@ -9380,6 +9406,8 @@ export namespace Prisma {
   }
 
   export type EventSumAggregateOutputType = {
+    botStartingBalance: number | null
+    botMaxExposure: number | null
     roundDurationSec: number | null
     lockBufferSec: number | null
     totalRounds: number | null
@@ -9405,7 +9433,15 @@ export namespace Prisma {
     collegeLogoUrl: string | null
     themeColor: string | null
     enableBots: boolean | null
+    botsEnabled: boolean | null
+    botStartingBalance: number | null
+    botMaxExposure: number | null
+    botStrategy: string | null
+    botStatus: string | null
+    botLastTradeAt: Date | null
     botIntensity: string | null
+    mode: string | null
+    demoStatus: string | null
     asset: string | null
     roundDurationSec: number | null
     lockBufferSec: number | null
@@ -9441,7 +9477,15 @@ export namespace Prisma {
     collegeLogoUrl: string | null
     themeColor: string | null
     enableBots: boolean | null
+    botsEnabled: boolean | null
+    botStartingBalance: number | null
+    botMaxExposure: number | null
+    botStrategy: string | null
+    botStatus: string | null
+    botLastTradeAt: Date | null
     botIntensity: string | null
+    mode: string | null
+    demoStatus: string | null
     asset: string | null
     roundDurationSec: number | null
     lockBufferSec: number | null
@@ -9477,7 +9521,15 @@ export namespace Prisma {
     collegeLogoUrl: number
     themeColor: number
     enableBots: number
+    botsEnabled: number
+    botStartingBalance: number
+    botMaxExposure: number
+    botStrategy: number
+    botStatus: number
+    botLastTradeAt: number
     botIntensity: number
+    mode: number
+    demoStatus: number
     asset: number
     roundDurationSec: number
     lockBufferSec: number
@@ -9501,6 +9553,8 @@ export namespace Prisma {
 
 
   export type EventAvgAggregateInputType = {
+    botStartingBalance?: true
+    botMaxExposure?: true
     roundDurationSec?: true
     lockBufferSec?: true
     totalRounds?: true
@@ -9512,6 +9566,8 @@ export namespace Prisma {
   }
 
   export type EventSumAggregateInputType = {
+    botStartingBalance?: true
+    botMaxExposure?: true
     roundDurationSec?: true
     lockBufferSec?: true
     totalRounds?: true
@@ -9537,7 +9593,15 @@ export namespace Prisma {
     collegeLogoUrl?: true
     themeColor?: true
     enableBots?: true
+    botsEnabled?: true
+    botStartingBalance?: true
+    botMaxExposure?: true
+    botStrategy?: true
+    botStatus?: true
+    botLastTradeAt?: true
     botIntensity?: true
+    mode?: true
+    demoStatus?: true
     asset?: true
     roundDurationSec?: true
     lockBufferSec?: true
@@ -9573,7 +9637,15 @@ export namespace Prisma {
     collegeLogoUrl?: true
     themeColor?: true
     enableBots?: true
+    botsEnabled?: true
+    botStartingBalance?: true
+    botMaxExposure?: true
+    botStrategy?: true
+    botStatus?: true
+    botLastTradeAt?: true
     botIntensity?: true
+    mode?: true
+    demoStatus?: true
     asset?: true
     roundDurationSec?: true
     lockBufferSec?: true
@@ -9609,7 +9681,15 @@ export namespace Prisma {
     collegeLogoUrl?: true
     themeColor?: true
     enableBots?: true
+    botsEnabled?: true
+    botStartingBalance?: true
+    botMaxExposure?: true
+    botStrategy?: true
+    botStatus?: true
+    botLastTradeAt?: true
     botIntensity?: true
+    mode?: true
+    demoStatus?: true
     asset?: true
     roundDurationSec?: true
     lockBufferSec?: true
@@ -9732,7 +9812,15 @@ export namespace Prisma {
     collegeLogoUrl: string | null
     themeColor: string | null
     enableBots: boolean
+    botsEnabled: boolean
+    botStartingBalance: number
+    botMaxExposure: number
+    botStrategy: string
+    botStatus: string
+    botLastTradeAt: Date | null
     botIntensity: string
+    mode: string
+    demoStatus: string
     asset: string
     roundDurationSec: number
     lockBufferSec: number
@@ -9787,7 +9875,15 @@ export namespace Prisma {
     collegeLogoUrl?: boolean
     themeColor?: boolean
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: boolean
+    botMaxExposure?: boolean
+    botStrategy?: boolean
+    botStatus?: boolean
+    botLastTradeAt?: boolean
     botIntensity?: boolean
+    mode?: boolean
+    demoStatus?: boolean
     asset?: boolean
     roundDurationSec?: boolean
     lockBufferSec?: boolean
@@ -9829,7 +9925,15 @@ export namespace Prisma {
     collegeLogoUrl?: boolean
     themeColor?: boolean
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: boolean
+    botMaxExposure?: boolean
+    botStrategy?: boolean
+    botStatus?: boolean
+    botLastTradeAt?: boolean
     botIntensity?: boolean
+    mode?: boolean
+    demoStatus?: boolean
     asset?: boolean
     roundDurationSec?: boolean
     lockBufferSec?: boolean
@@ -9866,7 +9970,15 @@ export namespace Prisma {
     collegeLogoUrl?: boolean
     themeColor?: boolean
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: boolean
+    botMaxExposure?: boolean
+    botStrategy?: boolean
+    botStatus?: boolean
+    botLastTradeAt?: boolean
     botIntensity?: boolean
+    mode?: boolean
+    demoStatus?: boolean
     asset?: boolean
     roundDurationSec?: boolean
     lockBufferSec?: boolean
@@ -9923,7 +10035,15 @@ export namespace Prisma {
       collegeLogoUrl: string | null
       themeColor: string | null
       enableBots: boolean
+      botsEnabled: boolean
+      botStartingBalance: number
+      botMaxExposure: number
+      botStrategy: string
+      botStatus: string
+      botLastTradeAt: Date | null
       botIntensity: string
+      mode: string
+      demoStatus: string
       asset: string
       roundDurationSec: number
       lockBufferSec: number
@@ -10354,7 +10474,15 @@ export namespace Prisma {
     readonly collegeLogoUrl: FieldRef<"Event", 'String'>
     readonly themeColor: FieldRef<"Event", 'String'>
     readonly enableBots: FieldRef<"Event", 'Boolean'>
+    readonly botsEnabled: FieldRef<"Event", 'Boolean'>
+    readonly botStartingBalance: FieldRef<"Event", 'Float'>
+    readonly botMaxExposure: FieldRef<"Event", 'Float'>
+    readonly botStrategy: FieldRef<"Event", 'String'>
+    readonly botStatus: FieldRef<"Event", 'String'>
+    readonly botLastTradeAt: FieldRef<"Event", 'DateTime'>
     readonly botIntensity: FieldRef<"Event", 'String'>
+    readonly mode: FieldRef<"Event", 'String'>
+    readonly demoStatus: FieldRef<"Event", 'String'>
     readonly asset: FieldRef<"Event", 'String'>
     readonly roundDurationSec: FieldRef<"Event", 'Int'>
     readonly lockBufferSec: FieldRef<"Event", 'Int'>
@@ -14085,6 +14213,7 @@ export namespace Prisma {
     priceAtFill: number | null
     payout: number | null
     status: $Enums.TradeStatus | null
+    actorType: string | null
     settledAt: Date | null
     createdAt: Date | null
   }
@@ -14101,6 +14230,7 @@ export namespace Prisma {
     priceAtFill: number | null
     payout: number | null
     status: $Enums.TradeStatus | null
+    actorType: string | null
     settledAt: Date | null
     createdAt: Date | null
   }
@@ -14117,6 +14247,7 @@ export namespace Prisma {
     priceAtFill: number
     payout: number
     status: number
+    actorType: number
     settledAt: number
     createdAt: number
     _all: number
@@ -14149,6 +14280,7 @@ export namespace Prisma {
     priceAtFill?: true
     payout?: true
     status?: true
+    actorType?: true
     settledAt?: true
     createdAt?: true
   }
@@ -14165,6 +14297,7 @@ export namespace Prisma {
     priceAtFill?: true
     payout?: true
     status?: true
+    actorType?: true
     settledAt?: true
     createdAt?: true
   }
@@ -14181,6 +14314,7 @@ export namespace Prisma {
     priceAtFill?: true
     payout?: true
     status?: true
+    actorType?: true
     settledAt?: true
     createdAt?: true
     _all?: true
@@ -14284,6 +14418,7 @@ export namespace Prisma {
     priceAtFill: number
     payout: number | null
     status: $Enums.TradeStatus
+    actorType: string
     settledAt: Date | null
     createdAt: Date
     _count: TradeCountAggregateOutputType | null
@@ -14319,6 +14454,7 @@ export namespace Prisma {
     priceAtFill?: boolean
     payout?: boolean
     status?: boolean
+    actorType?: boolean
     settledAt?: boolean
     createdAt?: boolean
     event?: boolean | EventDefaultArgs<ExtArgs>
@@ -14341,6 +14477,7 @@ export namespace Prisma {
     priceAtFill?: boolean
     payout?: boolean
     status?: boolean
+    actorType?: boolean
     settledAt?: boolean
     createdAt?: boolean
     event?: boolean | EventDefaultArgs<ExtArgs>
@@ -14361,6 +14498,7 @@ export namespace Prisma {
     priceAtFill?: boolean
     payout?: boolean
     status?: boolean
+    actorType?: boolean
     settledAt?: boolean
     createdAt?: boolean
   }
@@ -14401,6 +14539,7 @@ export namespace Prisma {
       priceAtFill: number
       payout: number | null
       status: $Enums.TradeStatus
+      actorType: string
       settledAt: Date | null
       createdAt: Date
     }, ExtArgs["result"]["trade"]>
@@ -14812,6 +14951,7 @@ export namespace Prisma {
     readonly priceAtFill: FieldRef<"Trade", 'Float'>
     readonly payout: FieldRef<"Trade", 'Float'>
     readonly status: FieldRef<"Trade", 'TradeStatus'>
+    readonly actorType: FieldRef<"Trade", 'String'>
     readonly settledAt: FieldRef<"Trade", 'DateTime'>
     readonly createdAt: FieldRef<"Trade", 'DateTime'>
   }
@@ -17288,6 +17428,8 @@ export namespace Prisma {
     role: 'role',
     status: 'status',
     image: 'image',
+    isBot: 'isBot',
+    botPersona: 'botPersona',
     lastLoginAt: 'lastLoginAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -17379,7 +17521,15 @@ export namespace Prisma {
     collegeLogoUrl: 'collegeLogoUrl',
     themeColor: 'themeColor',
     enableBots: 'enableBots',
+    botsEnabled: 'botsEnabled',
+    botStartingBalance: 'botStartingBalance',
+    botMaxExposure: 'botMaxExposure',
+    botStrategy: 'botStrategy',
+    botStatus: 'botStatus',
+    botLastTradeAt: 'botLastTradeAt',
     botIntensity: 'botIntensity',
+    mode: 'mode',
+    demoStatus: 'demoStatus',
     asset: 'asset',
     roundDurationSec: 'roundDurationSec',
     lockBufferSec: 'lockBufferSec',
@@ -17471,6 +17621,7 @@ export namespace Prisma {
     priceAtFill: 'priceAtFill',
     payout: 'payout',
     status: 'status',
+    actorType: 'actorType',
     settledAt: 'settledAt',
     createdAt: 'createdAt'
   };
@@ -17602,6 +17753,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -17626,13 +17784,6 @@ export namespace Prisma {
    * Reference to a field of type 'PermissionKey[]'
    */
   export type ListEnumPermissionKeyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PermissionKey[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -17825,6 +17976,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFilter<"User"> | $Enums.RoleType
     status?: EnumUserStatusFilter<"User"> | $Enums.UserStatus
     image?: StringNullableFilter<"User"> | string | null
+    isBot?: BoolFilter<"User"> | boolean
+    botPersona?: StringNullableFilter<"User"> | string | null
     lastLoginAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -17848,6 +18001,8 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     image?: SortOrderInput | SortOrder
+    isBot?: SortOrder
+    botPersona?: SortOrderInput | SortOrder
     lastLoginAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -17874,6 +18029,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFilter<"User"> | $Enums.RoleType
     status?: EnumUserStatusFilter<"User"> | $Enums.UserStatus
     image?: StringNullableFilter<"User"> | string | null
+    isBot?: BoolFilter<"User"> | boolean
+    botPersona?: StringNullableFilter<"User"> | string | null
     lastLoginAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -17897,6 +18054,8 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     image?: SortOrderInput | SortOrder
+    isBot?: SortOrder
+    botPersona?: SortOrderInput | SortOrder
     lastLoginAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -17916,6 +18075,8 @@ export namespace Prisma {
     role?: EnumRoleTypeWithAggregatesFilter<"User"> | $Enums.RoleType
     status?: EnumUserStatusWithAggregatesFilter<"User"> | $Enums.UserStatus
     image?: StringNullableWithAggregatesFilter<"User"> | string | null
+    isBot?: BoolWithAggregatesFilter<"User"> | boolean
+    botPersona?: StringNullableWithAggregatesFilter<"User"> | string | null
     lastLoginAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -18288,7 +18449,15 @@ export namespace Prisma {
     collegeLogoUrl?: StringNullableFilter<"Event"> | string | null
     themeColor?: StringNullableFilter<"Event"> | string | null
     enableBots?: BoolFilter<"Event"> | boolean
+    botsEnabled?: BoolFilter<"Event"> | boolean
+    botStartingBalance?: FloatFilter<"Event"> | number
+    botMaxExposure?: FloatFilter<"Event"> | number
+    botStrategy?: StringFilter<"Event"> | string
+    botStatus?: StringFilter<"Event"> | string
+    botLastTradeAt?: DateTimeNullableFilter<"Event"> | Date | string | null
     botIntensity?: StringFilter<"Event"> | string
+    mode?: StringFilter<"Event"> | string
+    demoStatus?: StringFilter<"Event"> | string
     asset?: StringFilter<"Event"> | string
     roundDurationSec?: IntFilter<"Event"> | number
     lockBufferSec?: IntFilter<"Event"> | number
@@ -18329,7 +18498,15 @@ export namespace Prisma {
     collegeLogoUrl?: SortOrderInput | SortOrder
     themeColor?: SortOrderInput | SortOrder
     enableBots?: SortOrder
+    botsEnabled?: SortOrder
+    botStartingBalance?: SortOrder
+    botMaxExposure?: SortOrder
+    botStrategy?: SortOrder
+    botStatus?: SortOrder
+    botLastTradeAt?: SortOrderInput | SortOrder
     botIntensity?: SortOrder
+    mode?: SortOrder
+    demoStatus?: SortOrder
     asset?: SortOrder
     roundDurationSec?: SortOrder
     lockBufferSec?: SortOrder
@@ -18373,7 +18550,15 @@ export namespace Prisma {
     collegeLogoUrl?: StringNullableFilter<"Event"> | string | null
     themeColor?: StringNullableFilter<"Event"> | string | null
     enableBots?: BoolFilter<"Event"> | boolean
+    botsEnabled?: BoolFilter<"Event"> | boolean
+    botStartingBalance?: FloatFilter<"Event"> | number
+    botMaxExposure?: FloatFilter<"Event"> | number
+    botStrategy?: StringFilter<"Event"> | string
+    botStatus?: StringFilter<"Event"> | string
+    botLastTradeAt?: DateTimeNullableFilter<"Event"> | Date | string | null
     botIntensity?: StringFilter<"Event"> | string
+    mode?: StringFilter<"Event"> | string
+    demoStatus?: StringFilter<"Event"> | string
     asset?: StringFilter<"Event"> | string
     roundDurationSec?: IntFilter<"Event"> | number
     lockBufferSec?: IntFilter<"Event"> | number
@@ -18414,7 +18599,15 @@ export namespace Prisma {
     collegeLogoUrl?: SortOrderInput | SortOrder
     themeColor?: SortOrderInput | SortOrder
     enableBots?: SortOrder
+    botsEnabled?: SortOrder
+    botStartingBalance?: SortOrder
+    botMaxExposure?: SortOrder
+    botStrategy?: SortOrder
+    botStatus?: SortOrder
+    botLastTradeAt?: SortOrderInput | SortOrder
     botIntensity?: SortOrder
+    mode?: SortOrder
+    demoStatus?: SortOrder
     asset?: SortOrder
     roundDurationSec?: SortOrder
     lockBufferSec?: SortOrder
@@ -18458,7 +18651,15 @@ export namespace Prisma {
     collegeLogoUrl?: StringNullableWithAggregatesFilter<"Event"> | string | null
     themeColor?: StringNullableWithAggregatesFilter<"Event"> | string | null
     enableBots?: BoolWithAggregatesFilter<"Event"> | boolean
+    botsEnabled?: BoolWithAggregatesFilter<"Event"> | boolean
+    botStartingBalance?: FloatWithAggregatesFilter<"Event"> | number
+    botMaxExposure?: FloatWithAggregatesFilter<"Event"> | number
+    botStrategy?: StringWithAggregatesFilter<"Event"> | string
+    botStatus?: StringWithAggregatesFilter<"Event"> | string
+    botLastTradeAt?: DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
     botIntensity?: StringWithAggregatesFilter<"Event"> | string
+    mode?: StringWithAggregatesFilter<"Event"> | string
+    demoStatus?: StringWithAggregatesFilter<"Event"> | string
     asset?: StringWithAggregatesFilter<"Event"> | string
     roundDurationSec?: IntWithAggregatesFilter<"Event"> | number
     lockBufferSec?: IntWithAggregatesFilter<"Event"> | number
@@ -18795,6 +18996,7 @@ export namespace Prisma {
     priceAtFill?: FloatFilter<"Trade"> | number
     payout?: FloatNullableFilter<"Trade"> | number | null
     status?: EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+    actorType?: StringFilter<"Trade"> | string
     settledAt?: DateTimeNullableFilter<"Trade"> | Date | string | null
     createdAt?: DateTimeFilter<"Trade"> | Date | string
     event?: XOR<EventRelationFilter, EventWhereInput>
@@ -18816,6 +19018,7 @@ export namespace Prisma {
     priceAtFill?: SortOrder
     payout?: SortOrderInput | SortOrder
     status?: SortOrder
+    actorType?: SortOrder
     settledAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     event?: EventOrderByWithRelationInput
@@ -18840,6 +19043,7 @@ export namespace Prisma {
     priceAtFill?: FloatFilter<"Trade"> | number
     payout?: FloatNullableFilter<"Trade"> | number | null
     status?: EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+    actorType?: StringFilter<"Trade"> | string
     settledAt?: DateTimeNullableFilter<"Trade"> | Date | string | null
     createdAt?: DateTimeFilter<"Trade"> | Date | string
     event?: XOR<EventRelationFilter, EventWhereInput>
@@ -18861,6 +19065,7 @@ export namespace Prisma {
     priceAtFill?: SortOrder
     payout?: SortOrderInput | SortOrder
     status?: SortOrder
+    actorType?: SortOrder
     settledAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: TradeCountOrderByAggregateInput
@@ -18885,6 +19090,7 @@ export namespace Prisma {
     priceAtFill?: FloatWithAggregatesFilter<"Trade"> | number
     payout?: FloatNullableWithAggregatesFilter<"Trade"> | number | null
     status?: EnumTradeStatusWithAggregatesFilter<"Trade"> | $Enums.TradeStatus
+    actorType?: StringWithAggregatesFilter<"Trade"> | string
     settledAt?: DateTimeNullableWithAggregatesFilter<"Trade"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Trade"> | Date | string
   }
@@ -19083,6 +19289,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19106,6 +19314,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19129,6 +19339,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19152,6 +19364,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19175,6 +19389,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19188,6 +19404,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19201,6 +19419,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19573,7 +19793,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -19614,7 +19842,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -19653,7 +19889,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -19694,7 +19938,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -19734,7 +19986,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -19769,7 +20029,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -19805,7 +20073,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -20170,6 +20446,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
     event: EventCreateNestedOneWithoutTradesInput
@@ -20191,6 +20468,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
     ledgerEntries?: PointLedgerUncheckedCreateNestedManyWithoutTradeInput
@@ -20204,6 +20482,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     event?: EventUpdateOneRequiredWithoutTradesNestedInput
@@ -20225,6 +20504,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ledgerEntries?: PointLedgerUncheckedUpdateManyWithoutTradeNestedInput
@@ -20242,6 +20522,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
   }
@@ -20254,6 +20535,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -20270,6 +20552,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -20516,6 +20799,11 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type DateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -20641,6 +20929,8 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     image?: SortOrder
+    isBot?: SortOrder
+    botPersona?: SortOrder
     lastLoginAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20654,6 +20944,8 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     image?: SortOrder
+    isBot?: SortOrder
+    botPersona?: SortOrder
     lastLoginAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20667,6 +20959,8 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     image?: SortOrder
+    isBot?: SortOrder
+    botPersona?: SortOrder
     lastLoginAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20726,6 +21020,14 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -20838,11 +21140,6 @@ export namespace Prisma {
     permissionId?: SortOrder
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type UserRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
@@ -20872,14 +21169,6 @@ export namespace Prisma {
     userId?: SortOrder
     permissionId?: SortOrder
     granted?: SortOrder
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type IntNullableFilter<$PrismaModel = never> = {
@@ -21018,17 +21307,6 @@ export namespace Prisma {
     not?: NestedEnumMarketCategoryFilter<$PrismaModel> | $Enums.MarketCategory
   }
 
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
-  }
-
   export type FloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -21038,6 +21316,17 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type EnumEventStatusFilter<$PrismaModel = never> = {
@@ -21079,7 +21368,15 @@ export namespace Prisma {
     collegeLogoUrl?: SortOrder
     themeColor?: SortOrder
     enableBots?: SortOrder
+    botsEnabled?: SortOrder
+    botStartingBalance?: SortOrder
+    botMaxExposure?: SortOrder
+    botStrategy?: SortOrder
+    botStatus?: SortOrder
+    botLastTradeAt?: SortOrder
     botIntensity?: SortOrder
+    mode?: SortOrder
+    demoStatus?: SortOrder
     asset?: SortOrder
     roundDurationSec?: SortOrder
     lockBufferSec?: SortOrder
@@ -21101,6 +21398,8 @@ export namespace Prisma {
   }
 
   export type EventAvgOrderByAggregateInput = {
+    botStartingBalance?: SortOrder
+    botMaxExposure?: SortOrder
     roundDurationSec?: SortOrder
     lockBufferSec?: SortOrder
     totalRounds?: SortOrder
@@ -21126,7 +21425,15 @@ export namespace Prisma {
     collegeLogoUrl?: SortOrder
     themeColor?: SortOrder
     enableBots?: SortOrder
+    botsEnabled?: SortOrder
+    botStartingBalance?: SortOrder
+    botMaxExposure?: SortOrder
+    botStrategy?: SortOrder
+    botStatus?: SortOrder
+    botLastTradeAt?: SortOrder
     botIntensity?: SortOrder
+    mode?: SortOrder
+    demoStatus?: SortOrder
     asset?: SortOrder
     roundDurationSec?: SortOrder
     lockBufferSec?: SortOrder
@@ -21162,7 +21469,15 @@ export namespace Prisma {
     collegeLogoUrl?: SortOrder
     themeColor?: SortOrder
     enableBots?: SortOrder
+    botsEnabled?: SortOrder
+    botStartingBalance?: SortOrder
+    botMaxExposure?: SortOrder
+    botStrategy?: SortOrder
+    botStatus?: SortOrder
+    botLastTradeAt?: SortOrder
     botIntensity?: SortOrder
+    mode?: SortOrder
+    demoStatus?: SortOrder
     asset?: SortOrder
     roundDurationSec?: SortOrder
     lockBufferSec?: SortOrder
@@ -21184,6 +21499,8 @@ export namespace Prisma {
   }
 
   export type EventSumOrderByAggregateInput = {
+    botStartingBalance?: SortOrder
+    botMaxExposure?: SortOrder
     roundDurationSec?: SortOrder
     lockBufferSec?: SortOrder
     totalRounds?: SortOrder
@@ -21204,22 +21521,6 @@ export namespace Prisma {
     _max?: NestedEnumMarketCategoryFilter<$PrismaModel>
   }
 
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
   export type FloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -21234,6 +21535,22 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type EnumEventStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -21555,6 +21872,7 @@ export namespace Prisma {
     priceAtFill?: SortOrder
     payout?: SortOrder
     status?: SortOrder
+    actorType?: SortOrder
     settledAt?: SortOrder
     createdAt?: SortOrder
   }
@@ -21578,6 +21896,7 @@ export namespace Prisma {
     priceAtFill?: SortOrder
     payout?: SortOrder
     status?: SortOrder
+    actorType?: SortOrder
     settledAt?: SortOrder
     createdAt?: SortOrder
   }
@@ -21594,6 +21913,7 @@ export namespace Prisma {
     priceAtFill?: SortOrder
     payout?: SortOrder
     status?: SortOrder
+    actorType?: SortOrder
     settledAt?: SortOrder
     createdAt?: SortOrder
   }
@@ -21958,6 +22278,10 @@ export namespace Prisma {
 
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -22362,10 +22686,6 @@ export namespace Prisma {
     connect?: PermissionWhereUniqueInput
   }
 
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
-  }
-
   export type UserUpdateOneRequiredWithoutUserPermissionsNestedInput = {
     create?: XOR<UserCreateWithoutUserPermissionsInput, UserUncheckedCreateWithoutUserPermissionsInput>
     connectOrCreate?: UserCreateOrConnectWithoutUserPermissionsInput
@@ -22484,7 +22804,7 @@ export namespace Prisma {
     set?: $Enums.MarketCategory
   }
 
-  export type IntFieldUpdateOperationsInput = {
+  export type FloatFieldUpdateOperationsInput = {
     set?: number
     increment?: number
     decrement?: number
@@ -22492,7 +22812,7 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type FloatFieldUpdateOperationsInput = {
+  export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
     decrement?: number
@@ -23076,6 +23396,11 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -23174,6 +23499,14 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -23217,19 +23550,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPermissionKeyFilter<$PrismaModel>
     _max?: NestedEnumPermissionKeyFilter<$PrismaModel>
-  }
-
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -23301,22 +23621,6 @@ export namespace Prisma {
     _max?: NestedEnumMarketCategoryFilter<$PrismaModel>
   }
 
-  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -23331,6 +23635,22 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type NestedEnumEventStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -23606,7 +23926,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -23645,7 +23973,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -23718,6 +24054,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
     event: EventCreateNestedOneWithoutTradesInput
@@ -23737,6 +24074,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
     ledgerEntries?: PointLedgerUncheckedCreateNestedManyWithoutTradeInput
@@ -24026,7 +24364,15 @@ export namespace Prisma {
     collegeLogoUrl?: StringNullableFilter<"Event"> | string | null
     themeColor?: StringNullableFilter<"Event"> | string | null
     enableBots?: BoolFilter<"Event"> | boolean
+    botsEnabled?: BoolFilter<"Event"> | boolean
+    botStartingBalance?: FloatFilter<"Event"> | number
+    botMaxExposure?: FloatFilter<"Event"> | number
+    botStrategy?: StringFilter<"Event"> | string
+    botStatus?: StringFilter<"Event"> | string
+    botLastTradeAt?: DateTimeNullableFilter<"Event"> | Date | string | null
     botIntensity?: StringFilter<"Event"> | string
+    mode?: StringFilter<"Event"> | string
+    demoStatus?: StringFilter<"Event"> | string
     asset?: StringFilter<"Event"> | string
     roundDurationSec?: IntFilter<"Event"> | number
     lockBufferSec?: IntFilter<"Event"> | number
@@ -24106,6 +24452,7 @@ export namespace Prisma {
     priceAtFill?: FloatFilter<"Trade"> | number
     payout?: FloatNullableFilter<"Trade"> | number | null
     status?: EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+    actorType?: StringFilter<"Trade"> | string
     settledAt?: DateTimeNullableFilter<"Trade"> | Date | string | null
     createdAt?: DateTimeFilter<"Trade"> | Date | string
   }
@@ -24375,6 +24722,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -24397,6 +24746,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -24460,6 +24811,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24482,6 +24835,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24535,6 +24890,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -24557,6 +24914,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -24595,6 +24954,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24617,6 +24978,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24639,6 +25002,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -24661,6 +25026,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -24699,6 +25066,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24721,6 +25090,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24743,6 +25114,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -24765,6 +25138,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -24876,6 +25251,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
     round: RoundCreateNestedOneWithoutTradesInput
@@ -24895,6 +25271,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
     ledgerEntries?: PointLedgerUncheckedCreateNestedManyWithoutTradeInput
@@ -24967,6 +25344,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24989,6 +25368,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25100,6 +25481,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25122,6 +25505,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25149,6 +25534,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25171,6 +25558,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25209,6 +25598,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25231,6 +25622,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25264,6 +25657,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25286,6 +25681,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25314,7 +25711,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -25354,7 +25759,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -25391,6 +25804,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25413,6 +25828,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25440,6 +25857,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
     event: EventCreateNestedOneWithoutTradesInput
@@ -25459,6 +25877,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
     ledgerEntries?: PointLedgerUncheckedCreateNestedManyWithoutTradeInput
@@ -25537,7 +25956,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -25577,7 +26004,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -25620,6 +26055,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25642,6 +26079,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25702,7 +26141,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -25742,7 +26189,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -25779,6 +26234,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
     event: EventCreateNestedOneWithoutTradesInput
@@ -25798,6 +26254,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
     ledgerEntries?: PointLedgerUncheckedCreateNestedManyWithoutTradeInput
@@ -25838,7 +26295,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -25878,7 +26343,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -25932,7 +26405,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -25972,7 +26453,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -26058,6 +26547,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26080,6 +26571,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26187,7 +26680,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -26227,7 +26728,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -26325,6 +26834,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -26347,6 +26858,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -26422,7 +26935,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -26462,7 +26983,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -26524,6 +27053,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26546,6 +27077,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26573,6 +27106,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
     event: EventCreateNestedOneWithoutTradesInput
@@ -26593,6 +27127,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
   }
@@ -26627,7 +27162,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -26667,7 +27210,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -26741,6 +27292,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -26763,6 +27316,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -26796,6 +27351,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     event?: EventUpdateOneRequiredWithoutTradesNestedInput
@@ -26816,6 +27372,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26828,6 +27385,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26850,6 +27409,8 @@ export namespace Prisma {
     role?: $Enums.RoleType
     status?: $Enums.UserStatus
     image?: string | null
+    isBot?: boolean
+    botPersona?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26888,6 +27449,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -26910,6 +27473,8 @@ export namespace Prisma {
     role?: EnumRoleTypeFieldUpdateOperationsInput | $Enums.RoleType
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     image?: NullableStringFieldUpdateOperationsInput | string | null
+    isBot?: BoolFieldUpdateOperationsInput | boolean
+    botPersona?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -26964,7 +27529,15 @@ export namespace Prisma {
     collegeLogoUrl?: string | null
     themeColor?: string | null
     enableBots?: boolean
+    botsEnabled?: boolean
+    botStartingBalance?: number
+    botMaxExposure?: number
+    botStrategy?: string
+    botStatus?: string
+    botLastTradeAt?: Date | string | null
     botIntensity?: string
+    mode?: string
+    demoStatus?: string
     asset?: string
     roundDurationSec?: number
     lockBufferSec?: number
@@ -27004,6 +27577,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
   }
@@ -27157,7 +27731,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -27196,7 +27778,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -27235,7 +27825,15 @@ export namespace Prisma {
     collegeLogoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     themeColor?: NullableStringFieldUpdateOperationsInput | string | null
     enableBots?: BoolFieldUpdateOperationsInput | boolean
+    botsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    botStartingBalance?: FloatFieldUpdateOperationsInput | number
+    botMaxExposure?: FloatFieldUpdateOperationsInput | number
+    botStrategy?: StringFieldUpdateOperationsInput | string
+    botStatus?: StringFieldUpdateOperationsInput | string
+    botLastTradeAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     botIntensity?: StringFieldUpdateOperationsInput | string
+    mode?: StringFieldUpdateOperationsInput | string
+    demoStatus?: StringFieldUpdateOperationsInput | string
     asset?: StringFieldUpdateOperationsInput | string
     roundDurationSec?: IntFieldUpdateOperationsInput | number
     lockBufferSec?: IntFieldUpdateOperationsInput | number
@@ -27292,6 +27890,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     event?: EventUpdateOneRequiredWithoutTradesNestedInput
@@ -27311,6 +27910,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ledgerEntries?: PointLedgerUncheckedUpdateManyWithoutTradeNestedInput
@@ -27327,6 +27927,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -27586,6 +28187,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
   }
@@ -27705,6 +28307,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     round?: RoundUpdateOneRequiredWithoutTradesNestedInput
@@ -27724,6 +28327,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ledgerEntries?: PointLedgerUncheckedUpdateManyWithoutTradeNestedInput
@@ -27740,6 +28344,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -27797,6 +28402,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
   }
@@ -27823,6 +28429,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     event?: EventUpdateOneRequiredWithoutTradesNestedInput
@@ -27842,6 +28449,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ledgerEntries?: PointLedgerUncheckedUpdateManyWithoutTradeNestedInput
@@ -27858,6 +28466,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -27915,6 +28524,7 @@ export namespace Prisma {
     priceAtFill: number
     payout?: number | null
     status?: $Enums.TradeStatus
+    actorType?: string
     settledAt?: Date | string | null
     createdAt?: Date | string
   }
@@ -27927,6 +28537,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     event?: EventUpdateOneRequiredWithoutTradesNestedInput
@@ -27946,6 +28557,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ledgerEntries?: PointLedgerUncheckedUpdateManyWithoutTradeNestedInput
@@ -27962,6 +28574,7 @@ export namespace Prisma {
     priceAtFill?: FloatFieldUpdateOperationsInput | number
     payout?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+    actorType?: StringFieldUpdateOperationsInput | string
     settledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

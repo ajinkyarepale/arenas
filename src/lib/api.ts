@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { auth, isOrganizer } from '@/lib/auth';
 import { formatZodError } from '@/lib/validation';
+import { RoleType } from '@/generated/client';
 
 /**
  * Shared plumbing for API route handlers: consistent error envelopes, session
@@ -43,6 +44,14 @@ export async function requireOrganizer() {
   const user = await requireUser();
   if (!user) return { user: null, allowed: false } as const;
   return { user, allowed: isOrganizer(user.role) } as const;
+}
+
+/** Require a superadmin or admin. */
+export async function requireSuperAdmin() {
+  const user = await requireUser();
+  if (!user) return { user: null, allowed: false } as const;
+  const allowed = user.role === RoleType.SUPERADMIN || user.role === RoleType.ADMIN;
+  return { user, allowed } as const;
 }
 
 type ParseResult<T> =
