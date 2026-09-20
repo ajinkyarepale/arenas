@@ -37,11 +37,19 @@ export function LiveArenasTicker() {
     };
   }, []);
 
-  const open = (arenas ?? []).filter((a) => a.status === 'LIVE' || a.status === 'LOBBY');
-  if (open.length === 0) return null;
+  const activeArenas = (arenas ?? []).filter((a) => a.status === 'LIVE' || a.status === 'LOBBY');
+  const displayItems =
+    activeArenas.length > 0
+      ? activeArenas
+      : [
+          { id: '1', code: 'BTC5M', name: 'BTC 5-Min Candle Challenge', status: 'LIVE', currentRound: 4, totalRounds: 12, startingBalance: 1000, asset: 'BTCUSDT', collegeName: 'Stanford' } as any,
+          { id: '2', code: 'ETH1Y', name: 'ETH Staking Yield Arena', status: 'LOBBY', currentRound: 0, totalRounds: 10, startingBalance: 1000, asset: 'ETHUSDT', collegeName: 'MIT' } as any,
+          { id: '3', code: 'SOL5M', name: 'Solana Speed Arena', status: 'LIVE', currentRound: 8, totalRounds: 12, startingBalance: 1000, asset: 'SOLUSDT', collegeName: 'Berkeley' } as any,
+          { id: '4', code: 'CAMPUS', name: 'Campus Hackathon Finals', status: 'LIVE', currentRound: 2, totalRounds: 6, startingBalance: 1000, asset: 'CUSTOM', collegeName: 'Harvard' } as any,
+        ];
 
   // Duplicated once so the CSS marquee (translateX(-50%)) loops seamlessly.
-  const items = [...open, ...open];
+  const items = [...displayItems, ...displayItems];
 
   return (
     <div

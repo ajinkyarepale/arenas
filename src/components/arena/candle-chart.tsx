@@ -282,6 +282,19 @@ export function CandleChart({
     }
   }, [livePrice, chartMode]);
 
+  // Dynamically update line and gradient color as price moves above/below open
+  useEffect(() => {
+    const series = seriesRef.current;
+    if (!series || livePrice == null || openPrice == null) return;
+    const isUp = livePrice >= openPrice;
+    if (chartMode === 'area') {
+      (series as ISeriesApi<'Area'>).applyOptions({
+        lineColor: isUp ? '#22C55E' : '#EF4444',
+        topColor: isUp ? 'rgba(34, 197, 94, 0.28)' : 'rgba(239, 68, 68, 0.28)',
+      });
+    }
+  }, [livePrice, openPrice, chartMode]);
+
   // Strike line sync
   useEffect(() => {
     const series = seriesRef.current;
