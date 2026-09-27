@@ -6,6 +6,8 @@
  * development (the operator watches the server log), never for production.
  */
 
+import { logger } from '@/lib/logger';
+
 export class EmailError extends Error {
   constructor(message: string) {
     super(message);
@@ -18,7 +20,7 @@ export async function sendOtpEmail(email: string, code: string): Promise<void> {
   const from = process.env.EMAIL_FROM ?? 'Arenas <no-reply@arenas.dev>';
 
   if (!apiKey) {
-    console.log(`[otp] sign-in code for ${email}: ${code} (RESEND_API_KEY unset — dev delivery via log)`);
+    logger.info('otp dev delivery', { email, code });
     return;
   }
 

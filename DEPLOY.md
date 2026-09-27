@@ -275,6 +275,15 @@ tick, so a restart mid-event recovers on its own with no lost rounds.
 Watch your data in Supabase's **Table Editor** during an event to see
 participants, trades and balances live.
 
+### Backups
+
+Supabase free projects have **no point-in-time recovery and can pause on
+inactivity** — export before every event: **Table Editor → any table → …
+→ Export as CSV**, or `pg_dump` against the session pooler URI the night
+before. Keep one dump per event; rounds, trades and balances are the tables
+that matter. On paid Supabase, enable daily backups + PITR and test a restore
+to a fresh project once before relying on it.
+
 ---
 
 ## Troubleshooting

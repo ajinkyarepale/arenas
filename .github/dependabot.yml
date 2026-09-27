@@ -1,0 +1,17 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    # Next.js majors are breaking for the custom server: review manually.
+    # (Track: upgrade next 14 -> 16 to clear the PostCSS advisories.)
+    allow:
+      - dependency-type: direct
+      - dependency-type: indirect
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
