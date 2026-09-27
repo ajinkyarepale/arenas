@@ -16,6 +16,7 @@ import {
   ordinal,
 } from '@/lib/format';
 import { getProfile, type ProfileArena } from '@/lib/profile';
+import { progressionFor } from '@/lib/progression';
 
 export const metadata: Metadata = { title: 'Portfolio' };
 export const dynamic = 'force-dynamic';
@@ -61,6 +62,11 @@ export default async function DashboardPage({
                 <h1 className="mt-1 text-4xl font-extrabold tracking-tight text-fg sm:text-5xl">
                   {session.user.name?.split(' ')[0] ?? 'Trader'}
                 </h1>
+                <TraderTitle
+                  settledTrades={analytics.settledTrades}
+                  netPnl={analytics.netPnl}
+                  hitRate={analytics.hitRate}
+                />
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -115,6 +121,10 @@ export default async function DashboardPage({
             </div>
           </div>
         </section>
+
+        {!hasHistory ? (
+          <Onboarding joined={arenas.length > 0} />
+        ) : null}
 
         {searchParams.error === 'organizer-only' ? (
           <p className="rounded-md border border-warn/40 bg-warn/10 px-4 py-3 text-sm text-warn">
@@ -283,6 +293,132 @@ export default async function DashboardPage({
         ) : null}
       </div>
     </SiteShell>
+  );
+}
+
+function TraderTitle({
+  settledTrades,
+  netPnl,
+  hitRate,
+}: {
+  settledTrades: number;
+  netPnl: number;
+  hitRate: number | null;
+}) {
+  const p = progressionFor({ settledTrades, netPnl, hitRate });
+  return (
+    <div className="mt-3 max-w-xs">
+      <div className="flex items-center gap-2">
+        <span className="rounded-md border border-accent/40 bg-accent/10 px-2 py-0.5 text-xs font-extrabold text-accent-light">
+          LVL {p.level} · {p.title}
+        </span>
+        {p.toNext !== null ? (
+          <span className="tnum text-[11px] font-semibold text-fg-faint">
+            {p.toNext} trades to next
+          </span>
+        ) : (
+          <span className="text-[11px] font-semibold text-yes">Max level</span>
+        )}
+      </div>
+      <div
+        className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-750"
+        role="img"
+        aria-label={`Level ${p.level} ${p.title}, ${Math.round(p.bandProgress * 100)} percent to next level`}
+      >
+        <div
+          className="h-full rounded-full bg-accent transition-[width] duration-500"
+          style={{ width: `${Math.round(p.bandProgress * 100)}%` }}
+        />
+      </div>
+      <p className="mt-1.5 text-xs text-fg-faint">{p.flavor}</p>
+    </div>
+  );
+}
+
+/** First-run checklist. Only measurable steps get checkmarks — guide reads
+    and browsing are links, never fake completions. */
+function Onboarding({ joined }: { joined: boolean }) {
+  const steps = [
+    {
+      done: false,
+      trackable: false,
+      title: 'Learn the contract',
+      body: 'YES pays ARC 1, NO pays ARC 1 — 3 minutes, no finance background needed.',
+      href: '/guide',
+      cta: 'Read the guide',
+    },
+    {
+      done: false,
+      trackable: false,
+      title: 'Find your room',
+      body: 'Browse open arenas across host colleges. No code needed to look.',
+      href: '/markets',
+      cta: 'Explore markets',
+    },
+    {
+      done: joined,
+      trackable: true,
+      title: 'Join with a code',
+      body: 'Your organizer hands you one code. That credits your starting Arcs.',
+      href: '/markets',
+      cta: joined ? 'Joined ✓' : 'Enter a code',
+    },
+    {
+      done: false,
+      trackable: true,
+      title: 'Place your first trade',
+      body: 'Stake ARC 10 on a side you can defend out loud. Settles in minutes.',
+      href: '/markets',
+      cta: 'Trade now',
+    },
+  ];
+
+  return (
+    <section aria-label="Getting started">
+      <Panel className="p-6 sm:p-7">
+        <div className="label !text-accent-light">Getting started</div>
+        <h2 className="mt-1.5 text-xl font-extrabold tracking-tight text-fg">
+          Four steps to your first settle
+        </h2>
+        <ol className="mt-5 grid gap-3 sm:grid-cols-2">
+          {steps.map((s, i) => (
+            <li
+              key={s.title}
+              className={cx(
+                'rounded-xl border p-4 transition-colors',
+                s.done ? 'border-yes/30 bg-yes/[0.04]' : 'border-line bg-ink-950',
+              )}
+            >
+              <div className="flex items-center gap-2.5">
+                <span
+                  className={cx(
+                    'tnum flex h-6 w-6 shrink-0 items-center justify-center rounded-md font-mono text-xs font-bold',
+                    s.done ? 'bg-yes/15 text-yes' : 'bg-ink-800 text-fg-faint',
+                  )}
+                  aria-label={s.done ? 'Done' : `Step ${i + 1}`}
+                >
+                  {s.done ? '✓' : i + 1}
+                </span>
+                <h3 className="text-sm font-bold text-fg">{s.title}</h3>
+              </div>
+              <p className="mt-2 text-[13px] leading-relaxed text-fg-muted">{s.body}</p>
+              <Link
+                href={s.href}
+                className={cx(
+                  'mt-3 inline-block text-[13px] font-bold',
+                  s.done ? 'text-yes' : 'text-accent-light hover:text-accent',
+                )}
+              >
+                {s.cta} →
+              </Link>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-4 text-xs text-fg-faint">
+          Checkmarks track real joins and trades only — nothing here is theatre.
+        </p>
+      </Panel>
+    </section>
   );
 }
 
