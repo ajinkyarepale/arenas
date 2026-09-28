@@ -142,30 +142,30 @@ export function BigScreen({
           <StatusLamp status={status} connected={connected} />
 
           {/* View Switcher Tabs (Always Visible) */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#141418] border border-[#27272A]">
+          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#141418] border border-[#27272A]">
             <button
               type="button"
               onClick={() => handleSelectView('live')}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-['Epilogue'] font-bold text-[#a1a1aa] hover:text-white hover:bg-[#201f1f] transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white hover:bg-[#201f1f] transition-all cursor-pointer"
               title="Switch to Live Arena Terminal"
             >
-              <span className="material-symbols-outlined text-[15px] text-[#22C55E]">bolt</span>
+              <span className="material-symbols-outlined text-[14px] text-[#22C55E]">bolt</span>
               <span className="hidden xl:inline">Live Arena</span>
             </button>
             <button
               type="button"
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-['Epilogue'] font-bold bg-[#38BDF8]/15 text-[#38BDF8] border border-[#38BDF8]/30 shadow-sm cursor-default"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-bold bg-[#38BDF8]/15 text-[#38BDF8] border border-[#38BDF8]/30 cursor-default"
             >
-              <span className="material-symbols-outlined text-[15px]">tv</span>
+              <span className="material-symbols-outlined text-[14px]">tv</span>
               <span className="hidden xl:inline">Big Screen</span>
             </button>
             <button
               type="button"
               onClick={() => handleSelectView('analysis')}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-['Epilogue'] font-bold text-[#a1a1aa] hover:text-white hover:bg-[#201f1f] transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white hover:bg-[#201f1f] transition-all cursor-pointer"
               title="View Tournament Analysis"
             >
-              <span className="material-symbols-outlined text-[15px] text-[#F59E0B]">analytics</span>
+              <span className="material-symbols-outlined text-[14px] text-[#F59E0B]">analytics</span>
               <span className="hidden xl:inline">Analysis</span>
             </button>
           </div>
@@ -589,32 +589,32 @@ function IdleOverlay({
 
     return (
       <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#131313]/90 backdrop-blur-md p-6">
-        <div className="text-center font-['Geist'] flex flex-col items-center max-w-lg">
-          <div className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] uppercase tracking-widest">{name}</div>
-          <div className="font-['Geist'] mt-4 text-5xl font-bold text-white">
+        <div className="text-center font-['Geist'] flex flex-col items-center max-w-md">
+          <div className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase tracking-widest">{name}</div>
+          <div className="font-['Geist'] mt-2 text-2xl sm:text-3xl font-extrabold text-white">
             Tournament Finished
           </div>
-          <p className="mt-4 font-['Geist'] text-lg text-[#c4c7c8]">
+          <p className="mt-2 font-['Geist'] text-sm text-[#a1a1aa]">
             Final leaderboard and standings are displayed on screen.
           </p>
 
           {/* Action Buttons to View Analysis or Final Board */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
             <button
               type="button"
               onClick={() => onSelectView?.('analysis')}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#22C55E] hover:bg-[#16a34a] text-black font-['Epilogue'] text-sm font-black shadow-[0_0_25px_rgba(34,197,94,0.4)] transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#22C55E] hover:bg-[#16a34a] text-black font-['Epilogue'] text-xs font-bold shadow-[0_0_20px_rgba(34,197,94,0.35)] transition-all cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[20px]">analytics</span>
+              <span className="material-symbols-outlined text-[17px]">analytics</span>
               View Tournament Analysis
             </button>
 
             <button
               type="button"
               onClick={() => setDismissed(true)}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-white font-['Epilogue'] text-xs font-bold transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-white font-['Epilogue'] text-xs font-medium transition-colors cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[18px] text-[#a1a1aa]">visibility</span>
+              <span className="material-symbols-outlined text-[16px] text-[#a1a1aa]">visibility</span>
               Inspect Standings
             </button>
           </div>

@@ -205,32 +205,32 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
           </div>
 
           {/* 3 Main Views Switcher */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#141418] border border-[#27272A]">
+          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#141418] border border-[#27272A]">
             <button
               type="button"
               onClick={() => handleViewChange('live')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-['Epilogue'] font-bold transition-all cursor-pointer bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30 shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-bold transition-all cursor-pointer bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
             >
-              <span className="material-symbols-outlined text-[15px]">bolt</span>
+              <span className="material-symbols-outlined text-[14px]">bolt</span>
               <span>Live Arena</span>
             </button>
 
             <button
               type="button"
               onClick={() => handleViewChange('screen')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-['Epilogue'] font-bold transition-all cursor-pointer text-[#a1a1aa] hover:text-white hover:bg-[#201f1f]"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium transition-all cursor-pointer text-[#a1a1aa] hover:text-white hover:bg-[#201f1f]"
             >
-              <span className="material-symbols-outlined text-[15px]">tv</span>
+              <span className="material-symbols-outlined text-[14px]">tv</span>
               <span>Big Screen</span>
             </button>
 
             <button
               type="button"
               onClick={() => handleViewChange('analysis')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-['Epilogue'] font-bold transition-all cursor-pointer text-[#a1a1aa] hover:text-white hover:bg-[#201f1f]"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium transition-all cursor-pointer text-[#a1a1aa] hover:text-white hover:bg-[#201f1f]"
             >
-              <span className="material-symbols-outlined text-[15px]">analytics</span>
-              <span>Tournament Analysis</span>
+              <span className="material-symbols-outlined text-[14px]">analytics</span>
+              <span>Analysis</span>
             </button>
           </div>
 
@@ -297,25 +297,25 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
             </div>
 
             {/* Mobile View Switcher Buttons */}
-            <div className="flex items-center gap-1.5 pt-2 border-t border-[#27272A]/70">
+            <div className="flex items-center gap-1 pt-1.5 border-t border-[#27272A]/70">
               <button
                 type="button"
                 onClick={() => handleViewChange('live')}
-                className="flex-1 py-1.5 rounded-lg text-center font-bold text-[11px] transition-colors bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
+                className="flex-1 py-1 rounded-md text-center font-bold text-[10px] transition-colors bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
               >
                 Live
               </button>
               <button
                 type="button"
                 onClick={() => handleViewChange('screen')}
-                className="flex-1 py-1.5 rounded-lg text-center font-bold text-[11px] transition-colors bg-[#18181c] text-[#a1a1aa] border border-[#27272A]"
+                className="flex-1 py-1 rounded-md text-center font-medium text-[10px] transition-colors bg-[#18181c] text-[#a1a1aa] border border-[#27272A]"
               >
                 Big Screen
               </button>
               <button
                 type="button"
                 onClick={() => handleViewChange('analysis')}
-                className="flex-1 py-1.5 rounded-lg text-center font-bold text-[11px] transition-colors bg-[#18181c] text-[#a1a1aa] border border-[#27272A]"
+                className="flex-1 py-1 rounded-md text-center font-medium text-[10px] transition-colors bg-[#18181c] text-[#a1a1aa] border border-[#27272A]"
               >
                 Analysis
               </button>
