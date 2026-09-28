@@ -7,7 +7,6 @@ import { Leaderboard } from '@/components/arena/leaderboard';
 import { ArenaQRCodeCard } from '@/components/arena/arena-share-modal';
 import { ProbabilityBar, ProbabilityTrace } from '@/components/arena/probability';
 import { roundPhase } from '@/components/arena/round-timer';
-import { TradeTape } from '@/components/arena/trade-tape';
 import { useArena, useCountdown } from '@/hooks/use-arena';
 import { cx, formatCountdown, formatPoints, formatPrice, formatProbability } from '@/lib/format';
 import type { ArenaPublicInfo } from '@/lib/engine/snapshot';
@@ -70,13 +69,13 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
           </p>
         </div>
 
-        {/* Center: Broadcast Countdown Clock with Live Winning Indicator */}
-        <HeaderTimer
-          round={round}
-          clockOffsetMs={clockOffsetMs}
-          openPrice={round?.openPrice ?? null}
-          livePrice={price?.price ?? null}
-        />
+        {/* Center: Broadcast Countdown Clock */}
+        <div className="shrink-0 flex items-center justify-center">
+          <HeaderTimer
+            round={round}
+            clockOffsetMs={clockOffsetMs}
+          />
+        </div>
 
         {/* Right: Round Counter & Status */}
         <div className="flex shrink-0 items-center justify-end gap-4 flex-1">
@@ -136,8 +135,8 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
                 </div>
                 <div className="h-4 w-full rounded-full bg-[#EF4444]/30 overflow-hidden flex p-0.5 border border-[#27272a]">
                   <div
-                    className="h-full bg-[#22C55E] transition-all duration-500 rounded-full"
-                    style={{ width: `${Math.max(5, Math.min(95, priceYes * 100))}%` }}
+                    className="h-full bg-[#22C55E] transition-all duration-150 rounded-full"
+                    style={{ width: `${Math.min(100, Math.max(0, priceYes * 100))}%` }}
                   />
                 </div>
               </div>
@@ -223,37 +222,28 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
               </div>
               <div className="h-3 w-full rounded-full bg-[#EF4444]/30 overflow-hidden flex p-0.5 border border-[#27272a]">
                 <div
-                  className="h-full bg-[#22C55E] transition-all duration-300 rounded-full"
-                  style={{ width: `${Math.max(5, Math.min(95, priceYes * 100))}%` }}
+                  className="h-full bg-[#22C55E] transition-all duration-150 rounded-full"
+                  style={{ width: `${Math.min(100, Math.max(0, priceYes * 100))}%` }}
                 />
               </div>
             </div>
           </div>
         </section>
 
-        {/* Right Column: Full-Height Live Leaderboard + Tape */}
+        {/* Right Column: Full-Height Live Leaderboard (Top 10) */}
         <section className="flex min-h-0 flex-col gap-2.5 overflow-hidden">
           {/* Leaderboard Card */}
-          <div className="bg-[#121215] border border-[#27272A] rounded-xl flex min-h-0 flex-1 flex-col p-3.5 shadow-lg">
-            <div className="mb-2 flex shrink-0 items-center justify-between font-['Epilogue'] text-xs border-b border-[#27272A]/80 pb-2">
+          <div className="bg-[#121215] border border-[#27272A] rounded-xl flex min-h-0 flex-1 flex-col p-4 shadow-lg">
+            <div className="mb-3 flex shrink-0 items-center justify-between font-['Epilogue'] text-xs border-b border-[#27272A]/80 pb-2.5">
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-white uppercase tracking-wider text-xs">TOURNAMENT LEADERBOARD</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#22C55E] text-[9px] font-bold">LIVE</span>
+                <span className="px-2 py-0.5 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#22C55E] text-[10px] font-bold">TOP 10 LIVE</span>
               </div>
-              <span className="text-[#8e9192] font-mono text-[11px]">{leaderboard?.participantCount ?? 0} traders</span>
+              <span className="text-[#8e9192] font-mono text-xs">{leaderboard?.participantCount ?? 0} traders</span>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-              <Leaderboard data={leaderboard} limit={12} variant="display" />
+              <Leaderboard data={leaderboard} limit={10} variant="display" />
             </div>
-          </div>
-
-          {/* Compact Live Order Tape */}
-          <div className="bg-[#121215] border border-[#27272A] rounded-xl max-h-28 overflow-hidden p-2.5 shrink-0 shadow-md">
-            <div className="mb-1 font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8] uppercase tracking-wider flex items-center justify-between">
-              <span>Live Order Tape</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
-            </div>
-            <TradeTape lastTrade={lastTrade} variant="display" />
           </div>
         </section>
       </main>
@@ -271,13 +261,9 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
 function HeaderTimer({
   round,
   clockOffsetMs,
-  openPrice,
-  livePrice,
 }: {
   round: any;
   clockOffsetMs: number;
-  openPrice?: number | null;
-  livePrice?: number | null;
 }) {
   const now = Date.now() + clockOffsetMs;
   const phase = roundPhase(round, now);
@@ -300,55 +286,25 @@ function HeaderTimer({
   };
 
   const isUrgent = phase === 'closing' || phase === 'locked';
-  const delta = livePrice != null && openPrice != null ? livePrice - openPrice : null;
-  const isYesWinning = delta != null ? delta >= 0 : true;
 
   return (
-    <div className="flex items-center gap-2.5">
-      {/* Broadcast Countdown Clock */}
-      <div className="flex flex-col items-center justify-center px-4 sm:px-5 py-1 rounded-xl bg-[#18181b] border border-[#27272A] shadow-lg backdrop-blur-xl">
-        <span
-          className={cx(
-            'font-["Epilogue"] text-[9px] sm:text-[10px] font-bold uppercase tracking-widest',
-            isUrgent ? 'text-[#EF4444] animate-pulse' : 'text-[#c4c7c8]',
-          )}
-        >
-          {phaseLabels[phase] || 'Trading Closes In'}
-        </span>
-        <span
-          className={cx(
-            'font-mono text-xl sm:text-3xl font-black tracking-widest tabular-nums leading-none mt-0.5',
-            isUrgent ? 'text-[#EF4444]' : 'text-white',
-          )}
-        >
-          {formatCountdown(remaining)}
-        </span>
-      </div>
-
-      {/* Real-time Winning Price Indicator Beside Timer */}
-      {livePrice != null && openPrice != null ? (
-        <div
-          className={cx(
-            'hidden sm:flex flex-col items-start justify-center px-3.5 py-1.5 rounded-xl border shadow-lg backdrop-blur-xl transition-all duration-150',
-            isYesWinning
-              ? 'bg-[#22C55E]/15 border-[#22C55E]/40 text-[#22C55E]'
-              : 'bg-[#EF4444]/15 border-[#EF4444]/40 text-[#EF4444]',
-          )}
-        >
-          <div className="flex items-center gap-1.5 font-['Epilogue'] text-[9px] font-black uppercase tracking-wider">
-            <span className="w-2 h-2 rounded-full animate-pulse bg-current" />
-            <span>{isYesWinning ? 'YES WINNING' : 'NO WINNING'}</span>
-          </div>
-          <div className="flex items-baseline gap-1.5 mt-0.5">
-            <span className="font-mono text-base xl:text-lg font-black tracking-tight text-white">
-              {formatPrice(livePrice)}
-            </span>
-            <span className="font-mono text-[11px] font-bold">
-              {isYesWinning ? `+${delta!.toFixed(2)}` : delta!.toFixed(2)}
-            </span>
-          </div>
-        </div>
-      ) : null}
+    <div className="flex flex-col items-center justify-center px-6 py-1.5 rounded-xl bg-[#18181b] border border-[#27272A] shadow-lg backdrop-blur-xl">
+      <span
+        className={cx(
+          'font-["Epilogue"] text-[9px] sm:text-[10px] font-bold uppercase tracking-widest',
+          isUrgent ? 'text-[#EF4444] animate-pulse' : 'text-[#c4c7c8]',
+        )}
+      >
+        {phaseLabels[phase] || 'Trading Closes In'}
+      </span>
+      <span
+        className={cx(
+          'font-mono text-2xl sm:text-3xl font-black tracking-widest tabular-nums leading-none mt-0.5',
+          isUrgent ? 'text-[#EF4444]' : 'text-white',
+        )}
+      >
+        {phase === 'resolved' ? '--:--' : formatCountdown(remaining)}
+      </span>
     </div>
   );
 }

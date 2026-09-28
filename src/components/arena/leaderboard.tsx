@@ -69,22 +69,26 @@ function LeaderboardRow({
         isDisplay ? 'px-4 py-3 xl:px-5 xl:py-3.5 gap-3.5' : 'px-2.5 py-1.5',
         highlighted
           ? 'border-accent/60 bg-accent/10 shadow-[0_0_20px_-8px_rgba(61,155,255,0.7)]'
-          : medal
-            ? 'border-line-strong bg-ink-800'
-            : 'border-line bg-ink-850',
+          : entry.rank === 1
+            ? 'border-[#EAB308]/40 bg-[#EAB308]/5 shadow-[0_0_20px_-10px_rgba(234,179,8,0.3)]'
+            : entry.rank === 2
+              ? 'border-[#E2E8F0]/30 bg-[#E2E8F0]/5'
+              : entry.rank === 3
+                ? 'border-[#CD7F32]/30 bg-[#CD7F32]/5'
+                : 'border-[#27272A] bg-[#141414]',
       )}
     >
       <span
         className={cx(
-          'font-display tnum flex shrink-0 items-center justify-center rounded font-bold',
-          isDisplay ? 'h-10 w-10 text-xl xl:h-11 xl:w-11 xl:text-2xl' : 'h-6 w-6 text-xs',
-          entry.rank === 1 && 'bg-warn/20 text-warn shadow-[0_0_14px_-4px_rgba(255,176,32,0.8)]',
-          entry.rank === 2 && 'bg-fg-muted/20 text-fg-muted',
-          entry.rank === 3 && 'bg-[#b06a3b]/25 text-[#d08a55]',
-          entry.rank > 3 && 'bg-ink-750 text-fg-faint',
+          'font-display tnum flex shrink-0 items-center justify-center rounded font-bold border',
+          isDisplay ? 'h-10 w-10 text-lg xl:h-11 xl:w-11 xl:text-xl' : 'h-6 w-6 text-xs',
+          entry.rank === 1 && 'bg-[#EAB308]/20 border-[#EAB308]/50 text-[#EAB308] shadow-[0_0_14px_-4px_rgba(255,176,32,0.8)]',
+          entry.rank === 2 && 'bg-[#E2E8F0]/20 border-[#E2E8F0]/40 text-[#E2E8F0]',
+          entry.rank === 3 && 'bg-[#CD7F32]/20 border-[#CD7F32]/40 text-[#FFA07A]',
+          entry.rank > 3 && 'bg-[#201f1f] border-[#27272A] text-[#8e9192]',
         )}
       >
-        {entry.rank}
+        {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}
       </span>
 
       <RankDelta delta={entry.rankDelta} variant={variant} />

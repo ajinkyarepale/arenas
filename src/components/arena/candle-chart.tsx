@@ -205,12 +205,12 @@ export function CandleChart({
       }
     } else {
       const candle = chart.addCandlestickSeries({
-        upColor: '#089981',
-        downColor: '#F23645',
-        borderUpColor: '#089981',
-        borderDownColor: '#F23645',
-        wickUpColor: '#089981',
-        wickDownColor: '#F23645',
+        upColor: '#22C55E',
+        downColor: '#EF4444',
+        borderUpColor: '#22C55E',
+        borderDownColor: '#EF4444',
+        wickUpColor: '#22C55E',
+        wickDownColor: '#EF4444',
         priceLineVisible: true,
         lastValueVisible: true,
       });
@@ -465,8 +465,8 @@ export function CandleChart({
               <span>O <strong className="text-white font-mono">{formatPrice(activeBar.open)}</strong></span>
               <span>H <strong className="text-white font-mono">{formatPrice(activeBar.high)}</strong></span>
               <span>L <strong className="text-white font-mono">{formatPrice(activeBar.low)}</strong></span>
-              <span>C <strong className={barUp ? 'text-[#089981] font-mono font-bold' : 'text-[#f23645] font-mono font-bold'}>{formatPrice(activeBar.close)}</strong></span>
-              <span className={`px-1 rounded text-[10px] font-bold ${barUp ? 'text-[#089981] bg-[#089981]/10' : 'text-[#f23645] bg-[#f23645]/10'}`}>
+              <span>C <strong className={barUp ? 'text-[#22C55E] font-mono font-bold' : 'text-[#EF4444] font-mono font-bold'}>{formatPrice(activeBar.close)}</strong></span>
+              <span className={`px-1 rounded text-[10px] font-bold ${barUp ? 'text-[#22C55E] bg-[#22C55E]/10' : 'text-[#EF4444] bg-[#EF4444]/10'}`}>
                 {barUp ? '+' : ''}{activeBar.changePercent.toFixed(2)}%
               </span>
             </div>

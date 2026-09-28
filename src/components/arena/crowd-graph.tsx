@@ -10,7 +10,7 @@ import {
   type ISeriesApi,
   type UTCTimestamp,
 } from 'lightweight-charts';
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { memo, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Maximize2, ZoomIn, ZoomOut } from 'lucide-react';
 import { formatPoints, formatPrice } from '@/lib/format';
 
@@ -34,7 +34,7 @@ interface CrowdGraphProps {
   className?: string;
 }
 
-export function CrowdGraph({
+export const CrowdGraph = memo(function CrowdGraph({
   trades = [],
   qYes = 0,
   qNo = 0,
@@ -141,15 +141,15 @@ export function CrowdGraph({
       return data;
     }
 
-    // Bucket trades by minute
-    const minuteMap = new Map<number, CrowdTradeItem[]>();
+    // Bucket trades by 5-second interval so the graph updates immediately on trades
+    const timeMap = new Map<number, CrowdTradeItem[]>();
     for (const t of sorted) {
       const timeMs = new Date(t.at).getTime();
-      const minKey = Math.floor(timeMs / 60000) * 60;
-      if (!minuteMap.has(minKey)) {
-        minuteMap.set(minKey, []);
+      const timeKey = Math.floor(timeMs / 5000) * 5;
+      if (!timeMap.has(timeKey)) {
+        timeMap.set(timeKey, []);
       }
-      minuteMap.get(minKey)!.push(t);
+      timeMap.get(timeKey)!.push(t);
     }
 
     let runningYes = 0;
@@ -157,9 +157,9 @@ export function CrowdGraph({
     let currentProb = 50;
     const result = [];
 
-    const sortedMinutes = Array.from(minuteMap.keys()).sort((a, b) => a - b);
-    for (const minKey of sortedMinutes) {
-      const items = minuteMap.get(minKey)!;
+    const sortedTimes = Array.from(timeMap.keys()).sort((a, b) => a - b);
+    for (const timeKey of sortedTimes) {
+      const items = timeMap.get(timeKey)!;
       const open = currentProb;
       let high = open;
       let low = open;
@@ -177,12 +177,21 @@ export function CrowdGraph({
 
       const close = currentProb;
       result.push({
-        time: minKey as UTCTimestamp,
+        time: timeKey as UTCTimestamp,
         open,
         high: Math.max(high, open, close) + 0.2,
         low: Math.min(low, open, close) - 0.2,
         close,
       });
+    }
+
+    // Ensure the last bar reflects the current live implied probability
+    if (result.length > 0 && priceYes != null) {
+      const last = result[result.length - 1];
+      const liveP = priceYes * 100;
+      last.close = liveP;
+      last.high = Math.max(last.high, liveP);
+      last.low = Math.min(last.low, liveP);
     }
 
     return result;
@@ -450,8 +459,8 @@ export function CrowdGraph({
             ) : (
               <>
                 <span className="text-[#8e9192] mr-1.5">Live Implied YES:</span>
-                <span className={`font-mono text-sm font-bold ${stats.yesPercent >= 50 ? 'text-[#22C55E]' : 'text-[#ef4444]'}`}>
-                  {stats.yesPercent.toFixed(1)}%
+                <span className={`font-mono text-sm font-bold ${(priceYes * 100) >= 50 ? 'text-[#22C55E]' : 'text-[#ef4444]'}`}>
+                  {(priceYes * 100).toFixed(1)}%
                 </span>
               </>
             )}
@@ -518,4 +527,4 @@ export function CrowdGraph({
       </div>
     </div>
   );
-}
+});

@@ -25,11 +25,12 @@ export interface TradePanelProps {
   disabledReason?: string;
   tradesPerMinuteLimit?: number;
   onFilled: () => void;
+  onOptimisticPrice?: (price: number | null) => void;
 }
 
-const QUICK_STAKES = [25, 50, 100];
+const QUICK_STAKES = [50, 100, 250];
 const QUICK_SHARES = [10, 25, 50];
-const DEFAULT_STAKE = 25;
+const DEFAULT_STAKE = 50;
 
 export function TradePanel({
   code,
@@ -44,10 +45,12 @@ export function TradePanel({
   disabledReason,
   tradesPerMinuteLimit = 0,
   onFilled,
+  onOptimisticPrice,
 }: TradePanelProps) {
   const ceiling = Math.max(0, Math.min(maxStakePerTrade, Math.floor(balance)));
   const [mode, setMode] = useState<'POINTS' | 'SHARES'>('POINTS');
   const [selectedSide, setSelectedSide] = useState<'YES' | 'NO'>('YES');
+  const [optimisticPriceYes, setOptimisticPriceYes] = useState<number | null>(null);
 
   // Input states
   const [pointsInput, setPointsInput] = useState(() => Math.min(DEFAULT_STAKE, Math.max(1, ceiling)));
@@ -56,7 +59,13 @@ export function TradePanel({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const pYes = Math.max(0.01, Math.min(0.99, priceYes));
+  // Reconcile optimistic price whenever authoritative server priceYes updates
+  useEffect(() => {
+    setOptimisticPriceYes(null);
+  }, [priceYes]);
+
+  const activePriceYes = optimisticPriceYes ?? priceYes;
+  const pYes = Math.max(0.01, Math.min(0.99, activePriceYes));
   const pNo = 1 - pYes;
 
   // Maximum shares affordable with the current ceiling
@@ -112,6 +121,12 @@ export function TradePanel({
     setPending(true);
     setError(null);
 
+    // Optimistically update visual probability based on the client-side calculated LMSR quote
+    if (quote && Number.isFinite(quote.priceAfter)) {
+      setOptimisticPriceYes(quote.priceAfter);
+      onOptimisticPrice?.(quote.priceAfter);
+    }
+
     try {
       const res = await fetch(`/api/arenas/${code}/trade`, {
         method: 'POST',
@@ -129,6 +144,9 @@ export function TradePanel({
 
       onFilled();
     } catch (err: unknown) {
+      // Revert visual optimistic price on failure
+      setOptimisticPriceYes(null);
+      onOptimisticPrice?.(null);
       setError(err instanceof Error ? err.message : 'Prediction failed');
     } finally {
       setPending(false);
@@ -177,18 +195,18 @@ export function TradePanel({
       <div>
         <div className="flex justify-between font-['Epilogue'] text-sm font-bold mb-2">
           <div className="text-[#22C55E] flex items-center gap-1">
-            <span>{Math.round(pYes * 100)}¢</span>
+            <span>{(pYes * 100).toFixed(1)}¢</span>
             <span className="text-xs text-[#22C55E]">YES</span>
           </div>
           <div className="text-[#EF4444] flex items-center gap-1">
             <span className="text-xs text-[#EF4444]">NO</span>
-            <span>{Math.round(pNo * 100)}¢</span>
+            <span>{(pNo * 100).toFixed(1)}¢</span>
           </div>
         </div>
 
         <div className="h-2 w-full flex rounded-full overflow-hidden bg-[#201f1f]">
-          <div className="h-full bg-[#22C55E] transition-all duration-300" style={{ width: `${pYes * 100}%` }} />
-          <div className="h-full bg-[#EF4444] transition-all duration-300" style={{ width: `${pNo * 100}%` }} />
+          <div className="h-full bg-[#22C55E] transition-all duration-150" style={{ width: `${pYes * 100}%` }} />
+          <div className="h-full bg-[#EF4444] transition-all duration-150" style={{ width: `${pNo * 100}%` }} />
         </div>
       </div>
 
@@ -210,27 +228,27 @@ export function TradePanel({
             <button
               type="button"
               onClick={() => setSelectedSide('YES')}
-              className={`py-3 px-4 rounded-xl border flex flex-col items-center gap-1 transition-all min-h-[44px] ${
+              className={`py-3 px-4 rounded-xl border flex flex-col items-center gap-1 transition-all min-h-[44px] active:scale-[0.98] ${
                 selectedSide === 'YES'
                   ? 'border-[#22C55E] bg-[#22C55E]/15 text-[#22C55E] font-bold ring-1 ring-[#22C55E]'
                   : 'border-[#27272A] bg-[#201f1f] text-[#c4c7c8] hover:border-[#38383a]'
               }`}
             >
               <span className="font-['Epilogue'] text-sm">PREDICT YES</span>
-              <span className="font-mono text-xs">{Math.round(pYes * 100)}¢ / share</span>
+              <span className="font-mono text-xs">{(pYes * 100).toFixed(1)}¢ / share</span>
             </button>
 
             <button
               type="button"
               onClick={() => setSelectedSide('NO')}
-              className={`py-3 px-4 rounded-xl border flex flex-col items-center gap-1 transition-all min-h-[44px] ${
+              className={`py-3 px-4 rounded-xl border flex flex-col items-center gap-1 transition-all min-h-[44px] active:scale-[0.98] ${
                 selectedSide === 'NO'
                   ? 'border-[#EF4444] bg-[#EF4444]/15 text-[#EF4444] font-bold ring-1 ring-[#EF4444]'
                   : 'border-[#27272A] bg-[#201f1f] text-[#c4c7c8] hover:border-[#38383a]'
               }`}
             >
               <span className="font-['Epilogue'] text-sm">PREDICT NO</span>
-              <span className="font-mono text-xs">{Math.round(pNo * 100)}¢ / share</span>
+              <span className="font-mono text-xs">{(pNo * 100).toFixed(1)}¢ / share</span>
             </button>
           </div>
 
@@ -263,7 +281,7 @@ export function TradePanel({
                     type="button"
                     onClick={() => setPointsInput(Math.min(amt, ceiling))}
                     disabled={amt > ceiling}
-                    className="flex-1 py-2 rounded-lg border border-[#27272A] bg-[#201f1f] hover:bg-[#2a2a2a] disabled:opacity-30 disabled:cursor-not-allowed font-['Epilogue'] text-xs font-semibold text-white transition-colors min-h-[36px]"
+                    className="flex-1 py-2.5 rounded-lg border border-[#27272A] bg-[#201f1f] hover:bg-[#2a2a2a] disabled:opacity-30 disabled:cursor-not-allowed font-['Epilogue'] text-xs font-semibold text-white transition-colors min-h-[44px]"
                   >
                     +{amt}
                   </button>
@@ -271,7 +289,7 @@ export function TradePanel({
                 <button
                   type="button"
                   onClick={() => setPointsInput(ceiling)}
-                  className="flex-1 py-2 rounded-lg border border-[#27272A] bg-[#201f1f] hover:bg-[#2a2a2a] font-['Epilogue'] text-xs font-semibold text-[#22C55E] transition-colors min-h-[36px]"
+                  className="flex-1 py-2.5 rounded-lg border border-[#27272A] bg-[#201f1f] hover:bg-[#2a2a2a] font-['Epilogue'] text-xs font-semibold text-[#22C55E] transition-colors min-h-[44px]"
                 >
                   MAX
                 </button>
@@ -305,7 +323,7 @@ export function TradePanel({
                     type="button"
                     onClick={() => setSharesInput(Math.min(amt, Math.max(1, Math.floor(maxSharesAffordable))))}
                     disabled={amt > maxSharesAffordable}
-                    className="flex-1 py-2 rounded-lg border border-[#27272A] bg-[#201f1f] hover:bg-[#2a2a2a] disabled:opacity-30 disabled:cursor-not-allowed font-['Epilogue'] text-xs font-semibold text-white transition-colors min-h-[36px]"
+                    className="flex-1 py-2.5 rounded-lg border border-[#27272A] bg-[#201f1f] hover:bg-[#2a2a2a] disabled:opacity-30 disabled:cursor-not-allowed font-['Epilogue'] text-xs font-semibold text-white transition-colors min-h-[44px]"
                   >
                     +{amt} sh
                   </button>
@@ -313,7 +331,7 @@ export function TradePanel({
                 <button
                   type="button"
                   onClick={() => setSharesInput(Math.max(1, Math.floor(maxSharesAffordable)))}
-                  className="flex-1 py-2 rounded-lg border border-[#27272A] bg-[#201f1f] hover:bg-[#2a2a2a] font-['Epilogue'] text-xs font-semibold text-[#22C55E] transition-colors min-h-[36px]"
+                  className="flex-1 py-2.5 rounded-lg border border-[#27272A] bg-[#201f1f] hover:bg-[#2a2a2a] font-['Epilogue'] text-xs font-semibold text-[#22C55E] transition-colors min-h-[44px]"
                 >
                   MAX
                 </button>

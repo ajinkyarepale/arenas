@@ -41,6 +41,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
   const [rightTab, setRightTab] = useState<'tape' | 'leaderboard'>('tape');
   const [showShareModal, setShowShareModal] = useState(false);
   const [trades, setTrades] = useState<CrowdTradeItem[]>([]);
+  const [optimisticPriceYes, setOptimisticPriceYes] = useState<number | null>(null);
 
   const loadTrades = useCallback(async () => {
     try {
@@ -80,6 +81,11 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
     }
   }, [lastTrade]);
 
+  // Reconcile optimistic price when authoritative server price changes
+  useEffect(() => {
+    setOptimisticPriceYes(null);
+  }, [round?.priceYes]);
+
   const info = snapshot?.arena ?? initialArena;
   const viewer = snapshot?.viewer ?? null;
   const status = arena?.status ?? info.status;
@@ -87,7 +93,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
   const now = Date.now() + clockOffsetMs;
   const phase = roundPhase(round, now);
   const tradingOpen = status === 'LIVE' && phase === 'trading';
-  const priceYes = round?.priceYes ?? 0.5;
+  const effectivePriceYes = optimisticPriceYes ?? (round?.priceYes ?? 0.5);
 
   const disabledReason =
     status === 'LOBBY'
@@ -125,9 +131,9 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
     : `Will ${info.asset.replace('USDT', '')} close UP above the round's open price?`;
   const questionSubtitle = isCustomMarket
     ? (info.resolutionCriteria
-        ? `Resolution Criteria: ${info.resolutionCriteria}. Winning outcome pays 100 points per share.`
-        : `Buy YES if you predict this outcome will occur, or NO if not. Winning outcome pays 100 points per share.`)
-    : `Polymarket binary market: Buy YES if you predict ${info.asset.replace('USDT', '')} will rise, or NO if it falls. Winning outcome pays 100 points ($1.00) per share at round settlement.`;
+        ? `Resolution Criteria: ${info.resolutionCriteria}. Winning outcome pays 1 point per share.`
+        : `Buy YES if you predict this outcome will occur, or NO if not. Winning outcome pays 1 point per share.`)
+    : `Polymarket binary market: Buy YES if you predict ${info.asset.replace('USDT', '')} will rise, or NO if it falls. Winning outcome pays 1 point per share at round settlement.`;
 
   return (
     <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
@@ -314,13 +320,13 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                   {/* Probability Bar */}
                   <div className="flex flex-col gap-2 pt-2 border-t border-[#27272a]">
                     <div className="flex justify-between items-center text-xs font-['Epilogue'] font-bold">
-                      <span className="text-[#22C55E]">YES CHANCE: {Math.round(priceYes * 100)}%</span>
-                      <span className="text-[#EF4444]">NO CHANCE: {Math.round((1 - priceYes) * 100)}%</span>
+                      <span className="text-[#22C55E]">YES CHANCE: {(effectivePriceYes * 100).toFixed(1)}%</span>
+                      <span className="text-[#EF4444]">NO CHANCE: {((1 - effectivePriceYes) * 100).toFixed(1)}%</span>
                     </div>
                     <div className="h-3.5 w-full rounded-full bg-[#EF4444]/30 overflow-hidden flex p-0.5 border border-[#27272a]">
                       <div
-                        className="h-full bg-[#22C55E] transition-all duration-500 rounded-full"
-                        style={{ width: `${Math.max(5, Math.min(95, priceYes * 100))}%` }}
+                        className="h-full bg-[#22C55E] transition-all duration-150 rounded-full"
+                        style={{ width: `${Math.min(100, Math.max(0, effectivePriceYes * 100))}%` }}
                       />
                     </div>
                   </div>
@@ -351,7 +357,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
               <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl">
                 <CrowdGraph
                   trades={trades}
-                  priceYes={priceYes}
+                  priceYes={effectivePriceYes}
                   qYes={round?.qYes}
                   qNo={round?.qNo}
                   asset={info.asset}
@@ -394,7 +400,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                                 {position.yesCost.toFixed(0)} pts
                               </td>
                               <td className="py-3 text-right font-bold text-[#22C55E]">
-                                {(position.yesShares * 100).toFixed(0)} pts
+                                {position.yesShares.toFixed(0)} pts
                               </td>
                             </tr>
                           )}
@@ -415,7 +421,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                                 {position.noCost.toFixed(0)} pts
                               </td>
                               <td className="py-3 text-right font-bold text-[#EF4444]">
-                                {(position.noShares * 100).toFixed(0)} pts
+                                {position.noShares.toFixed(0)} pts
                               </td>
                             </tr>
                           )}
@@ -443,14 +449,14 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                 liquidityParamB={info.liquidityParamB}
                 qYes={round?.qYes ?? 0}
                 qNo={round?.qNo ?? 0}
-                priceYes={priceYes}
+                priceYes={effectivePriceYes}
                 position={position}
                 tradingOpen={tradingOpen}
                 disabledReason={disabledReason}
                 tradesPerMinuteLimit={info.tradesPerMinuteLimit}
+                onOptimisticPrice={(p) => setOptimisticPriceYes(p)}
                 onFilled={() => {
                   void refresh();
-                  void loadTrades();
                 }}
               />
 
