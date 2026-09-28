@@ -250,7 +250,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               {/* Real-time Winning Price Indicator Beside Timer */}
               {price?.price != null && round?.openPrice != null ? (
                 (() => {
@@ -259,7 +259,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                   return (
                     <div
                       className={cx(
-                        'flex flex-col items-start justify-center px-3.5 py-2 rounded-xl border shadow-lg backdrop-blur-xl transition-all duration-150',
+                        'flex flex-col items-start justify-center px-4 py-2 rounded-xl border shadow-lg backdrop-blur-xl transition-all duration-150 shrink-0 h-[52px]',
                         isYesWinning
                           ? 'bg-[#22C55E]/15 border-[#22C55E]/40 text-[#22C55E]'
                           : 'bg-[#EF4444]/15 border-[#EF4444]/40 text-[#EF4444]',
@@ -282,20 +282,20 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                 })()
               ) : null}
 
-              <div className="flex items-center gap-4 bg-[#201f1f] px-4 py-2.5 rounded-xl border border-[#27272A]">
+              <div className="flex items-center gap-4 bg-[#201f1f] px-4 py-2 rounded-xl border border-[#27272A] shrink-0 h-[52px]">
                 <div className="text-right">
                   <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">
                     {phase === 'resolved' ? 'NEXT ROUND IN' : 'ROUND ENDS IN'}
                   </div>
-                  <div className="font-['Epilogue'] text-lg font-bold text-white flex items-center gap-2">
+                  <div className="font-['Epilogue'] text-lg font-bold text-white flex items-center gap-2 leading-none mt-0.5">
                     <span className={cx('w-2 h-2 rounded-full', phase === 'resolved' ? 'bg-[#38bdf8]' : 'bg-[#22C55E]', 'animate-pulse')} />
                     {timerMin}:{timerSec}
                   </div>
                 </div>
-                <div className="h-8 w-px bg-[#27272A]" />
+                <div className="h-6 w-px bg-[#27272A]" />
                 <div>
                   <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">STATUS</div>
-                  <div className={cx('font-["Epilogue"] text-xs font-bold', phase === 'resolved' ? 'text-[#38bdf8]' : 'text-[#22C55E]')}>
+                  <div className={cx('font-["Epilogue"] text-xs font-bold leading-none mt-1', phase === 'resolved' ? 'text-[#38bdf8]' : 'text-[#22C55E]')}>
                     {phase === 'resolved' ? 'RESOLVED' : tradingOpen ? 'TRADING' : status}
                   </div>
                 </div>
