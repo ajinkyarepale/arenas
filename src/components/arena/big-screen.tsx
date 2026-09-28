@@ -1,12 +1,14 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { Leaderboard } from '@/components/arena/leaderboard';
 import { ArenaQRCodeCard } from '@/components/arena/arena-share-modal';
 import { ProbabilityBar, ProbabilityTrace } from '@/components/arena/probability';
 import { roundPhase } from '@/components/arena/round-timer';
+import { TournamentAnalysis } from '@/components/arena/tournament-analysis';
 import { useArena, useCountdown } from '@/hooks/use-arena';
 import { cx, formatCountdown, formatPoints, formatPrice, formatProbability } from '@/lib/format';
 import type { ArenaPublicInfo } from '@/lib/engine/snapshot';
@@ -38,10 +40,28 @@ export function BigScreen({
 
   const [showQrModal, setShowQrModal] = useState(false);
   const [origin, setOrigin] = useState('');
+  const [internalView, setInternalView] = useState<'screen' | 'live' | 'analysis'>('screen');
+  const router = useRouter();
+
+  const handleSelectView = (view: 'live' | 'screen' | 'analysis') => {
+    if (onSelectView) {
+      onSelectView(view);
+    } else {
+      if (view === 'live') {
+        router.push(`/arenas/${code}/live`);
+      } else {
+        setInternalView(view);
+      }
+    }
+  };
 
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
+
+  if (internalView === 'analysis') {
+    return <TournamentAnalysis initialArena={initialArena} onSelectView={handleSelectView} />;
+  }
 
   const info = snapshot?.arena ?? initialArena;
   const status = arena?.status ?? info.status;
@@ -121,36 +141,34 @@ export function BigScreen({
 
           <StatusLamp status={status} connected={connected} />
 
-          {/* View Switcher Tabs */}
-          {onSelectView && (
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-[#141418] border border-[#27272A]">
-              <button
-                type="button"
-                onClick={() => onSelectView('live')}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-['Epilogue'] font-bold text-[#a1a1aa] hover:text-white hover:bg-[#201f1f] transition-all cursor-pointer"
-                title="Switch to Live Arena Terminal"
-              >
-                <span className="material-symbols-outlined text-[15px] text-[#22C55E]">bolt</span>
-                <span className="hidden xl:inline">Live Arena</span>
-              </button>
-              <button
-                type="button"
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-['Epilogue'] font-bold bg-[#38BDF8]/15 text-[#38BDF8] border border-[#38BDF8]/30 shadow-sm cursor-default"
-              >
-                <span className="material-symbols-outlined text-[15px]">tv</span>
-                <span className="hidden xl:inline">Big Screen</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onSelectView('analysis')}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-['Epilogue'] font-bold text-[#a1a1aa] hover:text-white hover:bg-[#201f1f] transition-all cursor-pointer"
-                title="View Tournament Analysis"
-              >
-                <span className="material-symbols-outlined text-[15px] text-[#F59E0B]">analytics</span>
-                <span className="hidden xl:inline">Analysis</span>
-              </button>
-            </div>
-          )}
+          {/* View Switcher Tabs (Always Visible) */}
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#141418] border border-[#27272A]">
+            <button
+              type="button"
+              onClick={() => handleSelectView('live')}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-['Epilogue'] font-bold text-[#a1a1aa] hover:text-white hover:bg-[#201f1f] transition-all cursor-pointer"
+              title="Switch to Live Arena Terminal"
+            >
+              <span className="material-symbols-outlined text-[15px] text-[#22C55E]">bolt</span>
+              <span className="hidden xl:inline">Live Arena</span>
+            </button>
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-['Epilogue'] font-bold bg-[#38BDF8]/15 text-[#38BDF8] border border-[#38BDF8]/30 shadow-sm cursor-default"
+            >
+              <span className="material-symbols-outlined text-[15px]">tv</span>
+              <span className="hidden xl:inline">Big Screen</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSelectView('analysis')}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-['Epilogue'] font-bold text-[#a1a1aa] hover:text-white hover:bg-[#201f1f] transition-all cursor-pointer"
+              title="View Tournament Analysis"
+            >
+              <span className="material-symbols-outlined text-[15px] text-[#F59E0B]">analytics</span>
+              <span className="hidden xl:inline">Analysis</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -354,7 +372,12 @@ export function BigScreen({
       {lastSettled ? <SettlementOverlay settled={lastSettled} /> : null}
 
       {status !== 'LIVE' ? (
-        <IdleOverlay status={status} code={info.code} name={info.name} />
+        <IdleOverlay
+          status={status}
+          code={info.code}
+          name={info.name}
+          onSelectView={handleSelectView}
+        />
       ) : null}
     </div>
   );
@@ -525,21 +548,48 @@ function IdleOverlay({
   status,
   code,
   name,
+  onSelectView,
 }: {
   status: string;
   code: string;
   name: string;
+  onSelectView?: (view: 'live' | 'screen' | 'analysis') => void;
 }) {
   const [origin, setOrigin] = useState('');
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
 
   if (status === 'ENDED') {
+    if (dismissed) {
+      return (
+        <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2 bg-[#141418]/95 border border-[#27272A] p-2 rounded-xl shadow-2xl backdrop-blur-xl">
+          <span className="font-['Epilogue'] text-xs font-bold text-[#a1a1aa] pl-2">Tournament Ended</span>
+          <button
+            type="button"
+            onClick={() => onSelectView?.('analysis')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#22C55E]/15 hover:bg-[#22C55E]/25 text-[#22C55E] border border-[#22C55E]/40 font-['Epilogue'] text-xs font-bold transition-all cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[15px]">analytics</span>
+            View Analysis
+          </button>
+          <button
+            type="button"
+            onClick={() => setDismissed(false)}
+            className="px-2 py-1 text-xs text-[#71717a] hover:text-white"
+            title="Expand overlay"
+          >
+            Expand
+          </button>
+        </div>
+      );
+    }
+
     return (
-      <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-[#131313]/90 backdrop-blur-md">
-        <div className="text-center font-['Geist']">
+      <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#131313]/90 backdrop-blur-md p-6">
+        <div className="text-center font-['Geist'] flex flex-col items-center max-w-lg">
           <div className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] uppercase tracking-widest">{name}</div>
           <div className="font-['Geist'] mt-4 text-5xl font-bold text-white">
             Tournament Finished
@@ -547,6 +597,27 @@ function IdleOverlay({
           <p className="mt-4 font-['Geist'] text-lg text-[#c4c7c8]">
             Final leaderboard and standings are displayed on screen.
           </p>
+
+          {/* Action Buttons to View Analysis or Final Board */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => onSelectView?.('analysis')}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#22C55E] hover:bg-[#16a34a] text-black font-['Epilogue'] text-sm font-black shadow-[0_0_25px_rgba(34,197,94,0.4)] transition-all cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[20px]">analytics</span>
+              View Tournament Analysis
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDismissed(true)}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-white font-['Epilogue'] text-xs font-bold transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[18px] text-[#a1a1aa]">visibility</span>
+              Inspect Standings
+            </button>
+          </div>
         </div>
       </div>
     );
