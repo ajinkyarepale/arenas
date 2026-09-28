@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 
 import { ArenaShareModal } from '@/components/arena/arena-share-modal';
+import { BigScreen } from '@/components/arena/big-screen';
 import { CrowdGraph, type CrowdTradeItem } from '@/components/arena/crowd-graph';
+import { TournamentAnalysis } from '@/components/arena/tournament-analysis';
 import { TradePanel } from '@/components/arena/trade-panel';
 import { SiteSidebar } from '@/components/site-sidebar';
 import { useArena } from '@/hooks/use-arena';
@@ -40,11 +42,36 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
   } = useArena(code);
 
   const [rightTab, setRightTab] = useState<'tape' | 'leaderboard'>('tape');
+  const [activeView, setActiveView] = useState<'live' | 'screen' | 'analysis'>('live');
   const [showShareModal, setShowShareModal] = useState(false);
   const [trades, setTrades] = useState<CrowdTradeItem[]>([]);
   const [optimisticPriceYes, setOptimisticPriceYes] = useState<number | null>(null);
   const [tradeFilledBalance, setTradeFilledBalance] = useState<number | null>(null);
   const [tradeFilledPosition, setTradeFilledPosition] = useState<PositionSummary | null>(null);
+
+  // Sync initial view from URL query param ?view=screen|analysis|live
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const viewParam = params.get('view');
+      if (viewParam === 'screen' || viewParam === 'analysis' || viewParam === 'live') {
+        setActiveView(viewParam);
+      }
+    }
+  }, []);
+
+  const handleViewChange = (view: 'live' | 'screen' | 'analysis') => {
+    setActiveView(view);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (view === 'live') {
+        url.searchParams.delete('view');
+      } else {
+        url.searchParams.set('view', view);
+      }
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
 
   const loadTrades = useCallback(async () => {
     try {
@@ -147,6 +174,15 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
         : `Buy YES if you predict this outcome will occur, or NO if not. Winning outcome pays 1 point per share.`)
     : `Polymarket binary market: Buy YES if you predict ${info.asset.replace('USDT', '')} will rise, or NO if it falls. Winning outcome pays 1 point per share at round settlement.`;
 
+  // Direct inline view delegation:
+  if (activeView === 'screen') {
+    return <BigScreen initialArena={initialArena} onSelectView={handleViewChange} />;
+  }
+
+  if (activeView === 'analysis') {
+    return <TournamentAnalysis initialArena={initialArena} onSelectView={handleViewChange} />;
+  }
+
   return (
     <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
       {/* SideNavBar */}
@@ -166,6 +202,36 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                 <span className="material-symbols-outlined text-[14px]">cycle</span> Round {currentRoundNum} of {totalRounds}
               </span>
             </div>
+          </div>
+
+          {/* 3 Main Views Switcher */}
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#141418] border border-[#27272A]">
+            <button
+              type="button"
+              onClick={() => handleViewChange('live')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-['Epilogue'] font-bold transition-all cursor-pointer bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30 shadow-sm"
+            >
+              <span className="material-symbols-outlined text-[15px]">bolt</span>
+              <span>Live Arena</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleViewChange('screen')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-['Epilogue'] font-bold transition-all cursor-pointer text-[#a1a1aa] hover:text-white hover:bg-[#201f1f]"
+            >
+              <span className="material-symbols-outlined text-[15px]">tv</span>
+              <span>Big Screen</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleViewChange('analysis')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-['Epilogue'] font-bold transition-all cursor-pointer text-[#a1a1aa] hover:text-white hover:bg-[#201f1f]"
+            >
+              <span className="material-symbols-outlined text-[15px]">analytics</span>
+              <span>Tournament Analysis</span>
+            </button>
           </div>
 
           <div className="flex items-center gap-6">
@@ -211,20 +277,47 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
         {/* Page Content Canvas */}
         <div className="flex-1 p-3 sm:p-6 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-4 sm:gap-6">
           {/* Mobile Status Strip */}
-          <div className="md:hidden flex flex-wrap items-center justify-between bg-[#141414] border border-[#27272A] rounded-xl px-4 py-2.5 gap-2 font-['Epilogue'] text-xs">
-            <div className="flex items-center gap-2">
-              <span className="font-mono font-bold text-[#22C55E]">{info.code}</span>
-              <span className="text-[#8e9192]">·</span>
-              <span className="text-[#c4c7c8]">R{currentRoundNum}/{totalRounds}</span>
+          <div className="md:hidden flex flex-col gap-2.5 bg-[#141414] border border-[#27272A] rounded-xl p-3 font-['Epilogue'] text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-[#22C55E]">{info.code}</span>
+                <span className="text-[#8e9192]">·</span>
+                <span className="text-[#c4c7c8]">R{currentRoundNum}/{totalRounds}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-white font-bold">{formatPoints(viewer?.balance ?? info.startingBalance, 0)} pts</span>
+                <button
+                  type="button"
+                  onClick={() => setShowShareModal(true)}
+                  className="p-1 rounded bg-[#201f1f] border border-[#27272A] text-white flex items-center"
+                >
+                  <span className="material-symbols-outlined text-[14px]">qr_code_2</span>
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-white font-bold">{formatPoints(viewer?.balance ?? info.startingBalance, 0)} pts</span>
+
+            {/* Mobile View Switcher Buttons */}
+            <div className="flex items-center gap-1.5 pt-2 border-t border-[#27272A]/70">
               <button
                 type="button"
-                onClick={() => setShowShareModal(true)}
-                className="p-1 rounded bg-[#201f1f] border border-[#27272A] text-white flex items-center"
+                onClick={() => handleViewChange('live')}
+                className="flex-1 py-1.5 rounded-lg text-center font-bold text-[11px] transition-colors bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
               >
-                <span className="material-symbols-outlined text-[14px]">qr_code_2</span>
+                Live
+              </button>
+              <button
+                type="button"
+                onClick={() => handleViewChange('screen')}
+                className="flex-1 py-1.5 rounded-lg text-center font-bold text-[11px] transition-colors bg-[#18181c] text-[#a1a1aa] border border-[#27272A]"
+              >
+                Big Screen
+              </button>
+              <button
+                type="button"
+                onClick={() => handleViewChange('analysis')}
+                className="flex-1 py-1.5 rounded-lg text-center font-bold text-[11px] transition-colors bg-[#18181c] text-[#a1a1aa] border border-[#27272A]"
+              >
+                Analysis
               </button>
             </div>
           </div>

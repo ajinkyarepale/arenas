@@ -16,7 +16,13 @@ const CandleChart = dynamic(
   { ssr: false, loading: () => <div className="h-full animate-pulse rounded-xl bg-[#201f1f]" /> },
 );
 
-export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
+export function BigScreen({
+  initialArena,
+  onSelectView,
+}: {
+  initialArena: ArenaPublicInfo;
+  onSelectView?: (view: 'live' | 'screen' | 'analysis') => void;
+}) {
   const code = initialArena.code;
   const {
     snapshot,
@@ -114,6 +120,37 @@ export function BigScreen({ initialArena }: { initialArena: ArenaPublicInfo }) {
           </button>
 
           <StatusLamp status={status} connected={connected} />
+
+          {/* View Switcher Tabs */}
+          {onSelectView && (
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-[#141418] border border-[#27272A]">
+              <button
+                type="button"
+                onClick={() => onSelectView('live')}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-['Epilogue'] font-bold text-[#a1a1aa] hover:text-white hover:bg-[#201f1f] transition-all cursor-pointer"
+                title="Switch to Live Arena Terminal"
+              >
+                <span className="material-symbols-outlined text-[15px] text-[#22C55E]">bolt</span>
+                <span className="hidden xl:inline">Live Arena</span>
+              </button>
+              <button
+                type="button"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-['Epilogue'] font-bold bg-[#38BDF8]/15 text-[#38BDF8] border border-[#38BDF8]/30 shadow-sm cursor-default"
+              >
+                <span className="material-symbols-outlined text-[15px]">tv</span>
+                <span className="hidden xl:inline">Big Screen</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onSelectView('analysis')}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-['Epilogue'] font-bold text-[#a1a1aa] hover:text-white hover:bg-[#201f1f] transition-all cursor-pointer"
+                title="View Tournament Analysis"
+              >
+                <span className="material-symbols-outlined text-[15px] text-[#F59E0B]">analytics</span>
+                <span className="hidden xl:inline">Analysis</span>
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
