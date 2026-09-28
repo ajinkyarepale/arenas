@@ -30,6 +30,7 @@ vi.mock('@/lib/prisma', () => ({
 vi.mock('@/lib/engine/trading', () => ({
   placeTrade: vi.fn(),
   getPosition: vi.fn(),
+  seedPositionCache: vi.fn(),
 }));
 
 describe('Demo Controller (60 Virtual Participants) Hardening Tests', () => {

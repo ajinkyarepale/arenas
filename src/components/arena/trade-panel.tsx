@@ -24,7 +24,7 @@ export interface TradePanelProps {
   tradingOpen: boolean;
   disabledReason?: string;
   tradesPerMinuteLimit?: number;
-  onFilled: () => void;
+  onFilled: (result: { balance: number; position: PositionSummary; priceYes: number }) => void;
   onOptimisticPrice?: (price: number | null) => void;
 }
 
@@ -142,7 +142,12 @@ export function TradePanel({
         throw new Error(body.error ?? 'Prediction submission failed');
       }
 
-      onFilled();
+      const data = await res.json();
+      onFilled({
+        balance: data.balance,
+        position: data.position,
+        priceYes: data.priceYes,
+      });
     } catch (err: unknown) {
       // Revert visual optimistic price on failure
       setOptimisticPriceYes(null);

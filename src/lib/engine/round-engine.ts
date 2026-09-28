@@ -64,6 +64,7 @@ export interface RoundAggregate {
 }
 
 export const roundAggregateCache = new Map<string, RoundAggregate>();
+export const lastRoundPnlCache = new Map<string, Map<string, number>>(); // eventId -> participantId -> pnl
 
 export async function aggregateRound(roundId: string): Promise<RoundAggregate> {
   const cached = roundAggregateCache.get(roundId);
@@ -165,23 +166,27 @@ export async function computeLeaderboard(
     },
   });
 
-  // Points won or lost on the most recently resolved round.
-  const lastResolved = await prisma.round.findFirst({
-    where: { eventId, status: 'RESOLVED' },
-    orderBy: { roundNumber: 'desc' },
-    select: { id: true },
-  });
-
-  const pnlByParticipant = new Map<string, number>();
-  if (lastResolved) {
-    const trades = await prisma.trade.findMany({
-      where: { roundId: lastResolved.id },
-      select: { participantId: true, cost: true, payout: true },
+  // Points won or lost on the most recently resolved round (cached at settlement).
+  let pnlByParticipant = lastRoundPnlCache.get(eventId);
+  if (!pnlByParticipant) {
+    pnlByParticipant = new Map<string, number>();
+    const lastResolved = await prisma.round.findFirst({
+      where: { eventId, status: 'RESOLVED' },
+      orderBy: { roundNumber: 'desc' },
+      select: { id: true },
     });
-    for (const trade of trades) {
-      const current = pnlByParticipant.get(trade.participantId) ?? 0;
-      pnlByParticipant.set(trade.participantId, current + ((trade.payout ?? 0) - trade.cost));
+
+    if (lastResolved) {
+      const trades = await prisma.trade.findMany({
+        where: { roundId: lastResolved.id },
+        select: { participantId: true, cost: true, payout: true },
+      });
+      for (const trade of trades) {
+        const current = pnlByParticipant.get(trade.participantId) ?? 0;
+        pnlByParticipant.set(trade.participantId, current + ((trade.payout ?? 0) - trade.cost));
+      }
     }
+    lastRoundPnlCache.set(eventId, pnlByParticipant);
   }
 
   const prior = previousRanks.get(eventId) ?? new Map<string, number>();
@@ -292,6 +297,10 @@ export async function openNextRound(eventId: string): Promise<OpenResult> {
   // A fresh round means a fresh trade budget.
   clearRateLimit(`trade:${eventId}:`);
 
+  // Pre-seed aggregate cache: new round always starts at zero volume/trades.
+  // Without this, the first ~60 trades each trigger an expensive trade.aggregate DB call.
+  roundAggregateCache.set(round.id, { volume: 0, tradeCount: 0 });
+
   await broadcastRound(updatedEvent, round);
   broadcastArenaState(updatedEvent);
   await broadcastLeaderboard(eventId);
@@ -401,6 +410,7 @@ export async function settleRound(
   voidReason: string | null,
 ): Promise<void> {
   const settledAt = new Date();
+  const settledPnlMap = new Map<string, number>();
 
   const { event, round } = await prisma.$transaction(
     async (tx: Prisma.TransactionClient) => {
@@ -427,6 +437,10 @@ export async function settleRound(
         creditByParticipant.set(
           trade.participantId,
           (creditByParticipant.get(trade.participantId) ?? 0) + payout,
+        );
+        settledPnlMap.set(
+          trade.participantId,
+          (settledPnlMap.get(trade.participantId) ?? 0) + (payout - trade.cost),
         );
       }
 
@@ -493,6 +507,8 @@ export async function settleRound(
     },
     { timeout: 20_000 },
   );
+
+  lastRoundPnlCache.set(event.id, settledPnlMap);
 
   emitToArena(event.id, 'settled', {
     roundId: round.id,

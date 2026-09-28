@@ -1,4 +1,4 @@
-import { placeTrade, getPosition } from '@/lib/engine/trading';
+import { placeTrade, getPosition, seedPositionCache } from '@/lib/engine/trading';
 import { priceYes as lmsrPriceYes } from '@/lib/lmsr';
 import { prisma } from '@/lib/prisma';
 import type { Side } from '@/lib/lmsr';
@@ -207,6 +207,12 @@ export async function evaluateDemoRoom(
     const fullConfig = { ...DEFAULT_CONFIG, ...config };
     const demoParticipants = await ensureDemoParticipants(event.id, fullConfig.participantCount, fullConfig.startingBalance);
 
+    // Pre-seed position cache for all demo participants this round
+    // so their first trade doesn't trigger a DB scan
+    for (const item of demoParticipants) {
+      seedPositionCache(round.id, item.participant.id);
+    }
+
     const priceYes = lmsrPriceYes({ qYes: round.qYes, qNo: round.qNo }, event.liquidityParamB);
 
     // Determine burst size: simulate 3 to 10 active trades in this tick
@@ -217,13 +223,17 @@ export async function evaluateDemoRoom(
     const shuffled = [...demoParticipants].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, activeCount);
 
+    // Cap to 3 bot trades per tick maximum to prevent queue starvation
+    const DEMO_TRADES_PER_TICK = 3;
+    const cappedSelected = selected.slice(0, DEMO_TRADES_PER_TICK);
+
     let metrics = demoMetricsMap.get(eventId);
     if (!metrics) {
       metrics = { attempts: 0, success: 0, rejected: 0, volume: 0, latencies: [] };
       demoMetricsMap.set(eventId, metrics);
     }
 
-    for (const item of selected) {
+    for (const item of cappedSelected) {
       if (item.participant.balance < 1.0) continue;
 
       const { side, stake } = chooseSideAndStake(
@@ -236,6 +246,9 @@ export async function evaluateDemoRoom(
 
       metrics.attempts++;
       const t0 = performance.now();
+
+      // Small random stagger so bot trades don't all hit the lock at the same instant
+      await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 80)));
 
       const result = await placeTrade({
         eventId: event.id,
@@ -253,6 +266,8 @@ export async function evaluateDemoRoom(
       if (result.ok) {
         metrics.success++;
         metrics.volume += stake;
+        // Update cached balance so next tick uses correct value without DB re-read
+        item.participant.balance -= stake;
       } else {
         metrics.rejected++;
       }

@@ -10,6 +10,7 @@ import { TradePanel } from '@/components/arena/trade-panel';
 import { SiteSidebar } from '@/components/site-sidebar';
 import { useArena } from '@/hooks/use-arena';
 import type { ArenaPublicInfo } from '@/lib/engine/snapshot';
+import type { PositionSummary } from '@/lib/engine/trading';
 import { cx, formatPoints, formatPrice, formatTime } from '@/lib/format';
 import { roundPhase } from '@/components/arena/round-timer';
 
@@ -42,6 +43,8 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
   const [showShareModal, setShowShareModal] = useState(false);
   const [trades, setTrades] = useState<CrowdTradeItem[]>([]);
   const [optimisticPriceYes, setOptimisticPriceYes] = useState<number | null>(null);
+  const [tradeFilledBalance, setTradeFilledBalance] = useState<number | null>(null);
+  const [tradeFilledPosition, setTradeFilledPosition] = useState<PositionSummary | null>(null);
 
   const loadTrades = useCallback(async () => {
     try {
@@ -86,6 +89,13 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
     setOptimisticPriceYes(null);
   }, [round?.priceYes]);
 
+  // Reset trade-filled overrides when the server snapshot confirms a new balance
+  // (this happens on socket reconnect -> refresh() -> new snapshot)
+  useEffect(() => {
+    setTradeFilledBalance(null);
+    setTradeFilledPosition(null);
+  }, [snapshot?.viewer?.balance]);
+
   const info = snapshot?.arena ?? initialArena;
   const viewer = snapshot?.viewer ?? null;
   const status = arena?.status ?? info.status;
@@ -121,7 +131,9 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
 
   const leaderboardEntries = leaderboard?.entries ?? [];
   const userRank = viewer?.rank ?? (leaderboardEntries.findIndex((p) => p.displayName === viewer?.participantId) + 1);
-  const position = viewer?.position ?? null;
+  const effectiveBalance = tradeFilledBalance ?? viewer?.balance ?? info.startingBalance;
+  const position = tradeFilledPosition ?? viewer?.position ?? null;
+  const effectivePosition = position;
 
   // Question & subtitle construction
   const isCustomMarket = info.marketCategory !== 'CRYPTO_PRICE';
@@ -161,7 +173,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
               <div className="text-right">
                 <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">BALANCE</div>
                 <div className="font-['Epilogue'] text-sm font-bold text-white">
-                  {formatPoints(viewer?.balance ?? info.startingBalance, 0)} pts
+                  {formatPoints(effectiveBalance, 0)} pts
                 </div>
               </div>
               <div className="h-6 w-px bg-[#27272A]" />
@@ -444,19 +456,20 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
               {/* Order Entry Panel */}
               <TradePanel
                 code={info.code}
-                balance={viewer?.balance ?? info.startingBalance}
+                balance={effectiveBalance}
                 maxStakePerTrade={info.maxStakePerTrade}
                 liquidityParamB={info.liquidityParamB}
                 qYes={round?.qYes ?? 0}
                 qNo={round?.qNo ?? 0}
                 priceYes={effectivePriceYes}
-                position={position}
+                position={effectivePosition}
                 tradingOpen={tradingOpen}
                 disabledReason={disabledReason}
                 tradesPerMinuteLimit={info.tradesPerMinuteLimit}
                 onOptimisticPrice={(p) => setOptimisticPriceYes(p)}
-                onFilled={() => {
-                  void refresh();
+                onFilled={(result) => {
+                  setTradeFilledBalance(result.balance);
+                  setTradeFilledPosition(result.position);
                 }}
               />
 

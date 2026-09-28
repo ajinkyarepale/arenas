@@ -77,11 +77,17 @@ async function advanceArena(event: Event, now: number): Promise<void> {
   if (round.status === 'TRADING' && round.locksAt && now >= round.locksAt.getTime()) {
     await lockRound(round.id);
   } else if (round.status === 'TRADING') {
-    if (event.botsEnabled || event.enableBots) {
+    // Stagger the three bot systems across alternating 500ms ticks.
+    // Previously all three fired every tick -> up to 14 queued lock entries/500ms.
+    // Now each fires on its own tick -> max ~3-4 queued lock entries/500ms.
+    const tickMod = Math.floor(now / 500) % 3;
+    if (tickMod === 0 && (event.botsEnabled || event.enableBots)) {
       void evaluateLiquidityBot(event.id, now, event, round);
+    }
+    if (tickMod === 1 && (event.botsEnabled || event.enableBots)) {
       void executeBotMicroTrade(event.id, round.id, 2, event, round);
     }
-    if (event.mode === 'DEMO' || event.demoStatus === 'ACTIVE' || event.demoStatus === 'RUNNING') {
+    if (tickMod === 2 && (event.mode === 'DEMO' || event.demoStatus === 'ACTIVE' || event.demoStatus === 'RUNNING')) {
       void evaluateDemoRoom(event.id, {}, now, event, round);
     }
     // Broadcast live standings every 2 seconds during active trading
@@ -97,7 +103,20 @@ async function advanceArena(event: Event, now: number): Promise<void> {
     // several seconds after it.
     const sampleFrom = round.resolvesAt.getTime() - twapWindowMs(event);
     if (now >= sampleFrom) {
-      await resolveRound(round.id);
+      // Wrap in setImmediate to yield the event loop during the 6-second TWAP wait.
+      // This allows HTTP requests and socket messages to be processed during sampling.
+      // The arena is still marked inFlight so a second tick cannot enter this branch.
+      await new Promise<void>((resolve) => {
+        setImmediate(async () => {
+          try {
+            await resolveRound(round.id);
+          } catch (err) {
+            console.error(`[scheduler] resolveRound failed for round ${round.id}`, err);
+          } finally {
+            resolve();
+          }
+        });
+      });
       // Resolution takes a few seconds; re-read before deciding what is next.
       const fresh = await prisma.event.findUnique({ where: { id: event.id } });
       const freshRound = await prisma.round.findUnique({ where: { id: round.id } });
@@ -179,6 +198,15 @@ async function tick(): Promise<void> {
  * polling would be rate-limited within seconds.
  */
 async function pollPrices(): Promise<void> {
+  // If the Binance WebSocket stream has delivered a price in the last 3 seconds,
+  // skip REST polling entirely — the stream already emits via emitToArena every ~60ms.
+  // REST polling is only a fallback for when the WS stream is disconnected.
+  const { getStreamPrice } = await import('@/lib/price/binance-stream');
+  const btcCheck = getStreamPrice('BTCUSDT');
+  if (btcCheck && Date.now() - btcCheck.at < 3000) {
+    return; // WS stream is healthy, nothing to do
+  }
+
   const events = await prisma.event.findMany({
     where: { status: { in: ['LIVE', 'LOBBY'] } },
     select: { id: true, asset: true },
