@@ -65,27 +65,27 @@ function LeaderboardRow({
   return (
     <li
       className={cx(
-        'flex items-center gap-2.5 rounded-lg border transition-colors',
-        isDisplay ? 'px-4 py-3 xl:px-5 xl:py-3.5 gap-3.5' : 'px-2.5 py-1.5',
+        'flex items-center gap-2.5 rounded-xl border transition-all duration-200',
+        isDisplay ? 'px-4 py-2.5 xl:px-5 xl:py-3 gap-3.5' : 'px-2.5 py-1.5',
         highlighted
           ? 'border-accent/60 bg-accent/10 shadow-[0_0_20px_-8px_rgba(61,155,255,0.7)]'
           : entry.rank === 1
-            ? 'border-[#EAB308]/40 bg-[#EAB308]/5 shadow-[0_0_20px_-10px_rgba(234,179,8,0.3)]'
+            ? 'border-[#EAB308]/60 bg-gradient-to-r from-[#EAB308]/15 via-[#EAB308]/5 to-transparent shadow-[0_0_25px_-8px_rgba(234,179,8,0.35)]'
             : entry.rank === 2
-              ? 'border-[#E2E8F0]/30 bg-[#E2E8F0]/5'
+              ? 'border-[#E2E8F0]/40 bg-gradient-to-r from-[#E2E8F0]/10 via-[#E2E8F0]/5 to-transparent'
               : entry.rank === 3
-                ? 'border-[#CD7F32]/30 bg-[#CD7F32]/5'
-                : 'border-[#27272A] bg-[#141414]',
+                ? 'border-[#CD7F32]/40 bg-gradient-to-r from-[#CD7F32]/10 via-[#CD7F32]/5 to-transparent'
+                : 'border-[#27272A]/80 bg-[#121215]',
       )}
     >
       <span
         className={cx(
-          'font-display tnum flex shrink-0 items-center justify-center rounded font-bold border',
-          isDisplay ? 'h-10 w-10 text-lg xl:h-11 xl:w-11 xl:text-xl' : 'h-6 w-6 text-xs',
-          entry.rank === 1 && 'bg-[#EAB308]/20 border-[#EAB308]/50 text-[#EAB308] shadow-[0_0_14px_-4px_rgba(255,176,32,0.8)]',
-          entry.rank === 2 && 'bg-[#E2E8F0]/20 border-[#E2E8F0]/40 text-[#E2E8F0]',
-          entry.rank === 3 && 'bg-[#CD7F32]/20 border-[#CD7F32]/40 text-[#FFA07A]',
-          entry.rank > 3 && 'bg-[#201f1f] border-[#27272A] text-[#8e9192]',
+          'font-display tnum flex shrink-0 items-center justify-center rounded-lg font-black border',
+          isDisplay ? 'h-9 w-9 text-base xl:h-10 xl:w-10 xl:text-lg' : 'h-6 w-6 text-xs',
+          entry.rank === 1 && 'bg-[#EAB308]/25 border-[#EAB308]/60 text-[#EAB308] shadow-[0_0_14px_-2px_rgba(255,176,32,0.7)]',
+          entry.rank === 2 && 'bg-[#E2E8F0]/25 border-[#E2E8F0]/50 text-[#E2E8F0]',
+          entry.rank === 3 && 'bg-[#CD7F32]/25 border-[#CD7F32]/50 text-[#FFA07A]',
+          entry.rank > 3 && 'bg-[#18181b] border-[#27272A] text-[#a1a1aa]',
         )}
       >
         {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}
@@ -95,8 +95,8 @@ function LeaderboardRow({
 
       <span
         className={cx(
-          'min-w-0 flex-1 truncate font-["Geist"] font-semibold text-white',
-          isDisplay ? 'text-xl xl:text-2xl' : 'text-xs',
+          'min-w-0 flex-1 truncate font-["Geist"] font-bold text-white',
+          isDisplay ? 'text-lg xl:text-xl' : 'text-xs',
         )}
       >
         {entry.displayName}
@@ -105,9 +105,9 @@ function LeaderboardRow({
       {showPnl && entry.lastRoundPnl !== 0 ? (
         <span
           className={cx(
-            'tnum shrink-0 font-semibold font-mono',
-            isDisplay ? 'text-lg xl:text-xl' : 'text-[11px]',
-            entry.lastRoundPnl > 0 ? 'text-yes' : 'text-no',
+            'tnum shrink-0 font-bold font-mono',
+            isDisplay ? 'text-base xl:text-lg' : 'text-[11px]',
+            entry.lastRoundPnl > 0 ? 'text-[#22C55E]' : 'text-[#EF4444]',
           )}
         >
           {formatSignedPoints(entry.lastRoundPnl, 0)}
@@ -117,10 +117,11 @@ function LeaderboardRow({
       <span
         className={cx(
           'tnum shrink-0 font-bold tabular-nums font-mono',
-          isDisplay ? 'w-32 xl:w-40 text-right text-xl xl:text-2xl text-white' : 'w-20 text-right text-xs',
+          isDisplay ? 'w-32 xl:w-40 text-right text-lg xl:text-xl text-white' : 'w-20 text-right text-xs',
         )}
       >
         {formatPoints(entry.balance, 0)}
+        {isDisplay ? <span className="text-[#a1a1aa] text-xs xl:text-sm font-normal ml-1">pts</span> : null}
       </span>
     </li>
   );

@@ -457,26 +457,28 @@ export function CandleChart({
   return (
     <div className="relative w-full h-full flex flex-col min-h-0 select-none">
       {/* TradingView Action Header Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 bg-[#0f0f12]/90 border-b border-[#27272A]/70 text-xs font-mono shrink-0">
+      {/* Header: OHLC Readout and optional desktop controls */}
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 bg-[#0c0c0e]/95 border-b border-[#27272A]/80 text-xs font-mono shrink-0">
         {/* Left: Dynamic TradingView OHLC Readout */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+        <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-0.5">
           {activeBar ? (
-            <div className="flex items-center gap-2 text-[11px] font-medium text-[#a1a1aa] whitespace-nowrap">
+            <div className="flex items-center gap-3 text-xs sm:text-sm font-medium text-[#a1a1aa] whitespace-nowrap">
               <span>O <strong className="text-white font-mono">{formatPrice(activeBar.open)}</strong></span>
               <span>H <strong className="text-white font-mono">{formatPrice(activeBar.high)}</strong></span>
               <span>L <strong className="text-white font-mono">{formatPrice(activeBar.low)}</strong></span>
               <span>C <strong className={barUp ? 'text-[#22C55E] font-mono font-bold' : 'text-[#EF4444] font-mono font-bold'}>{formatPrice(activeBar.close)}</strong></span>
-              <span className={`px-1 rounded text-[10px] font-bold ${barUp ? 'text-[#22C55E] bg-[#22C55E]/10' : 'text-[#EF4444] bg-[#EF4444]/10'}`}>
+              <span className={`px-1.5 py-0.5 rounded text-[11px] font-bold ${barUp ? 'text-[#22C55E] bg-[#22C55E]/15' : 'text-[#EF4444] bg-[#EF4444]/15'}`}>
                 {barUp ? '+' : ''}{activeBar.changePercent.toFixed(2)}%
               </span>
             </div>
           ) : (
-            <span className="text-[#71717a] text-[11px]">Streaming live ticks...</span>
+            <span className="text-[#71717a] text-xs">Streaming live ticks...</span>
           )}
         </div>
 
-        {/* Right: Timeframe, Chart Style & Zoom Controls */}
-        <div className="flex items-center gap-1.5 ml-auto shrink-0">
+        {/* Right: Timeframe, Chart Style & Zoom Controls (Hidden on projector/display mode) */}
+        {!isDisplay && (
+          <div className="flex items-center gap-1.5 ml-auto shrink-0">
           {/* Timeframe Pills */}
           <div className="flex items-center bg-[#18181b] rounded-md p-0.5 border border-[#27272A]">
             {TIMEFRAMES.map((tf) => (
@@ -560,6 +562,7 @@ export function CandleChart({
             </button>
           </div>
         </div>
+        )}
       </div>
 
       {/* Main Canvas Container */}
