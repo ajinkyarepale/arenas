@@ -10,7 +10,7 @@ import { ProbabilityBar, ProbabilityTrace } from '@/components/arena/probability
 import { roundPhase } from '@/components/arena/round-timer';
 import { TournamentAnalysis } from '@/components/arena/tournament-analysis';
 import { useArena, useCountdown } from '@/hooks/use-arena';
-import { cx, formatCountdown, formatPoints, formatPrice, formatProbability } from '@/lib/format';
+import { cx, formatCountdown, formatPoints, formatPrice, formatProbability, formatSignedPoints } from '@/lib/format';
 import type { ArenaPublicInfo } from '@/lib/engine/snapshot';
 
 const CandleChart = dynamic(
@@ -39,6 +39,7 @@ export function BigScreen({
   } = useArena(code);
 
   const [showQrModal, setShowQrModal] = useState(false);
+  const [showStandingsModal, setShowStandingsModal] = useState(false);
   const getOrigin = () => {
     const envUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
     if (envUrl) return envUrl.replace(/\/$/, '');
@@ -182,48 +183,37 @@ export function BigScreen({
         </div>
       </header>
 
-      {/* Main Broadcast Grid: Left Market Battle (55%) | Right Stage Leaderboard (45%) */}
-      <main className="relative grid min-h-0 flex-1 grid-cols-1 gap-3.5 py-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] xl:gap-4">
-        {/* Left Column: Battle Hero + Chart + Implied Probability Duel */}
-        <section className="flex min-h-0 flex-col gap-3 overflow-hidden">
-          {/* Battle Hero Card */}
-          <div className="bg-[#101014] border border-[#27272A] rounded-2xl p-3.5 xl:p-4 shadow-xl flex flex-col gap-2.5 shrink-0">
-            <div className="flex items-center justify-between">
-              <span className="font-['Epilogue'] text-xs font-bold uppercase tracking-wider text-[#a1a1aa] flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
-                ROUND QUESTION & TARGET
-              </span>
-              <span className="font-['Epilogue'] text-xs font-semibold text-[#71717a]">
-                Settles on 1m TWAP at 0:00
-              </span>
+      {/* Main Broadcast Grid: Left Market Battle (76%) | Right Stage Podium Rail (24% / 320px) */}
+      <main className="relative grid min-h-0 flex-1 grid-cols-1 gap-3 py-1 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px] xl:gap-4">
+        {/* Left Column: Unified Market Arena (76% width) */}
+        <section className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[#101014] border border-[#27272A] rounded-2xl shadow-2xl">
+          {/* Top Arena HUD: Question & Target Metrics */}
+          <div className="flex shrink-0 items-center justify-between gap-4 border-b border-[#27272A]/80 px-4 py-2.5 xl:py-3 bg-[#131317]">
+            <div className="flex min-w-0 flex-1 items-center gap-2.5">
+              <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse shrink-0" />
+              <h2 className="font-['Geist'] text-sm sm:text-base xl:text-lg font-black text-white truncate tracking-tight">
+                {isCustomMarket
+                  ? (customQuestion || info.name)
+                  : `Will ${info.asset.replace('USDT', '')} close UP above the round's open strike?`}
+              </h2>
             </div>
 
-            <h2 className="font-['Geist'] text-lg sm:text-xl xl:text-2xl font-black text-white leading-tight">
-              {isCustomMarket
-                ? (customQuestion || info.name)
-                : `Will ${info.asset.replace('USDT', '')} close UP above the round's open strike?`}
-            </h2>
-
             {!isCustomMarket && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-                {/* Strike / Open Card */}
-                <div className="bg-[#16161a] border border-[#27272A] rounded-xl px-3.5 py-2 flex flex-col justify-center">
-                  <span className="font-['Epilogue'] text-[10px] font-bold uppercase tracking-wider text-[#a1a1aa]">
-                    TARGET STRIKE (OPEN)
-                  </span>
-                  <span className="font-mono text-lg xl:text-xl font-black text-white mt-0.5">
+              <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+                {/* Target Strike */}
+                <div className="flex items-baseline gap-1.5 px-3 py-1 rounded-lg bg-[#18181c] border border-[#27272A] text-xs">
+                  <span className="font-['Epilogue'] text-[10px] font-bold text-[#8e9192] uppercase">STRIKE</span>
+                  <span className="font-mono font-bold text-white">
                     {formatPrice(round?.openPrice)}
                   </span>
                 </div>
 
-                {/* Live Spot Price Card */}
-                <div className="bg-[#16161a] border border-[#27272A] rounded-xl px-3.5 py-2 flex flex-col justify-center">
-                  <span className="font-['Epilogue'] text-[10px] font-bold uppercase tracking-wider text-[#a1a1aa]">
-                    LIVE BINANCE SPOT
-                  </span>
+                {/* Spot Price */}
+                <div className="flex items-baseline gap-1.5 px-3 py-1 rounded-lg bg-[#18181c] border border-[#27272A] text-xs">
+                  <span className="font-['Epilogue'] text-[10px] font-bold text-[#8e9192] uppercase">SPOT</span>
                   <span
                     className={cx(
-                      'font-mono text-lg xl:text-xl font-black mt-0.5 flex items-baseline gap-2',
+                      'font-mono font-black',
                       priceUp === true ? 'text-[#22C55E]' : priceUp === false ? 'text-[#EF4444]' : 'text-white',
                     )}
                   >
@@ -234,50 +224,33 @@ export function BigScreen({
                 {/* Real-time Verdict */}
                 <div
                   className={cx(
-                    'border rounded-xl px-3.5 py-2 flex flex-col justify-center transition-colors',
+                    'px-3 py-1 rounded-lg font-mono text-xs font-black border transition-colors',
                     priceUp
                       ? 'bg-[#22C55E]/15 border-[#22C55E]/40 text-[#22C55E]'
                       : 'bg-[#EF4444]/15 border-[#EF4444]/40 text-[#EF4444]',
                   )}
                 >
-                  <span className="font-['Epilogue'] text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
-                    LIVE VERDICT
-                  </span>
-                  <span className="font-mono text-base xl:text-lg font-black mt-0.5 tracking-tight truncate">
-                    {priceUp
-                      ? `YES WINNING (+${delta?.toFixed(2)})`
-                      : `NO WINNING (-${Math.abs(delta ?? 0).toFixed(2)})`}
-                  </span>
+                  {priceUp
+                    ? `YES WINNING (+${delta?.toFixed(2)})`
+                    : `NO WINNING (-${Math.abs(delta ?? 0).toFixed(2)})`}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Clean Streamlined Chart Body */}
-          <div className="bg-[#101014] border border-[#27272A] rounded-2xl flex min-h-0 flex-1 flex-col overflow-hidden shadow-xl">
+          {/* Full-Height High-Res Chart Canvas */}
+          <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[#0a0a0d]">
             <ChartFill code={code} openPrice={round?.openPrice ?? null} livePrice={price?.price ?? null} />
           </div>
 
-          {/* Crowd Odds Implied Probability Duel */}
-          <div className="bg-[#101014] border border-[#27272A] rounded-2xl p-3.5 xl:p-4 shadow-xl flex flex-col gap-2 shrink-0">
+          {/* Integrated Crowd Odds Sentiment Bar */}
+          <div className="flex shrink-0 flex-col gap-1.5 border-t border-[#27272A]/80 px-4 py-2.5 bg-[#131317]">
             <div className="flex items-center justify-between font-['Epilogue'] text-xs">
-              <span className="font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#38BDF8]" />
-                CROWD PREDICTION ODDS (MARKET SENTIMENT)
-              </span>
-              <span className="text-[#a1a1aa] font-mono text-xs">
-                {formatPoints(round?.volume ?? 0, 0)} pts volume · {round?.tradeCount ?? 0} predictions
-              </span>
-            </div>
-
-            {/* Duel Percentages */}
-            <div className="flex justify-between items-baseline font-mono px-1">
-              <div className="flex items-baseline gap-2">
-                <span className="font-['Epilogue'] text-xs font-black text-[#22C55E] uppercase tracking-wider">
+              <div className="flex items-baseline gap-2 font-mono">
+                <span className="font-['Epilogue'] text-[11px] font-black text-[#22C55E] uppercase tracking-wider">
                   YES ODDS
                 </span>
-                <span className="text-xl sm:text-2xl font-black text-[#22C55E]">
+                <span className="text-base sm:text-lg font-black text-[#22C55E]">
                   {formatProbability(priceYes, 1)}
                 </span>
                 <span className="text-xs text-[#a1a1aa] font-mono">
@@ -285,57 +258,43 @@ export function BigScreen({
                 </span>
               </div>
 
-              <div className="flex items-baseline gap-2 text-right">
+              <div className="hidden sm:flex items-center gap-1.5 text-[#a1a1aa] font-mono text-xs">
+                <span>{formatPoints(round?.volume ?? 0, 0)} pts volume</span>
+                <span>·</span>
+                <span>{round?.tradeCount ?? 0} predictions</span>
+              </div>
+
+              <div className="flex items-baseline gap-2 font-mono text-right">
                 <span className="text-xs text-[#a1a1aa] font-mono">
                   ({((1 - priceYes) * 100).toFixed(1)}¢)
                 </span>
-                <span className="text-xl sm:text-2xl font-black text-[#EF4444]">
+                <span className="text-base sm:text-lg font-black text-[#EF4444]">
                   {formatProbability(1 - priceYes, 1)}
                 </span>
-                <span className="font-['Epilogue'] text-xs font-black text-[#EF4444] uppercase tracking-wider">
+                <span className="font-['Epilogue'] text-[11px] font-black text-[#EF4444] uppercase tracking-wider">
                   NO ODDS
                 </span>
               </div>
             </div>
 
             {/* Stadium Dual-Color Probability Bar */}
-            <div className="h-5 w-full rounded-full bg-[#EF4444]/30 overflow-hidden flex p-0.5 border border-[#27272A]">
+            <div className="h-3 w-full rounded-full bg-[#EF4444]/30 overflow-hidden flex p-0.5 border border-[#27272A]">
               <div
-                className="h-full bg-[#22C55E] transition-all duration-200 rounded-full shadow-[0_0_12px_rgba(34,197,94,0.5)]"
+                className="h-full bg-[#22C55E] transition-all duration-200 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]"
                 style={{ width: `${Math.min(98, Math.max(2, priceYes * 100))}%` }}
               />
             </div>
           </div>
         </section>
 
-        {/* Right Column: Tournament Stage Leaderboard (Top 10) */}
-        <section className="flex min-h-0 flex-col gap-3 overflow-hidden">
-          <div className="bg-[#101014] border border-[#27272A] rounded-2xl flex min-h-0 flex-1 flex-col p-4 shadow-xl">
-            <div className="mb-3 flex shrink-0 items-center justify-between font-['Epilogue'] border-b border-[#27272A]/80 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="font-black text-white uppercase tracking-wider text-sm">
-                  STAGE LEADERBOARD
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E] text-[11px] font-bold">
-                  TOP 10 LIVE
-                </span>
-              </div>
-              <span className="text-[#a1a1aa] font-mono text-xs font-bold">
-                {leaderboard?.participantCount ?? 0} ACTIVE TRADERS
-              </span>
-            </div>
-
-            <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-              <Leaderboard data={leaderboard} limit={10} variant="display" />
-            </div>
-
-            {/* Stage Telemetry Footer */}
-            <div className="mt-3 pt-2.5 border-t border-[#27272A]/80 flex items-center justify-between text-xs font-mono text-[#a1a1aa] shrink-0">
-              <span>Round {currentRound > 0 ? currentRound : 1} of {info.totalRounds}</span>
-              <span>Total Volume: <strong className="text-white">{formatPoints(round?.volume ?? 0, 0)} pts</strong></span>
-            </div>
-          </div>
-        </section>
+        {/* Right Column: Stage Podium Rail (24% / 320px) */}
+        <StagePodiumRail
+          leaderboard={leaderboard}
+          currentRound={currentRound}
+          totalRounds={info.totalRounds}
+          volume={round?.volume ?? 0}
+          onOpenStandings={() => setShowStandingsModal(true)}
+        />
       </main>
 
       {/* Pop-up Join QR Code Modal for Latecomers in the Room */}
@@ -373,6 +332,38 @@ export function BigScreen({
             </div>
             <div className="shrink-0 p-3 bg-white rounded-xl shadow-lg">
               <ArenaQRCodeCard code={info.code} joinUrl={joinUrl} size={180} showDownload={false} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pop-up Full Standings Modal if triggered from Rail */}
+      {showStandingsModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-6"
+          onClick={() => setShowStandingsModal(false)}
+        >
+          <div
+            className="flex flex-col rounded-2xl bg-[#141417] border border-[#3f3f46] p-6 text-white shadow-2xl max-w-lg w-full max-h-[85vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[#27272A] pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[20px] text-[#22C55E]">leaderboard</span>
+                <span className="font-['Geist'] text-base font-black text-white">Full Tournament Standings</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowStandingsModal(false)}
+                className="text-xs text-[#a1a1aa] hover:text-white px-2.5 py-1 rounded bg-[#27272A] hover:bg-[#3f3f46] transition-colors"
+              >
+                Close (ESC)
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+              <Leaderboard data={leaderboard} limit={50} variant="display" />
             </div>
           </div>
         </div>
@@ -485,6 +476,159 @@ function ChartFill({
         candleLimit={120}
       />
     </div>
+  );
+}
+
+function StagePodiumRail({
+  leaderboard,
+  currentRound,
+  totalRounds,
+  volume,
+  onOpenStandings,
+}: {
+  leaderboard: any;
+  currentRound: number;
+  totalRounds: number;
+  volume: number;
+  onOpenStandings: () => void;
+}) {
+  const entries = leaderboard?.entries ?? [];
+  const top3 = entries.slice(0, 3);
+  const runnersUp = entries.slice(3, 6);
+  const hasTraders = entries.length > 0;
+
+  return (
+    <aside className="bg-[#101014] border border-[#27272A] rounded-2xl flex min-h-0 flex-col p-3.5 xl:p-4 shadow-2xl justify-between overflow-hidden">
+      {/* Rail Header */}
+      <div>
+        <div className="flex shrink-0 items-center justify-between font-['Epilogue'] border-b border-[#27272A]/80 pb-2.5 mb-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#EAB308] animate-pulse" />
+            <span className="font-black text-white uppercase tracking-wider text-xs sm:text-sm">
+              STAGE PODIUM
+            </span>
+          </div>
+          <span className="px-2 py-0.5 rounded-full bg-[#27272A] text-[#a1a1aa] font-mono text-[10px] font-bold">
+            {leaderboard?.participantCount ?? entries.length} TRADERS
+          </span>
+        </div>
+
+        {/* Podium Content */}
+        {!hasTraders ? (
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#27272A] p-6 text-center text-[#71717a] gap-2">
+            <span className="material-symbols-outlined text-2xl text-[#a1a1aa]">military_tech</span>
+            <p className="text-xs font-semibold text-white">Podium Awaiting Predictions</p>
+            <p className="text-[10px]">Leaderboard updates as round trades resolve.</p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {/* Top 3 Cards */}
+            {top3.map((entry: any, index: number) => {
+              const isFirst = index === 0;
+              const isSecond = index === 1;
+              const isThird = index === 2;
+
+              return (
+                <div
+                  key={entry.participantId}
+                  className={cx(
+                    'flex items-center justify-between rounded-xl border px-3 py-2 xl:py-2.5 transition-all select-none',
+                    isFirst && 'border-[#EAB308]/60 bg-gradient-to-r from-[#EAB308]/20 via-[#EAB308]/5 to-[#16161a] shadow-[0_0_20px_-6px_rgba(234,179,8,0.35)]',
+                    isSecond && 'border-[#E2E8F0]/40 bg-gradient-to-r from-[#E2E8F0]/15 via-[#E2E8F0]/5 to-[#16161a]',
+                    isThird && 'border-[#CD7F32]/40 bg-gradient-to-r from-[#CD7F32]/15 via-[#CD7F32]/5 to-[#16161a]',
+                  )}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1 mr-2">
+                    <div
+                      className={cx(
+                        'flex shrink-0 items-center justify-center rounded-lg font-black border font-mono text-xs w-7 h-7 tracking-tight',
+                        isFirst && 'bg-[#EAB308]/25 border-[#EAB308]/80 text-[#EAB308] shadow-[0_0_10px_rgba(234,179,8,0.5)]',
+                        isSecond && 'bg-[#E2E8F0]/20 border-[#E2E8F0]/60 text-[#E2E8F0]',
+                        isThird && 'bg-[#CD7F32]/25 border-[#CD7F32]/70 text-[#FFA07A]',
+                      )}
+                    >
+                      {String(index + 1).padStart(2, '0')}
+                    </div>
+
+                    <span
+                      className="truncate font-['Geist'] text-xs xl:text-sm font-bold text-white tracking-tight"
+                      title={entry.displayName}
+                    >
+                      {entry.displayName}
+                    </span>
+                  </div>
+
+                  <div className="flex items-baseline gap-1.5 shrink-0 text-right">
+                    {entry.lastRoundPnl !== 0 && (
+                      <span
+                        className={cx(
+                          'text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border',
+                          entry.lastRoundPnl > 0
+                            ? 'bg-[#22C55E]/15 border-[#22C55E]/30 text-[#22C55E]'
+                            : 'bg-[#EF4444]/15 border-[#EF4444]/30 text-[#EF4444]',
+                        )}
+                      >
+                        {formatSignedPoints(entry.lastRoundPnl, 0)}
+                      </span>
+                    )}
+                    <span className="font-mono text-xs xl:text-sm font-black text-white">
+                      {formatPoints(entry.balance, 0)}
+                    </span>
+                    <span className="text-[10px] text-[#71717a] font-mono">pts</span>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Runners Up Micro Rows */}
+            {runnersUp.length > 0 && (
+              <div className="mt-1 flex flex-col gap-1 pt-2 border-t border-[#27272A]/60">
+                <span className="text-[10px] font-['Epilogue'] font-bold uppercase tracking-wider text-[#71717a] px-1">
+                  Runners Up
+                </span>
+                {runnersUp.map((entry: any, i: number) => (
+                  <div
+                    key={entry.participantId}
+                    className="flex items-center justify-between px-2.5 py-1 rounded-lg bg-[#141417] border border-[#27272A]/50 text-xs"
+                  >
+                    <div className="flex items-center gap-2 truncate min-w-0 flex-1 mr-2">
+                      <span className="font-mono text-[10px] font-bold text-[#71717a]">
+                        #{String(i + 4).padStart(2, '0')}
+                      </span>
+                      <span className="truncate font-medium text-white text-[11px]">
+                        {entry.displayName}
+                      </span>
+                    </div>
+                    <span className="font-mono text-[11px] font-bold text-[#c4c7c8] shrink-0">
+                      {formatPoints(entry.balance, 0)} pts
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Rail Footer */}
+      <div className="pt-3 border-t border-[#27272A]/80 flex flex-col gap-2 shrink-0">
+        <div className="flex items-center justify-between text-[11px] font-mono text-[#a1a1aa]">
+          <span>Round {currentRound > 0 ? currentRound : 1} of {totalRounds}</span>
+          <span>Volume: <strong className="text-white">{formatPoints(volume, 0)} pts</strong></span>
+        </div>
+
+        {entries.length > 3 && (
+          <button
+            type="button"
+            onClick={onOpenStandings}
+            className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-xs font-['Epilogue'] font-bold text-[#c4c7c8] hover:text-white transition-colors cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[14px]">leaderboard</span>
+            View Full Standings ({entries.length})
+          </button>
+        )}
+      </div>
+    </aside>
   );
 }
 
