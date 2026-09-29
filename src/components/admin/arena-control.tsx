@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Leaderboard } from '@/components/arena/leaderboard';
 import { RoundTimer } from '@/components/arena/round-timer';
@@ -116,10 +116,17 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
 
   const { round, price, connected, clockOffsetMs } = useArena(code);
 
-  const load = useCallback(async () => {
+  const dataRef = useRef<AdminPayload | null>(null);
+  dataRef.current = data;
+
+  const load = useCallback(async (isInitial = false) => {
     try {
       const res = await fetch(`/api/admin/arenas/${arenaId}`, { cache: 'no-store' });
       if (!res.ok) {
+        // If it's a routine background poll and we already have data, suppress transient 50x server errors
+        if (!isInitial && dataRef.current && res.status >= 500) {
+          return;
+        }
         const body = await res.json().catch(() => ({}));
         setError(body.error ?? 'Could not load management data.');
         return;
@@ -128,14 +135,16 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
       setData(json);
       setError(null);
     } catch {
-      setError('Network error loading management data.');
+      if (isInitial || !dataRef.current) {
+        setError('Network error loading management data.');
+      }
     }
   }, [arenaId]);
 
   useEffect(() => {
-    void load();
+    void load(true);
     const interval = setInterval(() => {
-      if (document.visibilityState === 'visible') void load();
+      if (document.visibilityState === 'visible') void load(false);
     }, 4000);
     return () => clearInterval(interval);
   }, [load]);
@@ -293,14 +302,23 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
 
   if (!data) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6 font-['Geist'] text-[#e5e2e1] animate-in fade-in duration-300">
         {error ? (
-          <div className="p-4 rounded-xl border border-red-500/30 bg-red-950/20 text-red-400 text-sm">
-            {error}
+          <div className="p-4 rounded-xl border border-red-500/30 bg-red-950/20 backdrop-blur-md flex items-center justify-between gap-4 text-red-300 text-sm shadow-lg shadow-red-950/10">
+            <div className="flex items-center gap-3">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+              <span>{error}</span>
+            </div>
+            <button
+              onClick={() => void load(true)}
+              className="px-3.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-500/30 text-xs font-semibold transition-all duration-150 active:scale-95"
+            >
+              Retry
+            </button>
           </div>
         ) : null}
-        <div className="h-44 animate-pulse rounded-xl border border-[#27272A] bg-[#201f1f]/50" />
-        <div className="h-64 animate-pulse rounded-xl border border-[#27272A] bg-[#201f1f]/50" />
+        <div className="h-48 rounded-xl border border-[#27272A]/70 bg-gradient-to-br from-[#1c1c1f]/60 to-[#141416]/40 backdrop-blur-xl animate-pulse" />
+        <div className="h-64 rounded-xl border border-[#27272A]/70 bg-gradient-to-br from-[#1c1c1f]/60 to-[#141416]/40 backdrop-blur-xl animate-pulse" />
       </div>
     );
   }
@@ -314,8 +332,17 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
   return (
     <div className="flex flex-col gap-6 font-['Geist'] text-[#e5e2e1]">
       {error ? (
-        <div className="p-4 rounded-xl border border-red-500/30 bg-red-950/20 text-red-400 text-sm">
-          {error}
+        <div className="p-4 rounded-xl border border-red-500/30 bg-red-950/25 backdrop-blur-md text-red-300 text-sm flex items-center justify-between gap-3 shadow-lg shadow-red-950/10 transition-all duration-300">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-red-500" />
+            <span>{error}</span>
+          </div>
+          <button
+            onClick={() => setError(null)}
+            className="text-xs text-red-400/80 hover:text-red-200 px-2 py-0.5 rounded transition active:scale-95"
+          >
+            Dismiss
+          </button>
         </div>
       ) : null}
 

@@ -40,14 +40,16 @@ const handle = app.getRequestHandler();
 async function main(): Promise<void> {
   await app.prepare();
 
-  const httpServer = createServer((req, res) => {
+  const httpServer = createServer(async (req, res) => {
     try {
       // `parse` with query parsing is what Next's own server does.
-      handle(req, res, parse(req.url ?? '/', true));
+      await handle(req, res, parse(req.url ?? '/', true));
     } catch (error) {
       console.error('[http] request failed', error);
-      res.statusCode = 500;
-      res.end('Internal server error');
+      if (!res.headersSent) {
+        res.statusCode = 500;
+        res.end('Internal server error');
+      }
     }
   });
 
@@ -150,6 +152,14 @@ async function main(): Promise<void> {
   process.on('SIGINT', () => void shutdown('SIGINT'));
   process.on('SIGTERM', () => void shutdown('SIGTERM'));
 }
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[server] Unhandled Rejection:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('[server] Uncaught Exception:', error);
+});
 
 main().catch((error) => {
   console.error('[server] failed to start', error);
