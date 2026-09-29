@@ -117,16 +117,17 @@ export function BigScreen({
           <HeaderTimer
             round={round}
             clockOffsetMs={clockOffsetMs}
+            isEnded={status === 'ENDED'}
           />
         </div>
 
         {/* Right: Round Counter, Join Beacon, and Live Lamp */}
-        <div className="flex shrink-0 items-center justify-end gap-4 xl:gap-6 flex-1">
+        <div className="flex shrink-0 items-center justify-end gap-2.5 xl:gap-4 flex-1">
           <div className="text-right">
-            <div className="font-['Epilogue'] text-[11px] font-bold text-[#8e9192] uppercase tracking-wider">ROUND</div>
-            <div className="font-['Epilogue'] text-2xl xl:text-3xl font-black text-white leading-none">
+            <div className="font-['Epilogue'] text-[10px] font-bold text-[#8e9192] uppercase tracking-wider">ROUND</div>
+            <div className="font-['Epilogue'] text-xl xl:text-2xl font-black text-white leading-none">
               {currentRound > 0 ? currentRound : '—'}
-              <span className="text-[#71717a] text-sm xl:text-base font-normal"> / {info.totalRounds}</span>
+              <span className="text-[#71717a] text-xs xl:text-sm font-normal"> / {info.totalRounds}</span>
             </div>
           </div>
 
@@ -134,18 +135,18 @@ export function BigScreen({
           <button
             type="button"
             onClick={() => setShowQrModal(true)}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[#18181b] hover:bg-[#222228] border border-[#27272A] text-white shadow-lg transition-all cursor-pointer"
+            className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#18181b] hover:bg-[#222228] border border-[#27272A] text-white shadow-lg transition-all cursor-pointer"
             title="Click to view large join QR code"
           >
             <div className="text-left font-['Epilogue']">
-              <span className="text-[10px] text-[#22C55E] font-extrabold uppercase tracking-wider block">
+              <span className="text-[9px] text-[#22C55E] font-extrabold uppercase tracking-wider block">
                 SCAN TO JOIN
               </span>
-              <span className="font-mono text-sm xl:text-base font-black text-white tracking-wider">
+              <span className="font-mono text-xs xl:text-sm font-black text-white tracking-wider">
                 {info.code}
               </span>
             </div>
-            <span className="material-symbols-outlined text-[22px] text-[#22C55E]">qr_code_2</span>
+            <span className="material-symbols-outlined text-[18px] text-[#22C55E]">qr_code_2</span>
           </button>
 
           <StatusLamp status={status} connected={connected} />
@@ -181,8 +182,8 @@ export function BigScreen({
         </div>
       </header>
 
-      {/* Main Broadcast Grid: Left Market Battle (62%) | Right Stage Leaderboard (38%) */}
-      <main className="relative grid min-h-0 flex-1 grid-cols-1 gap-3.5 py-1 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] xl:gap-4">
+      {/* Main Broadcast Grid: Left Market Battle (55%) | Right Stage Leaderboard (45%) */}
+      <main className="relative grid min-h-0 flex-1 grid-cols-1 gap-3.5 py-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] xl:gap-4">
         {/* Left Column: Battle Hero + Chart + Implied Probability Duel */}
         <section className="flex min-h-0 flex-col gap-3 overflow-hidden">
           {/* Battle Hero Card */}
@@ -395,10 +396,25 @@ export function BigScreen({
 function HeaderTimer({
   round,
   clockOffsetMs,
+  isEnded,
 }: {
   round: any;
   clockOffsetMs: number;
+  isEnded?: boolean;
 }) {
+  if (isEnded) {
+    return (
+      <div className="flex flex-col items-center justify-center px-6 py-2 rounded-2xl border border-[#27272A] bg-[#141418] shadow-xl">
+        <span className="font-['Epilogue'] text-[10px] font-black uppercase tracking-widest text-[#22C55E]">
+          STAGE COMPLETE
+        </span>
+        <span className="font-mono text-lg sm:text-xl xl:text-2xl font-black tracking-tight text-white mt-0.5">
+          CONCLUDED
+        </span>
+      </div>
+    );
+  }
+
   const now = Date.now() + clockOffsetMs;
   const phase = roundPhase(round, now);
   const target =
@@ -584,7 +600,7 @@ function IdleOverlay({
   if (status === 'ENDED') {
     if (dismissed) {
       return (
-        <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2 bg-[#141418]/95 border border-[#27272A] p-2 rounded-xl shadow-2xl backdrop-blur-xl">
+        <div className="fixed bottom-4 left-4 z-40 flex items-center gap-2 bg-[#141418]/95 border border-[#27272A] p-2 rounded-xl shadow-2xl backdrop-blur-xl">
           <span className="font-['Epilogue'] text-xs font-bold text-[#a1a1aa] pl-2">Tournament Ended</span>
           <button
             type="button"

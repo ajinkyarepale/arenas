@@ -560,8 +560,9 @@ export function CreateArenaForm() {
               <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-2">
-                    <span className="font-['Epilogue'] text-xs font-bold text-white uppercase">
-                      🤖 Liquidity Bot & Market Maker
+                    <span className="font-['Epilogue'] text-xs font-bold text-white uppercase flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[15px] text-[#22C55E]">smart_toy</span>
+                      Liquidity Bot & Market Maker
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-[#27272A] text-[#c4c7c8] border border-[#3f3f46] text-[9px] font-bold uppercase font-['Epilogue']">
                       LMSR Adaptive
@@ -644,9 +645,9 @@ export function CreateArenaForm() {
                       ))}
                     </div>
                     <div className="p-2.5 rounded-lg bg-[#121214] border border-[#27272A] text-[11px] text-[#a1a1aa]">
-                      {form.botStrategy === 'CONSERVATIVE' && '🛡️ Triggers only at heavy imbalance (>=70% skew). Small conservative stake sizes.'}
-                      {form.botStrategy === 'BALANCED' && '⚖️ Triggers at moderate imbalance (>=60% skew). Balanced stake sizes.'}
-                      {form.botStrategy === 'ADAPTIVE' && '⚡ Dynamic stakes based on book depth, implied probability delta, and round volatility.'}
+                      {form.botStrategy === 'CONSERVATIVE' && 'Conservative: Triggers only at heavy imbalance (>=70% skew). Small conservative stake sizes.'}
+                      {form.botStrategy === 'BALANCED' && 'Balanced: Triggers at moderate imbalance (>=60% skew). Balanced stake sizes.'}
+                      {form.botStrategy === 'ADAPTIVE' && 'Adaptive: Dynamic stakes based on book depth, implied probability delta, and round volatility.'}
                     </div>
                   </div>
                 </div>
@@ -658,8 +659,9 @@ export function CreateArenaForm() {
               <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-2">
-                    <span className="font-['Epilogue'] text-xs font-bold text-white uppercase">
-                      🎮 Demo Arena Mode (Virtual Participants)
+                    <span className="font-['Epilogue'] text-xs font-bold text-white uppercase flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[15px] text-[#60a5fa]">sports_esports</span>
+                      Demo Arena Mode (Virtual Participants)
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-[#3b82f6]/10 text-[#60a5fa] border border-[#3b82f6]/30 text-[9px] font-bold uppercase font-['Epilogue']">
                       Simulation
@@ -704,7 +706,7 @@ export function CreateArenaForm() {
                     </div>
                   </div>
                   <div className="p-3 rounded-lg bg-[#3b82f6]/10 border border-[#3b82f6]/20 text-[11px] text-[#93c5fd]">
-                    ✨ <strong>Active Demo Mode:</strong> Provisioned traders trade with varied profiles (Momentum, Contrarian, Large/Small, Balanced) to showcase realistic market dynamics and depth.
+                    <strong>Active Demo Mode:</strong> Provisioned traders trade with varied profiles (Momentum, Contrarian, Large/Small, Balanced) to showcase realistic market dynamics and depth.
                   </div>
                 </div>
               )}
@@ -732,12 +734,12 @@ export function CreateArenaForm() {
                     </span>
                     {(form.enableBots || form.botsEnabled) && (
                       <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] text-[#22C55E] text-[10px] font-['Epilogue'] font-bold uppercase flex items-center gap-1">
-                        🤖 Bot ({form.botStrategy})
+                        Bot ({form.botStrategy})
                       </span>
                     )}
                     {form.isDemoMode && (
                       <span className="px-2 py-0.5 rounded-full bg-[#3b82f6]/20 border border-[#3b82f6]/40 text-[#93c5fd] text-[10px] font-['Epilogue'] font-bold uppercase flex items-center gap-1">
-                        🎮 Demo ({form.demoParticipantCount} traders)
+                        Demo ({form.demoParticipantCount} traders)
                       </span>
                     )}
                   </div>

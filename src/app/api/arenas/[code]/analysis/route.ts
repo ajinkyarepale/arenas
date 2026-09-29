@@ -249,21 +249,21 @@ export async function GET(
         isCorrect = finalProbability >= 0.5;
         verdict =
           finalProbability >= 0.65
-            ? '🎯 Strong Crowd Accuracy (YES Predicted & Won)'
+            ? 'Strong Crowd Accuracy (YES Predicted & Won)'
             : finalProbability >= 0.5
-              ? '⚖️ Narrow Market Consensus Won (YES)'
-              : '⚡ Contrarian Upset (Market leaned NO, but YES won)';
+              ? 'Narrow Market Consensus Won (YES)'
+              : 'Contrarian Upset (Market leaned NO, but YES won)';
       } else if (outcome === 'NO') {
         brierScore = Number(Math.pow(finalProbability - 0, 2).toFixed(4));
         isCorrect = finalProbability <= 0.5;
         verdict =
           finalProbability <= 0.35
-            ? '🎯 Strong Crowd Accuracy (NO Predicted & Won)'
+            ? 'Strong Crowd Accuracy (NO Predicted & Won)'
             : finalProbability <= 0.5
-              ? '⚖️ Narrow Market Consensus Won (NO)'
-              : '⚡ Contrarian Upset (Market leaned YES, but NO won)';
+              ? 'Narrow Market Consensus Won (NO)'
+              : 'Contrarian Upset (Market leaned YES, but NO won)';
       } else if (outcome === 'VOID') {
-        verdict = `⚠️ Round Voided: ${round.voidReason || 'Market Cancelled'}`;
+        verdict = `Round Voided: ${round.voidReason || 'Market Cancelled'}`;
       }
 
       if (outcome === 'YES' || outcome === 'NO') {
@@ -272,7 +272,7 @@ export async function GET(
         if (brierScore != null) sumBrierScore += brierScore;
       }
     } else if (round.status === 'TRADING' || round.status === 'LOCKED') {
-      verdict = '🔴 Round Live / In Progress';
+      verdict = 'Round Live / In Progress';
     }
 
     return {

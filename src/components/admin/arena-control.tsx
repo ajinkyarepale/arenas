@@ -578,7 +578,8 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
               <span className="font-['Geist'] text-base font-bold text-white flex items-center gap-2">
-                🤖 Automated Liquidity Bot
+                <span className="material-symbols-outlined text-[18px] text-[#22C55E]">smart_toy</span>
+                Automated Liquidity Bot
               </span>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-[10px] font-['Epilogue'] font-bold uppercase tracking-wider ${
@@ -647,7 +648,8 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
               <span className="font-['Geist'] text-base font-bold text-white flex items-center gap-2">
-                🎮 Demo Room Controller (60 Virtual Traders)
+                <span className="material-symbols-outlined text-[18px] text-[#3b82f6]">sports_esports</span>
+                Demo Room Controller (60 Virtual Traders)
               </span>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-[10px] font-['Epilogue'] font-bold uppercase tracking-wider ${

@@ -504,8 +504,9 @@ export default function HostPage() {
 
               <div className="flex items-center justify-between pt-2 border-t border-[#27272A]">
                 {!session?.user ? (
-                  <p className="text-[11px] text-[#a1a1aa]">
-                    💡 You will be prompted to sign in or create an account when submitting.
+                  <p className="text-[11px] text-[#a1a1aa] flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[14px] text-[#F59E0B]">info</span>
+                    You will be prompted to sign in or create an account when submitting.
                   </p>
                 ) : (
                   <span className="text-[11px] text-[#a1a1aa]">

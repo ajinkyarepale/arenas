@@ -294,7 +294,7 @@ export default function AnalyticsOverviewPage() {
             </div>
           ) : filteredEvents.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-12 rounded-2xl border border-dashed border-[#27272A] text-center gap-3 bg-[#121215]/30">
-              <span className="text-3xl">🔍</span>
+              <span className="material-symbols-outlined text-3xl text-[#71717a]">search</span>
               <p className="text-base font-bold text-white">No tournaments matched your criteria</p>
               <p className="text-xs text-[#a1a1aa] max-w-xs">
                 Try searching with a different keyword or resetting your filter.
@@ -371,7 +371,7 @@ export default function AnalyticsOverviewPage() {
                                 )}
                               >
                                 R{ro.roundNumber}: {ro.outcome || 'Pending'}
-                                {isResolved && (ro.isCorrect ? ' ✓' : ' ✗')}
+                                {isResolved && (ro.isCorrect ? ' · WON' : ' · MISS')}
                               </span>
                             );
                           })
