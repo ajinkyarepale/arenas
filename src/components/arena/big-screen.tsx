@@ -39,7 +39,9 @@ export function BigScreen({
   } = useArena(code);
 
   const [showQrModal, setShowQrModal] = useState(false);
-  const [origin, setOrigin] = useState('');
+  const [origin, setOrigin] = useState(
+    process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')
+  );
   const [internalView, setInternalView] = useState<'screen' | 'live' | 'analysis'>('screen');
   const router = useRouter();
 

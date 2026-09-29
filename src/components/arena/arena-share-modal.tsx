@@ -18,7 +18,9 @@ export function ArenaShareModal({
   isOpen,
   onClose,
 }: ArenaShareModalProps) {
-  const [origin, setOrigin] = useState('');
+  const [origin, setOrigin] = useState(
+    process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')
+  );
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);

@@ -99,7 +99,9 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
   const [busy, setBusy] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [origin, setOrigin] = useState('');
+  const [origin, setOrigin] = useState(
+    process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')
+  );
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
