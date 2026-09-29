@@ -730,7 +730,7 @@ function IdleOverlay({
     if (typeof window !== 'undefined' && window.location.origin) return window.location.origin;
     return '';
   });
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
     const envUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
