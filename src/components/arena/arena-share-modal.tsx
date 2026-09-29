@@ -18,17 +18,22 @@ export function ArenaShareModal({
   isOpen,
   onClose,
 }: ArenaShareModalProps) {
-  const [origin, setOrigin] = useState(
-    process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')
-  );
+  const getOrigin = () => {
+    const envUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+    if (envUrl) return envUrl.replace(/\/$/, '');
+    if (typeof window !== 'undefined' && window.location.origin) {
+      return window.location.origin;
+    }
+    return '';
+  };
+
+  const [origin, setOrigin] = useState(getOrigin);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setOrigin(window.location.origin);
-    }
+    setOrigin(getOrigin());
   }, []);
 
   const joinUrl = origin ? `${origin}/arenas/${code}` : `/arenas/${code}`;

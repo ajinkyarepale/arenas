@@ -39,9 +39,16 @@ export function BigScreen({
   } = useArena(code);
 
   const [showQrModal, setShowQrModal] = useState(false);
-  const [origin, setOrigin] = useState(
-    process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')
-  );
+  const getOrigin = () => {
+    const envUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+    if (envUrl) return envUrl.replace(/\/$/, '');
+    if (typeof window !== 'undefined' && window.location.origin) {
+      return window.location.origin;
+    }
+    return '';
+  };
+
+  const [origin, setOrigin] = useState(getOrigin);
   const [internalView, setInternalView] = useState<'screen' | 'live' | 'analysis'>('screen');
   const router = useRouter();
 
@@ -58,7 +65,7 @@ export function BigScreen({
   };
 
   useEffect(() => {
-    setOrigin(window.location.origin);
+    setOrigin(getOrigin());
   }, []);
 
   if (internalView === 'analysis') {
@@ -557,11 +564,21 @@ function IdleOverlay({
   name: string;
   onSelectView?: (view: 'live' | 'screen' | 'analysis') => void;
 }) {
-  const [origin, setOrigin] = useState('');
+  const [origin, setOrigin] = useState(() => {
+    const envUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+    if (envUrl) return envUrl.replace(/\/$/, '');
+    if (typeof window !== 'undefined' && window.location.origin) return window.location.origin;
+    return '';
+  });
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    setOrigin(window.location.origin);
+    const envUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+    if (envUrl) {
+      setOrigin(envUrl.replace(/\/$/, ''));
+    } else if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
   }, []);
 
   if (status === 'ENDED') {
