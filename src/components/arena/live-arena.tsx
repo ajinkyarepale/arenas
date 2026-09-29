@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { ArenaShareModal } from '@/components/arena/arena-share-modal';
 import { BigScreen } from '@/components/arena/big-screen';
+import { Leaderboard } from '@/components/arena/leaderboard';
 import { CrowdGraph, type CrowdTradeItem } from '@/components/arena/crowd-graph';
 import { TournamentAnalysis } from '@/components/arena/tournament-analysis';
 import { TradePanel } from '@/components/arena/trade-panel';
@@ -567,83 +568,110 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
               />
 
               {/* Feed & Leaderboard Switcher */}
-              <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl flex flex-col gap-4">
-                <div className="flex items-center justify-between border-b border-[#27272A] pb-3">
-                  <div className="flex gap-4">
+              <div className="glass-panel p-5 border border-[#27272A] bg-[rgba(20,20,20,0.75)] backdrop-blur-xl rounded-2xl flex flex-col gap-4 shadow-xl">
+                <div className="flex items-center justify-between border-b border-[#27272A]/80 pb-3">
+                  {/* Segmented Pill Switcher */}
+                  <div className="flex p-1 rounded-xl bg-[#121215] border border-[#27272A] gap-1">
                     <button
                       type="button"
                       onClick={() => setRightTab('tape')}
-                      className={`font-['Epilogue'] text-xs font-bold transition-colors ${
-                        rightTab === 'tape' ? 'text-white border-b-2 border-[#22C55E] pb-1' : 'text-[#c4c7c8]'
+                      className={`px-3 py-1.5 rounded-lg text-xs font-['Epilogue'] font-bold transition-all duration-150 flex items-center gap-1.5 active:scale-95 ${
+                        rightTab === 'tape'
+                          ? 'bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E] shadow-sm'
+                          : 'text-[#a1a1aa] hover:text-white border border-transparent'
                       }`}
                     >
-                      LIVE TAPE
+                      <span>LIVE TAPE</span>
+                      {trades.length > 0 && (
+                        <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#22C55E]/20 text-[#22C55E] font-mono">
+                          {trades.length}
+                        </span>
+                      )}
                     </button>
                     <button
                       type="button"
                       onClick={() => setRightTab('leaderboard')}
-                      className={`font-['Epilogue'] text-xs font-bold transition-colors ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-['Epilogue'] font-bold transition-all duration-150 flex items-center gap-1.5 active:scale-95 ${
                         rightTab === 'leaderboard'
-                          ? 'text-white border-b-2 border-[#22C55E] pb-1'
-                          : 'text-[#c4c7c8]'
+                          ? 'bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E] shadow-sm'
+                          : 'text-[#a1a1aa] hover:text-white border border-transparent'
                       }`}
                     >
-                      LEADERBOARD
+                      <span>LEADERBOARD</span>
+                      {leaderboard?.entries?.length ? (
+                        <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#EAB308]/20 text-[#EAB308] font-mono">
+                          {leaderboard.entries.length}
+                        </span>
+                      ) : null}
                     </button>
                   </div>
-                  <span className="font-mono text-[10px] text-[#22C55E] uppercase flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" /> LIVE
+
+                  <span className="font-mono text-[10px] font-bold text-[#22C55E] tracking-wider uppercase flex items-center gap-1.5 bg-[#22C55E]/10 border border-[#22C55E]/20 px-2 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" /> LIVE FEED
                   </span>
                 </div>
 
                 {rightTab === 'tape' ? (
-                  <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
+                  <div className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
                     {trades.length === 0 ? (
-                      <p className="text-xs text-[#c4c7c8] py-8 text-center">No trades placed in this round yet.</p>
+                      <div className="flex flex-col items-center justify-center py-10 px-4 text-center gap-3">
+                        <div className="relative flex items-center justify-center w-12 h-12 rounded-full bg-[#18181b] border border-[#27272A]">
+                          <span className="w-3 h-3 rounded-full bg-[#22C55E] animate-ping absolute opacity-75" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#22C55E]" />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <p className="font-['Geist'] text-xs font-bold text-white">Awaiting First Prediction</p>
+                          <p className="font-['Geist'] text-[11px] text-[#71717a] max-w-[210px] leading-relaxed">
+                            No trades filled in this round yet. Take a YES or NO position to lead the market tape!
+                          </p>
+                        </div>
+                      </div>
                     ) : (
                       [...trades]
                         .reverse()
-                        .slice(0, 15)
-                        .map((trade) => (
-                          <div
-                            key={trade.id}
-                            className="flex justify-between items-center py-2 px-3 rounded-lg bg-[#201f1f]/50 border border-[#27272A] font-['Epilogue'] text-xs"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span
-                                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                  trade.side === 'YES'
-                                    ? 'bg-[#22C55E]/15 text-[#22C55E]'
-                                    : 'bg-[#EF4444]/15 text-[#EF4444]'
-                                }`}
-                              >
-                                {trade.side}
+                        .slice(0, 20)
+                        .map((trade) => {
+                          const isYes = trade.side === 'YES';
+                          return (
+                            <div
+                              key={trade.id}
+                              className="group flex justify-between items-center py-2 px-3 rounded-xl bg-[#141417]/80 hover:bg-[#18181c] border border-[#27272A]/80 hover:border-[#3f3f46] font-['Geist'] text-xs transition-all duration-150"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <span
+                                  className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-black shrink-0 ${
+                                    isYes
+                                      ? 'bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E]'
+                                      : 'bg-[#EF4444]/15 border border-[#EF4444]/30 text-[#EF4444]'
+                                  }`}
+                                >
+                                  {isYes ? 'YES ▲' : 'NO ▼'}
+                                </span>
+                                <span className="font-bold text-white font-mono shrink-0">
+                                  {formatPoints(trade.cost, 0)} pts
+                                </span>
+                                {trade.shares && (
+                                  <span className="text-[11px] text-[#71717a] font-mono truncate hidden sm:inline">
+                                    ({trade.shares.toFixed(1)} sh)
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[10px] font-mono text-[#a1a1aa] shrink-0">
+                                {formatTime(trade.at)}
                               </span>
-                              <span className="text-[#c4c7c8]">{formatPoints(trade.cost, 0)} pts</span>
                             </div>
-                            <span className="text-[10px] text-[#8e9192]">{formatTime(trade.at)}</span>
-                          </div>
-                        ))
+                          );
+                        })
                     )}
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
-                    {leaderboardEntries.length === 0 ? (
-                      <p className="text-xs text-[#c4c7c8] py-8 text-center">No participants ranked yet.</p>
-                    ) : (
-                      leaderboardEntries.map((p, idx) => (
-                        <div
-                          key={p.displayName}
-                          className="flex justify-between items-center py-2 px-3 rounded-lg bg-[#201f1f]/50 border border-[#27272A] font-['Epilogue'] text-xs"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-[#8e9192] w-4">{idx + 1}</span>
-                            <span className="text-white truncate max-w-[120px]">{p.displayName}</span>
-                          </div>
-                          <span className="font-bold text-[#22C55E]">{formatPoints(p.balance, 0)} pts</span>
-                        </div>
-                      ))
-                    )}
+                  <div className="max-h-80 overflow-y-auto pr-1">
+                    <Leaderboard
+                      data={leaderboard}
+                      limit={15}
+                      variant="compact"
+                      highlightParticipantId={snapshot?.viewer?.participantId}
+                    />
                   </div>
                 )}
               </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 
 import { cx, formatPoints, formatShares } from '@/lib/format';
 import type { MarketPayload } from '@/lib/realtime/events';
@@ -9,15 +9,7 @@ type Fill = NonNullable<MarketPayload['lastTrade']> & { key: string };
 
 const TAPE_LENGTH = 8;
 
-/**
- * The trade tape — a running strip of recent fills across the whole room.
- *
- * The data has been flowing over the socket since the trading engine shipped
- * (`MarketPayload.lastTrade`); this is the first component that renders it.
- * Follows the same ring-buffer-on-prop-change pattern as `ProbabilityTrace`
- * in probability.tsx rather than introducing a new one.
- */
-export function TradeTape({
+export const TradeTape = memo(function TradeTape({
   lastTrade,
   variant = 'compact',
   className,
@@ -63,9 +55,9 @@ export function TradeTape({
       ))}
     </ol>
   );
-}
+});
 
-function TapeRow({
+const TapeRow = memo(function TapeRow({
   fill,
   variant,
   isNewest,
@@ -102,5 +94,5 @@ function TapeRow({
       </span>
     </li>
   );
-}
+});
 

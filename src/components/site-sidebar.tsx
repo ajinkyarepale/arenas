@@ -35,6 +35,7 @@ export function SiteSidebar() {
   const navItems = [
     { href: '/markets', label: 'Markets', icon: 'show_chart' },
     { href: '/arenas', label: 'Live', icon: 'sensors' },
+    { href: '/analytics', label: 'Analytics', icon: 'analytics' },
     { href: '/guide', label: 'Guide', icon: 'menu_book' },
     { href: '/info', label: 'About', icon: 'info' },
     ...(isOrganizer ? [{ href: '/admin', label: 'Admin Panel', icon: 'admin_panel_settings' }] : []),

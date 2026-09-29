@@ -9,9 +9,10 @@ import type { ArenaPublicInfo } from '@/lib/engine/snapshot';
 interface TournamentAnalysisProps {
   initialArena: ArenaPublicInfo;
   onSelectView?: (view: 'live' | 'screen' | 'analysis') => void;
+  onBack?: () => void;
 }
 
-export function TournamentAnalysis({ initialArena, onSelectView }: TournamentAnalysisProps) {
+export function TournamentAnalysis({ initialArena, onSelectView, onBack }: TournamentAnalysisProps) {
   const code = initialArena.code;
   const [data, setData] = useState<TournamentAnalysisPayload | null>(null);
   const [loading, setLoading] = useState(true);
@@ -70,6 +71,18 @@ export function TournamentAnalysis({ initialArena, onSelectView }: TournamentAna
       {/* Top Header / View Switcher Bar */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#27272A] bg-[#0c0c0e]/95 px-4 sm:px-6 py-2.5 backdrop-blur-xl">
         <div className="flex items-center gap-3">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#141417] hover:bg-[#1f1f23] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all active:scale-95 shadow-sm"
+              title="Return to All Events Overview"
+            >
+              <span>←</span>
+              <span className="hidden sm:inline font-mono">Overview</span>
+            </button>
+          )}
+
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
               <span className="font-['Epilogue'] text-[10px] font-bold uppercase tracking-widest text-[#22C55E]">
