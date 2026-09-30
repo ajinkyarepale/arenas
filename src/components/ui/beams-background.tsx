@@ -71,16 +71,21 @@ export function BeamsBackground({
     if (!ctx) return;
 
     const updateCanvasSize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const logicalWidth = window.innerWidth;
+      const logicalHeight = window.innerHeight;
+
+      canvas.width = logicalWidth * dpr;
+      canvas.height = logicalHeight * dpr;
+      canvas.style.width = `${logicalWidth}px`;
+      canvas.style.height = `${logicalHeight}px`;
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
 
       const totalBeams = MINIMUM_BEAMS;
       beamsRef.current = Array.from({ length: totalBeams }, () =>
-        createBeam(canvas.width, canvas.height)
+        createBeam(logicalWidth, logicalHeight)
       );
     };
 
@@ -90,16 +95,19 @@ export function BeamsBackground({
     function resetBeam(beam: Beam, index: number, totalBeams: number) {
       if (!canvas) return beam;
 
+      const logicalWidth = window.innerWidth;
+      const logicalHeight = window.innerHeight;
+
       const column = index % 3;
-      const spacing = canvas.width / 3;
+      const spacing = logicalWidth / 3;
 
       const hueBase = 205;
       const hueRange = 40;
 
-      beam.y = canvas.height + 100;
+      beam.y = logicalHeight + 60;
       beam.x =
         column * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.6;
-      beam.width = 80 + Math.random() * 90;
+      beam.width = 70 + Math.random() * 80;
       beam.speed = 0.5 + Math.random() * 0.6;
       beam.hue = hueBase + (index * hueRange) / totalBeams;
       beam.opacity = 0.18 + Math.random() * 0.14;
@@ -158,14 +166,16 @@ export function BeamsBackground({
     function animate() {
       if (!(canvas && ctx)) return;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const logicalWidth = window.innerWidth;
+      const logicalHeight = window.innerHeight;
+      ctx.clearRect(0, 0, logicalWidth, logicalHeight);
 
       const totalBeams = beamsRef.current.length;
       beamsRef.current.forEach((beam, index) => {
         beam.y -= beam.speed;
         beam.pulse += beam.pulseSpeed;
 
-        if (beam.y + beam.length < -100) {
+        if (beam.y + beam.length < -60) {
           resetBeam(beam, index, totalBeams);
         }
 
@@ -187,9 +197,9 @@ export function BeamsBackground({
 
   return (
     <div className="relative w-full min-h-screen overflow-hidden bg-[#131313]">
-      {/* Ambient beams canvas with GPU-accelerated blur */}
+      {/* Ambient beams canvas with mobile-safe GPU-accelerated blur */}
       <canvas
-        className="pointer-events-none fixed inset-0 z-0 opacity-60 blur-[28px] transform-gpu will-change-transform"
+        className="pointer-events-none fixed inset-0 z-0 opacity-70 blur-[18px] md:blur-[28px] transform-gpu will-change-transform"
         ref={canvasRef}
       />
 
