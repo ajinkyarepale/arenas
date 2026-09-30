@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { ArenaControl } from '@/components/admin/arena-control';
+import { AppShell } from '@/components/app-shell';
 import { RoundTimeline, SplitBar } from '@/components/charts';
 import { SiteSidebar } from '@/components/site-sidebar';
 import { getArenaAnalytics } from '@/lib/analytics';
@@ -64,7 +65,7 @@ export default async function ManageArenaPage({ params }: { params: { id: string
       <SiteSidebar />
 
       {/* Main Content Area */}
-      <div className="flex-1 md:ml-64 flex flex-col min-h-screen relative pt-16 md:pt-0">
+      <AppShell className="relative">
         {/* Desktop TopNavBar */}
         <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-30">
           <div className="flex items-center gap-3">
@@ -219,7 +220,7 @@ export default async function ManageArenaPage({ params }: { params: { id: string
             </section>
           )}
         </main>
-      </div>
+      </AppShell>
     </div>
   );
 }

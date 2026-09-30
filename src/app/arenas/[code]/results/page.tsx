@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { AppShell } from '@/components/app-shell';
 import { SiteSidebar } from '@/components/site-sidebar';
 import { auth } from '@/lib/auth';
 import { formatPoints } from '@/lib/format';
@@ -57,7 +58,7 @@ export default async function ArenaResultsPage({
       <SiteSidebar />
 
       {/* Main Content Area */}
-      <div className="flex-1 md:ml-64 flex flex-col min-h-screen relative pt-16 md:pt-0">
+      <AppShell className="relative">
         {/* Desktop TopNavBar */}
         <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-30">
           <div className="flex items-center gap-3">
@@ -246,7 +247,7 @@ export default async function ArenaResultsPage({
             </div>
           </div>
         </main>
-      </div>
+      </AppShell>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { AppShell } from '@/components/app-shell';
 import { SiteNavAuth } from '@/components/site-nav-auth';
 import { SiteSidebar } from '@/components/site-sidebar';
 
@@ -16,7 +17,7 @@ export default function GuidePage() {
       <SiteSidebar />
 
       {/* Main Content Wrapper */}
-      <div className="flex-1 md:ml-64 flex flex-col min-h-screen min-w-0 pt-16 md:pt-0">
+      <AppShell>
         {/* Desktop TopNavBar */}
         <header className="hidden md:flex bg-[rgba(20,20,20,0.7)] top-0 sticky border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
           <div>
@@ -117,7 +118,7 @@ export default function GuidePage() {
             <Link href="/guide" className="hover:text-white hover:underline transition-colors">Docs</Link>
           </div>
         </footer>
-      </div>
+      </AppShell>
     </div>
   );
 }

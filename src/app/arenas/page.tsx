@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { AppShell, AppContent } from '@/components/app-shell';
 import { ArenaDirectory } from '@/components/arena-directory';
 import { SiteNavAuth } from '@/components/site-nav-auth';
 import { SiteSidebar } from '@/components/site-sidebar';
@@ -14,7 +15,7 @@ export default function ArenasPage() {
       <SiteSidebar />
 
       {/* Main Content Wrapper */}
-      <div className="flex-1 md:ml-64 flex flex-col min-h-screen pt-16 md:pt-0">
+      <AppShell>
         {/* Desktop TopNavBar */}
         <header className="hidden md:flex top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
           <div className="flex items-center gap-2">
@@ -28,7 +29,7 @@ export default function ArenasPage() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-6 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-6 md:gap-8">
+        <AppContent>
           <section className="flex flex-col gap-2">
             <h1 className="font-['Geist'] text-3xl md:text-4xl font-semibold text-white tracking-tight">
               Arena Catalog
@@ -37,8 +38,8 @@ export default function ArenasPage() {
 
           {/* Directory Grid */}
           <ArenaDirectory showJoinActions />
-        </main>
-      </div>
+        </AppContent>
+      </AppShell>
     </div>
   );
 }

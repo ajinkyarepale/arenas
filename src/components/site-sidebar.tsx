@@ -6,16 +6,18 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { SwitchButton } from '@/components/ui';
 
+import { useSidebar } from '@/context/sidebar-context';
+import { cx } from '@/lib/format';
+
 export function SiteSidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, toggleCollapsed, mobileOpen, setMobileOpen } = useSidebar();
 
   // Close mobile drawer whenever route changes
   useEffect(() => {
     setMobileOpen(false);
-  }, [pathname]);
+  }, [pathname, setMobileOpen]);
 
   // Lock body scroll when mobile drawer is open
   useEffect(() => {
@@ -57,7 +59,7 @@ export function SiteSidebar() {
           <SwitchButton size="sm" showLabel={false} />
           <button
             type="button"
-            onClick={() => setMobileOpen((prev) => !prev)}
+            onClick={() => setMobileOpen(!mobileOpen)}
             className="p-2 rounded-lg text-[#c4c7c8] hover:text-white hover:bg-[#201f1f] border border-transparent hover:border-[#27272A] transition-colors flex items-center justify-center"
             aria-label={mobileOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
           >
@@ -79,14 +81,14 @@ export function SiteSidebar() {
 
       {/* Main Sidebar Drawer (Responsive for Mobile & Desktop) */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 h-full bg-[#141414] md:bg-[rgba(20,20,20,0.85)] border-r border-[#27272A] backdrop-blur-xl flex flex-col py-6 px-4 z-50 transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 bottom-0 left-0 h-full bg-[#141414] md:bg-[rgba(20,20,20,0.85)] border-r border-[#27272A] backdrop-blur-xl flex flex-col py-6 z-50 transition-all duration-300 ease-in-out ${
           mobileOpen
-            ? 'translate-x-0 w-72 shadow-2xl'
+            ? 'translate-x-0 w-72 shadow-2xl px-4'
             : '-translate-x-full md:translate-x-0'
-        } ${collapsed ? 'md:w-16' : 'md:w-64'}`}
+        } ${collapsed ? 'md:w-16 md:px-2' : 'md:w-64 md:px-4'}`}
       >
         {/* Brand Header */}
-        <div className="flex items-center justify-between mb-6 px-2">
+        <div className={cx("flex items-center mb-6", collapsed ? "justify-center px-0" : "justify-between px-2")}>
           <Link
             href="/"
             onClick={() => setMobileOpen(false)}
@@ -112,8 +114,8 @@ export function SiteSidebar() {
           </button>
           <button
             type="button"
-            onClick={() => setCollapsed((prev) => !prev)}
-            className="hidden md:flex p-1.5 rounded-lg text-[#c4c7c8] hover:text-white hover:bg-[#201f1f] border border-transparent hover:border-[#27272A] transition-colors"
+            onClick={toggleCollapsed}
+            className="hidden md:flex p-1.5 rounded-lg text-[#c4c7c8] hover:text-white hover:bg-[#201f1f] border border-transparent hover:border-[#27272A] transition-colors items-center justify-center"
             title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           >
             <span className="material-symbols-outlined text-sm">
@@ -123,7 +125,7 @@ export function SiteSidebar() {
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex flex-col gap-1.5 flex-1">
+        <nav className="flex flex-col gap-2 flex-1">
           {navItems.map((item) => {
             const active = pathname.startsWith(item.href);
             return (
@@ -132,11 +134,15 @@ export function SiteSidebar() {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 title={collapsed ? item.label : undefined}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-['Epilogue'] text-sm transition-all ${
+                className={cx(
+                  'flex items-center rounded-xl font-["Epilogue"] text-sm transition-all',
+                  collapsed
+                    ? 'w-10 h-10 p-0 justify-center mx-auto'
+                    : 'gap-3 px-3 py-2.5',
                   active
-                    ? 'text-white font-bold bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E]'
-                    : 'text-[#c4c7c8] hover:bg-[#201f1f] hover:text-white border border-transparent'
-                }`}
+                    ? 'text-[#22C55E] font-bold bg-[#22C55E]/15 border border-[#22C55E]/30'
+                    : 'text-[#c4c7c8] hover:bg-[#201f1f] hover:text-white border border-transparent',
+                )}
               >
                 <span className={`material-symbols-outlined text-[20px] shrink-0 ${active ? 'text-[#22C55E]' : ''}`}>
                   {item.icon}
@@ -154,11 +160,15 @@ export function SiteSidebar() {
               href="/dashboard"
               onClick={() => setMobileOpen(false)}
               title={collapsed ? 'Profile' : undefined}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-['Epilogue'] text-sm transition-all ${
+              className={cx(
+                'flex items-center rounded-xl font-["Epilogue"] text-sm transition-all',
+                collapsed
+                  ? 'w-10 h-10 p-0 justify-center mx-auto'
+                  : 'gap-3 px-3 py-2.5',
                 pathname === '/dashboard'
-                  ? 'text-white font-bold bg-[#22C55E]/15 border border-[#22C55E]/30'
-                  : 'text-[#c4c7c8] hover:bg-[#201f1f] hover:text-white border border-transparent'
-              }`}
+                  ? 'text-[#22C55E] font-bold bg-[#22C55E]/15 border border-[#22C55E]/30'
+                  : 'text-[#c4c7c8] hover:bg-[#201f1f] hover:text-white border border-transparent',
+              )}
             >
               <div className="w-6 h-6 rounded-full bg-[#201f1f] border border-[#27272A] flex items-center justify-center text-xs font-bold text-white shrink-0 uppercase">
                 {session.user?.name?.[0] ?? session.user?.email?.[0] ?? 'U'}
@@ -175,7 +185,12 @@ export function SiteSidebar() {
               href="/signin"
               onClick={() => setMobileOpen(false)}
               title={collapsed ? 'Sign In' : undefined}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#c4c7c8] font-['Epilogue'] text-sm hover:bg-[#201f1f] hover:text-white border border-transparent transition-colors"
+              className={cx(
+                'flex items-center rounded-xl text-[#c4c7c8] font-["Epilogue"] text-sm hover:bg-[#201f1f] hover:text-white border border-transparent transition-colors',
+                collapsed
+                  ? 'w-10 h-10 p-0 justify-center mx-auto'
+                  : 'gap-3 px-3 py-2.5',
+              )}
             >
               <span className="material-symbols-outlined text-[20px] shrink-0">login</span>
               <span className={collapsed ? 'md:hidden' : 'block'}>Sign In</span>

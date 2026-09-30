@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AppShell } from '@/components/app-shell';
 import { SiteSidebar } from '@/components/site-sidebar';
 
 export default function NotFound() {
@@ -6,7 +7,7 @@ export default function NotFound() {
     <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
       <SiteSidebar />
 
-      <main className="flex-1 md:ml-64 flex flex-col min-h-screen relative">
+      <AppShell className="relative">
         <header className="flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-40">
           <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
         </header>
@@ -47,7 +48,7 @@ export default function NotFound() {
             <Link href="/guide" className="hover:text-white underline">Docs</Link>
           </div>
         </footer>
-      </main>
+      </AppShell>
     </div>
   );
 }

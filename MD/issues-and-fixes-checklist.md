@@ -140,7 +140,31 @@ This document tracks all identified bugs, lagging features, missing links, anima
   - [x] Capped `devicePixelRatio` at `2.0` for mobile GPU memory safety.
   - [x] Adjusted responsive canvas blur (`blur-[18px] md:blur-[28px]`) to prevent mobile Safari/Android texture drops.
 
+---
 
-
-
-
+## Stage 11: Dynamic Centering, Responsive AppShell, & Tournament Card Polish
+- [x] **11.1 Global Responsive Layout (`src/components/app-shell.tsx`, `src/context/sidebar-context.tsx`)**:
+  - [x] Created `SidebarProvider` and `useSidebar()` with persistent preference in `localStorage`.
+  - [x] Created responsive `AppShell` that dynamically binds left margin to `collapsed ? 'md:ml-16' : 'md:ml-64'` with `transition-[margin] duration-300 ease-in-out` and `pt-16 md:pt-0` for mobile.
+  - [x] Converted all core application routes to `AppShell`:
+    - `src/app/analytics/page.tsx`
+    - `src/app/arenas/page.tsx`
+    - `src/app/markets/page.tsx`
+    - `src/app/dashboard/page.tsx`
+    - `src/app/admin/page.tsx`
+    - `src/app/admin/arenas/new/page.tsx`
+    - `src/app/admin/arenas/[id]/page.tsx`
+    - `src/app/arenas/[code]/page.tsx`
+    - `src/app/arenas/[code]/results/page.tsx`
+    - `src/app/guide/page.tsx`
+    - `src/app/info/page.tsx`
+    - `src/app/not-found.tsx`
+    - `src/components/arena/live-arena.tsx`
+- [x] **11.2 Collapsed Sidebar Aesthetic Polish (`src/components/site-sidebar.tsx`)**:
+  - [x] Fixed collapsed state padding: reduced to `md:px-2` and converted items into centered 40×40px square tiles (`w-10 h-10 p-0 justify-center mx-auto rounded-xl`).
+  - [x] Eliminated squished green oval distortion on active tabs.
+  - [x] Centered collapse/expand chevron and user avatar when collapsed.
+- [x] **11.3 Tournament Analytics Card Normalization (`src/app/analytics/page.tsx`)**:
+  - [x] Replaced multi-line wrapping textual badges (`R1: NO · WON ...`) with a compact, uniform round calibration strip (`flex items-center gap-1.5 h-4` with `h-2 rounded-full` indicators).
+  - [x] Green for Won, Red for Miss, Neutral for Pending/Void with full hover tooltip information.
+  - [x] Normalized card heights to a uniform geometry across all screen sizes.

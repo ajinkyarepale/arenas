@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { EventStatus } from '@/generated/client';
 
 import { AdminArenaList } from '@/components/admin/admin-arena-list';
+import { AppShell, AppContent } from '@/components/app-shell';
 import { SiteSidebar } from '@/components/site-sidebar';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -70,7 +71,7 @@ export default async function AdminPage() {
       <SiteSidebar />
 
       {/* Main Content Wrapper */}
-      <div className="flex-1 md:ml-64 flex flex-col min-h-screen pt-16 md:pt-0">
+      <AppShell>
         {/* Desktop TopNavBar */}
         <header className="hidden md:flex bg-[rgba(20,20,20,0.7)] top-0 sticky border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
           <div>
@@ -102,7 +103,7 @@ export default async function AdminPage() {
         </header>
 
         {/* Content Container */}
-        <main className="flex-1 p-4 sm:p-6 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-6 md:gap-8">
+        <AppContent>
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
@@ -147,8 +148,8 @@ export default async function AdminPage() {
 
           {/* Arenas List with Interactive QR & Share Actions */}
           <AdminArenaList arenas={arenas} />
-        </main>
-      </div>
+        </AppContent>
+      </AppShell>
     </div>
   );
 }

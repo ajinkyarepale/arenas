@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 
+import { AppShell } from '@/components/app-shell';
 import { SiteSidebar } from '@/components/site-sidebar';
 import { authOptions, isOrganizer } from '@/lib/auth';
 import { getTraderAnalytics } from '@/lib/analytics';
@@ -31,7 +32,7 @@ export default async function DashboardPage() {
       <SiteSidebar />
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 flex flex-col min-h-screen relative pt-16 md:pt-0">
+      <AppShell>
         {/* Desktop TopNavBar */}
         <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-30">
           <div>
@@ -243,7 +244,7 @@ export default async function DashboardPage() {
             <Link href="/guide" className="hover:text-white underline">Docs</Link>
           </div>
         </footer>
-      </main>
+      </AppShell>
     </div>
   );
 }

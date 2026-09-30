@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { AppShell, AppContent } from '@/components/app-shell';
 import { SiteSidebar } from '@/components/site-sidebar';
 import { SiteNavAuth } from '@/components/site-nav-auth';
 import { TournamentAnalysis } from '@/components/arena/tournament-analysis';
@@ -145,7 +146,7 @@ export default function AnalyticsOverviewPage() {
       <SiteSidebar />
 
       {/* Main Content Area */}
-      <div className="flex-1 md:ml-64 flex flex-col min-h-screen pt-16 md:pt-0">
+      <AppShell>
         {/* Top Header */}
         <header className="hidden md:flex bg-[rgba(20,20,20,0.7)] top-0 sticky border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
           <div>
@@ -168,7 +169,7 @@ export default function AnalyticsOverviewPage() {
         </header>
 
         {/* Dashboard Body */}
-        <main className="flex-1 p-4 sm:p-6 md:p-12 max-w-[1280px] w-full mx-auto flex flex-col gap-6 md:gap-8">
+        <AppContent>
           {/* Hero Title */}
           <div className="flex flex-col gap-2">
             <h1 className="font-['Geist'] text-3xl md:text-4xl font-semibold text-white tracking-tight">
@@ -340,38 +341,42 @@ export default function AnalyticsOverviewPage() {
                       </p>
                     </div>
 
-                    {/* Mini Round Outcomes Breakdown */}
+                    {/* Mini Round Calibration Strip */}
                     <div className="mb-4 pt-3 border-t border-[#27272A]/60">
                       <div className="flex items-center justify-between text-[11px] text-[#71717a] font-mono mb-2">
-                        <span>Round Outcomes</span>
-                        <span>{ev.currentRound > 0 ? `Round ${ev.currentRound} of ${ev.totalRounds}` : `${ev.totalRounds} Rounds`}</span>
+                        <span>Round Calibration</span>
+                        <span>
+                          {ev.roundOutcomes.length === 0
+                            ? `${ev.totalRounds} Rounds`
+                            : `${ev.roundOutcomes.filter((ro) => ro.isCorrect).length}/${ev.roundOutcomes.filter((ro) => ro.outcome && ro.outcome !== 'VOID').length || ev.totalRounds} Won`}
+                        </span>
                       </div>
 
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {ev.roundOutcomes.length === 0 ? (
+                      {ev.roundOutcomes.length === 0 ? (
+                        <div className="h-4 flex items-center">
                           <span className="text-xs text-[#52525b] italic">No rounds played yet</span>
-                        ) : (
-                          ev.roundOutcomes.map((ro) => {
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 h-4">
+                          {ev.roundOutcomes.map((ro) => {
                             const isResolved = ro.outcome && ro.outcome !== 'VOID';
                             return (
-                              <span
+                              <div
                                 key={ro.roundNumber}
+                                title={`Round ${ro.roundNumber}: ${ro.outcome || 'Pending'}${isResolved ? (ro.isCorrect ? ' (WON)' : ' (MISS)') : ''}`}
                                 className={cx(
-                                  'px-2 py-0.5 rounded-md font-mono text-[10px] font-bold border',
+                                  'flex-1 h-2 rounded-full transition-all duration-200 cursor-help',
                                   isResolved
                                     ? ro.isCorrect
-                                      ? 'bg-[#22C55E]/15 border-[#22C55E]/30 text-[#22C55E]'
-                                      : 'bg-[#EF4444]/15 border-[#EF4444]/30 text-[#EF4444]'
-                                    : 'bg-[#27272A]/40 border-[#27272A] text-[#a1a1aa]',
+                                      ? 'bg-[#22C55E]'
+                                      : 'bg-[#EF4444]'
+                                    : 'bg-[#27272A]/80 border border-[#3f3f46]',
                                 )}
-                              >
-                                R{ro.roundNumber}: {ro.outcome || 'Pending'}
-                                {isResolved && (ro.isCorrect ? ' · WON' : ' · MISS')}
-                              </span>
+                              />
                             );
-                          })
-                        )}
-                      </div>
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     {/* Metrics Row: Volume, Traders, Accuracy */}
@@ -409,8 +414,8 @@ export default function AnalyticsOverviewPage() {
               })}
             </div>
           )}
-        </main>
-      </div>
+        </AppContent>
+      </AppShell>
     </div>
   );
 }

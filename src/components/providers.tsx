@@ -2,6 +2,7 @@
 
 import { SessionProvider } from 'next-auth/react';
 import { ThemeProvider } from 'next-themes';
+import { SidebarProvider } from '@/context/sidebar-context';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -14,7 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         refetchInterval={0}
         refetchOnWindowFocus
       >
-        {children}
+        <SidebarProvider>{children}</SidebarProvider>
       </SessionProvider>
     </ThemeProvider>
   );
