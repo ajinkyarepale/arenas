@@ -135,10 +135,24 @@ export function JoinArena({
             type="text"
             required
             value={accessCode}
-            onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-            className="w-full bg-[#201f1f] border border-[#27272A] rounded-xl py-3 pl-10 pr-4 font-['Epilogue'] text-xs text-white tracking-widest uppercase focus:border-white focus:outline-none transition-all placeholder-[#8e9192]"
+            onChange={(e) => {
+              const val = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+              setAccessCode(val);
+            }}
+            className="w-full bg-[#201f1f] border border-[#27272A] rounded-xl py-3 pl-10 pr-10 font-mono text-xs text-white tracking-widest uppercase focus:border-[#22C55E] focus:outline-none transition-all placeholder-[#8e9192]"
             placeholder="CODE"
+            autoComplete="off"
+            spellCheck={false}
           />
+          {accessCode && (
+            <button
+              type="button"
+              onClick={() => setAccessCode('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8e9192] hover:text-white text-xs"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 

@@ -48,7 +48,7 @@ export function TradePanel({
   onOptimisticPrice,
 }: TradePanelProps) {
   const ceiling = Math.max(0, Math.min(maxStakePerTrade, Math.floor(balance)));
-  const [mode, setMode] = useState<'POINTS' | 'SHARES'>('POINTS');
+  const [mode, setMode] = useState<'ARCS' | 'SHARES'>('ARCS');
   const [selectedSide, setSelectedSide] = useState<'YES' | 'NO'>('YES');
   const [optimisticPriceYes, setOptimisticPriceYes] = useState<number | null>(null);
 
@@ -58,6 +58,11 @@ export function TradePanel({
 
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fillSuccess, setFillSuccess] = useState<{
+    shares: number;
+    side: 'YES' | 'NO';
+    cost: number;
+  } | null>(null);
 
   // Reconcile optimistic price whenever authoritative server priceYes updates
   useEffect(() => {
@@ -91,7 +96,7 @@ export function TradePanel({
       return { quote: null, effectiveStake: 0, effectiveShares: 0 };
     }
 
-    if (mode === 'POINTS') {
+    if (mode === 'ARCS') {
       const stake = Math.max(1, Math.min(pointsInput, ceiling));
       try {
         const q = quoteByBudget({ qYes, qNo }, selectedSide, stake, liquidityParamB);
@@ -143,6 +148,13 @@ export function TradePanel({
       }
 
       const data = await res.json();
+      setFillSuccess({
+        shares: Math.round(effectiveShares),
+        side: selectedSide,
+        cost: effectiveStake,
+      });
+      setTimeout(() => setFillSuccess(null), 4000);
+
       onFilled({
         balance: data.balance,
         position: data.position,
@@ -166,14 +178,14 @@ export function TradePanel({
         <div className="inline-flex rounded-lg bg-[#141414] p-0.5 border border-[#27272A]">
           <button
             type="button"
-            onClick={() => setMode('POINTS')}
+            onClick={() => setMode('ARCS')}
             className={`px-3 py-1 rounded-md font-['Epilogue'] text-[11px] font-bold transition-all ${
-              mode === 'POINTS'
+              mode === 'ARCS'
                 ? 'bg-white text-black shadow-sm'
                 : 'text-[#c4c7c8] hover:text-white'
             }`}
           >
-            By Points
+            By Arcs
           </button>
           <button
             type="button"
@@ -196,16 +208,26 @@ export function TradePanel({
         </span>
       </div>
 
+      {/* Execution Confirmation Alert */}
+      {fillSuccess && (
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-[#22C55E]/15 border border-[#22C55E]/40 text-[#22C55E] text-xs font-['Epilogue'] font-semibold shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all">
+          <span className="material-symbols-outlined text-base">check_circle</span>
+          <span>
+            Filled {fillSuccess.shares} {fillSuccess.side} shares for {fillSuccess.cost} arcs
+          </span>
+        </div>
+      )}
+
       {/* Live Odds Meter */}
       <div>
         <div className="flex justify-between font-['Epilogue'] text-sm font-bold mb-2">
           <div className="text-[#22C55E] flex items-center gap-1">
-            <span>{(pYes * 100).toFixed(1)}¢</span>
+            <span>{(pYes * 100).toFixed(1)}%</span>
             <span className="text-xs text-[#22C55E]">YES</span>
           </div>
           <div className="text-[#EF4444] flex items-center gap-1">
             <span className="text-xs text-[#EF4444]">NO</span>
-            <span>{(pNo * 100).toFixed(1)}¢</span>
+            <span>{(pNo * 100).toFixed(1)}%</span>
           </div>
         </div>
 
@@ -215,15 +237,15 @@ export function TradePanel({
         </div>
       </div>
 
-      {/* Zero Points Restriction Alert */}
+      {/* Zero Arcs Restriction Alert */}
       {isZeroBalance ? (
         <div className="rounded-xl border border-red-500/30 bg-red-950/20 p-4 flex flex-col gap-2 text-center">
           <div className="flex items-center justify-center gap-1.5 text-red-400 font-['Epilogue'] text-sm font-bold">
             <span className="material-symbols-outlined text-base">block</span>
-            0 Points Remaining
+            0 Arcs Remaining
           </div>
           <p className="text-xs text-[#c4c7c8]">
-            You have 0 points left and cannot place further trades.
+            You have 0 arcs left and cannot place further trades.
           </p>
         </div>
       ) : (
@@ -257,8 +279,8 @@ export function TradePanel({
             </button>
           </div>
 
-          {/* Trade Amount Input (Points or Shares) */}
-          {mode === 'POINTS' ? (
+          {/* Trade Amount Input (Arcs or Shares) */}
+          {mode === 'ARCS' ? (
             <div className="flex flex-col gap-2">
               <div className="flex justify-between items-center font-['Epilogue'] text-xs text-[#c4c7c8]">
                 <span>ARCS BUDGET</span>
@@ -400,7 +422,7 @@ export function TradePanel({
               <span>{disabledReason || 'Trading Closed'}</span>
             ) : isZeroBalance ? (
               <span>0 Arcs Available</span>
-            ) : mode === 'POINTS' ? (
+            ) : mode === 'ARCS' ? (
               <span>PREDICT {selectedSide} (≈{effectiveShares.toFixed(1)} sh)</span>
             ) : (
               <span>PREDICT {selectedSide} ({effectiveStake.toFixed(0)} arcs margin)</span>

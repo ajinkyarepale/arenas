@@ -118,5 +118,19 @@ This document tracks all identified bugs, lagging features, missing links, anima
 - [x] **8.5 Tournament Analysis Back Fallback (`src/components/arena/tournament-analysis.tsx`)**:
   - [x] Added fallback back link to `<Link href={`/arenas/${initialArena.code}`}>← Arena</Link>` when opened standalone.
 
+---
+
+## Stage 9: Flow Optimizations & Supabase Database Migration
+- [x] **9.1 Trade Execution Feedback & Label Harmonization (`src/components/arena/trade-panel.tsx`)**:
+  - [x] Added animated emerald fill confirmation alert: `✓ Filled X shares for Y arcs`.
+  - [x] Migrated mode toggle tabs and budget headers from `By Points` to `By Arcs`.
+  - [x] Replaced remaining cent references (`¢`) with `%` and updated zero balance warning to `0 Arcs Remaining`.
+- [x] **9.2 Smart Arena Code Input & Fast Directory Jump**:
+  - [x] `src/components/arena/join-arena.tsx`: Added auto-uppercase, alphanumeric sanitization, and input clear button.
+  - [x] `src/components/arena-directory.tsx`: Added fast Enter key jump directly into tournament rooms by code and search clear button.
+- [x] **9.3 Local to Supabase Database Synchronization (`scripts/sync-local-to-supabase.ts`)**:
+  - [x] Built bidirectional data transfer script and added `npm run db:sync:supabase` script to `package.json`.
+
+
 
 

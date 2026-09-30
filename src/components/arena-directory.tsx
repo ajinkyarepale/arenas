@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import { ArenaShareModal } from '@/components/arena/arena-share-modal';
@@ -51,6 +52,7 @@ const FILTERS: Array<{ value: Filter; label: string }> = [
 ];
 
 export function ArenaDirectory({ showJoinActions }: { showJoinActions?: boolean } = {}) {
+  const router = useRouter();
   const [arenas, setArenas] = useState<DirectoryArena[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -112,10 +114,29 @@ export function ArenaDirectory({ showJoinActions }: { showJoinActions?: boolean 
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            className="w-full bg-[#201f1f] border border-[#27272A] rounded-lg py-2 pl-10 pr-4 font-['Geist'] text-sm text-[#e5e2e1] placeholder-[#c4c7c8]/50 focus:outline-none focus:border-white transition-colors"
-            placeholder="Search by title, host, asset, code..."
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && arenas) {
+                const needle = query.trim().toUpperCase();
+                const matched = arenas.find(
+                  (a) => a.code === needle || a.code.replace(/^AR-/, '') === needle
+                );
+                if (matched) {
+                  router.push(`/arenas/${matched.code}`);
+                }
+              }
+            }}
+            className="w-full bg-[#201f1f] border border-[#27272A] rounded-lg py-2 pl-10 pr-10 font-['Geist'] text-sm text-[#e5e2e1] placeholder-[#c4c7c8]/50 focus:outline-none focus:border-white transition-colors"
+            placeholder="Search by title, asset, or code (press Enter to jump)..."
             type="text"
           />
+          {query && (
+            <button
+              onClick={() => setQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#8e9192] hover:text-white"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Filter Tabs */}

@@ -21,7 +21,8 @@
     "verify:engine": "tsx scripts/verify-engine.ts",
     "icons": "node scripts/generate-icons.mjs",
     "db:reset-demo": "tsx scripts/reset-demo.ts",
-    "db:deploy": "prisma migrate deploy"
+    "db:deploy": "prisma migrate deploy",
+    "db:sync:supabase": "tsx scripts/sync-local-to-supabase.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
