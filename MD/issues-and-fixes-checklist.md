@@ -131,6 +131,16 @@ This document tracks all identified bugs, lagging features, missing links, anima
 - [x] **9.3 Local to Supabase Database Synchronization (`scripts/sync-local-to-supabase.ts`)**:
   - [x] Built bidirectional data transfer script and added `npm run db:sync:supabase` script to `package.json`.
 
+---
+
+## Stage 10: Mobile Background Animation Visibility Fix
+- [x] **10.1 Mobile DPR Coordinate Scaling (`src/components/ui/beams-background.tsx`)**:
+  - [x] Fixed coordinate calculation to use CSS logical viewport dimensions (`window.innerWidth`, `window.innerHeight`) rather than physical pixels.
+  - [x] Reset 2D transform matrix before scaling (`ctx.setTransform(1, 0, 0, 1, 0, 0)`), preventing compounding scale on resize.
+  - [x] Capped `devicePixelRatio` at `2.0` for mobile GPU memory safety.
+  - [x] Adjusted responsive canvas blur (`blur-[18px] md:blur-[28px]`) to prevent mobile Safari/Android texture drops.
+
+
 
 
 
