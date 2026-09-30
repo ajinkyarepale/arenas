@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { SiteNavAuth } from '@/components/site-nav-auth';
 import { SiteSidebar } from '@/components/site-sidebar';
 
 export const metadata: Metadata = {
@@ -24,12 +25,7 @@ export default function InfoPage() {
             </span>
           </div>
           <div className="flex items-center gap-4 ml-auto">
-            <Link href="/signin" className="text-sm font-semibold text-[#c4c7c8] hover:text-white transition-colors">
-              Sign in
-            </Link>
-            <Link href="/signup" className="px-4 py-2 rounded-full bg-[#22C55E] text-[#131313] font-bold text-xs hover:bg-emerald-400 transition-colors shadow">
-              Sign up
-            </Link>
+            <SiteNavAuth />
           </div>
         </header>
 

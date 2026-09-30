@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 
 import { ArenaShareModal } from '@/components/arena/arena-share-modal';
 import { BigScreen } from '@/components/arena/big-screen';
@@ -11,10 +11,10 @@ import { CrowdGraph, type CrowdTradeItem } from '@/components/arena/crowd-graph'
 import { TournamentAnalysis } from '@/components/arena/tournament-analysis';
 import { TradePanel } from '@/components/arena/trade-panel';
 import { SiteSidebar } from '@/components/site-sidebar';
-import { useArena } from '@/hooks/use-arena';
+import { useArena, useCountdown } from '@/hooks/use-arena';
 import type { ArenaPublicInfo } from '@/lib/engine/snapshot';
 import type { PositionSummary } from '@/lib/engine/trading';
-import { cx, formatPoints, formatPrice, formatTime } from '@/lib/format';
+import { cx, formatCountdown, formatPoints, formatPrice, formatTime } from '@/lib/format';
 import { roundPhase } from '@/components/arena/round-timer';
 
 const CandleChart = dynamic(
@@ -126,9 +126,14 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
 
   const info = snapshot?.arena ?? initialArena;
   const viewer = snapshot?.viewer ?? null;
-  const status = arena?.status ?? info.status;
+  // 1-second interval heartbeat to keep now, phase, and tradingOpen real-time synchronized with the clock
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const now = Date.now() + clockOffsetMs;
+  const now = currentTime + clockOffsetMs;
   const phase = roundPhase(round, now);
   const tradingOpen = status === 'LIVE' && phase === 'trading';
   const effectivePriceYes = optimisticPriceYes ?? (round?.priceYes ?? 0.5);
@@ -147,15 +152,6 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
   const currentRoundNum = arena?.currentRound ?? info.currentRound;
   const totalRounds = info.totalRounds;
 
-  // Calculate remaining seconds in current round or 30s intermission
-  const targetMs =
-    phase === 'resolved'
-      ? (round?.settledAt ? new Date(round.settledAt).getTime() + 30_000 : now)
-      : (round?.locksAt ? new Date(round.locksAt).getTime() : now);
-  const remainingMs = Math.max(0, targetMs - now);
-  const remainingSec = Math.floor(remainingMs / 1000);
-  const timerMin = String(Math.floor(remainingSec / 60)).padStart(2, '0');
-  const timerSec = String(remainingSec % 60).padStart(2, '0');
 
   const leaderboardEntries = leaderboard?.entries ?? [];
   const userRank = viewer?.rank ?? (leaderboardEntries.findIndex((p) => p.displayName === viewer?.participantId) + 1);
@@ -194,7 +190,14 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
         {/* Desktop TopNavBar */}
         <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-30">
           <div className="flex items-center gap-4">
-            <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
+            <Link
+              href="/arenas"
+              className="flex items-center gap-1.5 group text-[#c4c7c8] hover:text-white transition-colors"
+              title="Return to Arenas Catalog"
+            >
+              <span className="material-symbols-outlined text-lg transition-transform group-hover:-translate-x-0.5">arrow_back</span>
+              <span className="font-['Geist'] text-lg font-bold text-white">Arenas</span>
+            </Link>
             <div className="hidden sm:flex gap-2">
               <span className="px-2.5 py-1 rounded-full border border-[#27272A] bg-[#201f1f] font-['Epilogue'] text-xs text-[#c4c7c8] flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[14px]">vpn_key</span> {info.code}
@@ -240,7 +243,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
               <div className="text-right">
                 <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">BALANCE</div>
                 <div className="font-['Epilogue'] text-sm font-bold text-white">
-                  {formatPoints(effectiveBalance, 0)} pts
+                  {formatPoints(effectiveBalance, 0)} arcs
                 </div>
               </div>
               <div className="h-6 w-px bg-[#27272A]" />
@@ -281,12 +284,15 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
           <div className="md:hidden flex flex-col gap-2.5 bg-[#141414] border border-[#27272A] rounded-xl p-3 font-['Epilogue'] text-xs">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
+                <Link href="/arenas" className="flex items-center text-[#c4c7c8] hover:text-white mr-1" title="Back to Arenas">
+                  <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+                </Link>
                 <span className="font-mono font-bold text-[#22C55E]">{info.code}</span>
                 <span className="text-[#8e9192]">·</span>
                 <span className="text-[#c4c7c8]">R{currentRoundNum}/{totalRounds}</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-white font-bold">{formatPoints(viewer?.balance ?? info.startingBalance, 0)} pts</span>
+                <span className="text-white font-bold">{formatPoints(viewer?.balance ?? info.startingBalance, 0)} arcs</span>
                 <button
                   type="button"
                   onClick={() => setShowShareModal(true)}
@@ -376,24 +382,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                 })()
               ) : null}
 
-              <div className="flex items-center gap-4 bg-[#201f1f] px-4 py-2 rounded-xl border border-[#27272A] shrink-0 h-[52px]">
-                <div className="text-right">
-                  <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">
-                    {phase === 'resolved' ? 'NEXT ROUND IN' : 'ROUND ENDS IN'}
-                  </div>
-                  <div className="font-['Epilogue'] text-lg font-bold text-white flex items-center gap-2 leading-none mt-0.5">
-                    <span className={cx('w-2 h-2 rounded-full', phase === 'resolved' ? 'bg-[#38bdf8]' : 'bg-[#22C55E]', 'animate-pulse')} />
-                    {timerMin}:{timerSec}
-                  </div>
-                </div>
-                <div className="h-6 w-px bg-[#27272A]" />
-                <div>
-                  <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">STATUS</div>
-                  <div className={cx('font-["Epilogue"] text-xs font-bold leading-none mt-1', phase === 'resolved' ? 'text-[#38bdf8]' : 'text-[#22C55E]')}>
-                    {phase === 'resolved' ? 'RESOLVED' : tradingOpen ? 'TRADING' : status}
-                  </div>
-                </div>
-              </div>
+              <ParticipantTimer round={round} clockOffsetMs={clockOffsetMs} status={status} />
             </div>
           </div>
 
@@ -500,13 +489,13 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                                 {position.yesShares.toFixed(1)}
                               </td>
                               <td className="py-3 text-right font-bold text-white">
-                                ¢{Math.round((position.yesAvgPrice ?? 0.5) * 100)}
+                                {(position.yesAvgPrice ?? 0.5).toFixed(2)} arcs
                               </td>
                               <td className="py-3 text-right font-bold text-white">
-                                {position.yesCost.toFixed(0)} pts
+                                {position.yesCost.toFixed(0)} arcs
                               </td>
                               <td className="py-3 text-right font-bold text-[#22C55E]">
-                                {position.yesShares.toFixed(0)} pts
+                                {position.yesShares.toFixed(0)} arcs
                               </td>
                             </tr>
                           )}
@@ -521,13 +510,13 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                                 {position.noShares.toFixed(1)}
                               </td>
                               <td className="py-3 text-right font-bold text-white">
-                                ¢{Math.round((position.noAvgPrice ?? 0.5) * 100)}
+                                {(position.noAvgPrice ?? 0.5).toFixed(2)} arcs
                               </td>
                               <td className="py-3 text-right font-bold text-white">
-                                {position.noCost.toFixed(0)} pts
+                                {position.noCost.toFixed(0)} arcs
                               </td>
                               <td className="py-3 text-right font-bold text-[#EF4444]">
-                                {position.noShares.toFixed(0)} pts
+                                {position.noShares.toFixed(0)} arcs
                               </td>
                             </tr>
                           )}
@@ -648,7 +637,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                                   {isYes ? 'YES ▲' : 'NO ▼'}
                                 </span>
                                 <span className="font-bold text-white font-mono shrink-0">
-                                  {formatPoints(trade.cost, 0)} pts
+                                  {formatPoints(trade.cost, 0)} arcs
                                 </span>
                                 {trade.shares && (
                                   <span className="text-[11px] text-[#71717a] font-mono truncate hidden sm:inline">
@@ -682,3 +671,76 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
     </div>
   );
 }
+
+const ParticipantTimer = memo(function ParticipantTimer({
+  round,
+  clockOffsetMs,
+  status,
+}: {
+  round: any;
+  clockOffsetMs: number;
+  status: string;
+}) {
+  const now = Date.now() + clockOffsetMs;
+  const phase = roundPhase(round, now);
+  const target =
+    phase === 'resolved'
+      ? (round?.settledAt
+          ? new Date(new Date(round.settledAt).getTime() + 30_000).toISOString()
+          : null)
+      : phase === 'locked'
+        ? (round?.resolvesAt ?? null)
+        : (round?.locksAt ?? null);
+
+  const remaining = useCountdown(target, clockOffsetMs);
+  const timerLabel =
+    phase === 'resolved'
+      ? 'NEXT ROUND IN'
+      : phase === 'locked' || phase === 'closing'
+        ? 'RESOLVING IN'
+        : 'TRADING LOCKS IN';
+
+  return (
+    <div className="flex items-center gap-4 bg-[#201f1f] px-4 py-2 rounded-xl border border-[#27272A] shrink-0 h-[52px]">
+      <div className="text-right">
+        <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">
+          {timerLabel}
+        </div>
+        <div className="font-mono text-lg font-bold text-white flex items-center gap-2 leading-none mt-0.5 tabular-nums">
+          <span
+            className={cx(
+              'w-2 h-2 rounded-full',
+              phase === 'resolved'
+                ? 'bg-[#38bdf8]'
+                : phase === 'locked' || phase === 'closing'
+                  ? 'bg-[#EF4444]'
+                  : 'bg-[#22C55E]',
+              'animate-pulse',
+            )}
+          />
+          {phase === 'resolved' && remaining <= 0
+            ? '--:--'
+            : (phase === 'locked' || phase === 'closing') && remaining <= 0
+              ? 'SETTLING...'
+              : formatCountdown(remaining)}
+        </div>
+      </div>
+      <div className="h-6 w-px bg-[#27272A]" />
+      <div>
+        <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">STATUS</div>
+        <div
+          className={cx(
+            'font-["Epilogue"] text-xs font-bold leading-none mt-1',
+            phase === 'resolved'
+              ? 'text-[#38bdf8]'
+              : phase === 'locked' || phase === 'closing'
+                ? 'text-[#EF4444]'
+                : 'text-[#22C55E]',
+          )}
+        >
+          {phase === 'resolved' ? 'RESOLVED' : phase === 'locked' ? 'LOCKED' : (status === 'LIVE' && phase === 'trading') ? 'TRADING' : status}
+        </div>
+      </div>
+    </div>
+  );
+});

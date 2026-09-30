@@ -79,7 +79,7 @@ async function main(): Promise<void> {
     socket.on('subscribe', async ({ code }) => {
       try {
         const normalised = String(code ?? '').trim().toUpperCase();
-        if (!/^[A-Z0-9]{4,12}$/.test(normalised)) {
+        if (!/^[A-Z0-9-]{4,16}$/.test(normalised)) {
           socket.emit('error', { message: 'Invalid arena code' });
           return;
         }

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -90,27 +91,35 @@ export function BigScreen({
   return (
     <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#070709] text-[#e5e2e1] font-['Geist'] p-3.5 xl:p-5 antialiased select-none">
       {/* Broadcast Header */}
-      <header className="relative flex shrink-0 items-center justify-between gap-4 border-b border-[#27272A]/80 pb-3 mb-2.5">
-        {/* Left: Tournament & Host Credentials */}
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#18181b] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#22C55E] tracking-widest uppercase">
-              <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
-              {isCustomMarket ? 'CAMPUS PREDICTION ARENA' : 'BIG SCREEN BROADCAST'}
-            </div>
-            {info.collegeName && (
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#18181b] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8] uppercase tracking-wider">
-                <span className="material-symbols-outlined text-[13px]">school</span>
-                <span>{info.collegeName}</span>
+      <header className="relative grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-[#27272A]/80 pb-3 mb-2.5 shrink-0">
+        {/* Left: Tournament & Host Credentials + Round Badge */}
+        <div className="min-w-0 flex items-center gap-3">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#18181b] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#22C55E] tracking-widest uppercase">
+                <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
+                {isCustomMarket ? 'CAMPUS ARENA' : 'BROADCAST'}
               </div>
-            )}
+              <span className="px-2 py-0.5 rounded-full bg-[#38BDF8]/10 border border-[#38BDF8]/25 font-mono text-[10px] font-bold text-[#38BDF8] uppercase">
+                {isCustomMarket ? 'Custom Market' : info.asset}
+              </span>
+              {info.collegeName && (
+                <div className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#18181b] border border-[#27272A] font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8] uppercase">
+                  <span className="material-symbols-outlined text-[12px]">school</span>
+                  <span className="truncate max-w-[120px]">{info.collegeName}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-baseline gap-2.5">
+              <h1 className="font-['Geist'] text-lg sm:text-xl xl:text-2xl font-black tracking-tight text-white truncate max-w-sm xl:max-w-md">
+                {info.name}
+              </h1>
+              <span className="shrink-0 text-xs font-mono font-bold text-[#a1a1aa] bg-[#18181b] border border-[#27272A] px-2 py-0.5 rounded-md">
+                Round {currentRound > 0 ? currentRound : 1} of {info.totalRounds}
+              </span>
+            </div>
           </div>
-          <h1 className="font-['Geist'] text-xl sm:text-2xl xl:text-3xl font-black tracking-tight text-white truncate">
-            {info.name}
-          </h1>
-          <p className="mt-0.5 font-['Epilogue'] text-xs text-[#a1a1aa]">
-            {info.hostName ?? info.organizerName} · {isCustomMarket ? 'Custom Market' : info.asset}
-          </p>
         </div>
 
         {/* Center: Command Stadium Broadcast Timer */}
@@ -122,35 +131,33 @@ export function BigScreen({
           />
         </div>
 
-        {/* Right: Round Counter, Join Beacon, and Live Lamp */}
-        <div className="flex shrink-0 items-center justify-end gap-2.5 xl:gap-4 flex-1">
-          <div className="text-right">
-            <div className="font-['Epilogue'] text-[10px] font-bold text-[#8e9192] uppercase tracking-wider">ROUND</div>
-            <div className="font-['Epilogue'] text-xl xl:text-2xl font-black text-white leading-none">
-              {currentRound > 0 ? currentRound : '—'}
-              <span className="text-[#71717a] text-xs xl:text-sm font-normal"> / {info.totalRounds}</span>
-            </div>
-          </div>
+        {/* Right: Join Beacon, Exit Link, and View Switcher Tabs */}
+        <div className="flex shrink-0 items-center justify-end gap-2 xl:gap-2.5">
+          {/* Exit Big Screen Button */}
+          <Link
+            href={`/arenas/${info.code}`}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#18181b] hover:bg-[#222228] border border-[#27272A] text-xs font-['Epilogue'] font-medium text-[#c4c7c8] hover:text-white transition-all cursor-pointer"
+            title="Exit Big Screen View"
+          >
+            <span className="material-symbols-outlined text-[15px]">arrow_back</span>
+            <span className="hidden sm:inline">Exit</span>
+          </Link>
 
           {/* Join QR Beacon (Clickable for Room Attendees) */}
           <button
             type="button"
             onClick={() => setShowQrModal(true)}
-            className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#18181b] hover:bg-[#222228] border border-[#27272A] text-white shadow-lg transition-all cursor-pointer"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#18181b] hover:bg-[#222228] border border-[#27272A] text-white shadow-lg transition-all cursor-pointer select-none"
             title="Click to view large join QR code"
           >
-            <div className="text-left font-['Epilogue']">
-              <span className="text-[9px] text-[#22C55E] font-extrabold uppercase tracking-wider block">
-                SCAN TO JOIN
-              </span>
-              <span className="font-mono text-xs xl:text-sm font-black text-white tracking-wider">
-                {info.code}
-              </span>
-            </div>
-            <span className="material-symbols-outlined text-[18px] text-[#22C55E]">qr_code_2</span>
+            <span className="text-[10px] text-[#22C55E] font-extrabold uppercase font-['Epilogue'] tracking-wider">
+              JOIN
+            </span>
+            <span className="font-mono text-xs xl:text-sm font-black text-white tracking-widest">
+              {info.code}
+            </span>
+            <span className="material-symbols-outlined text-[16px] text-[#22C55E]">qr_code_2</span>
           </button>
-
-          <StatusLamp status={status} connected={connected} />
 
           {/* View Switcher Tabs (Always Visible) */}
           <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#141418] border border-[#27272A]">
@@ -254,19 +261,19 @@ export function BigScreen({
                   {formatProbability(priceYes, 1)}
                 </span>
                 <span className="text-xs text-[#a1a1aa] font-mono">
-                  ({(priceYes * 100).toFixed(1)}¢)
+                  ({(priceYes).toFixed(2)} arcs)
                 </span>
               </div>
 
               <div className="hidden sm:flex items-center gap-1.5 text-[#a1a1aa] font-mono text-xs">
-                <span>{formatPoints(round?.volume ?? 0, 0)} pts volume</span>
+                <span>{formatPoints(round?.volume ?? 0, 0)} arcs volume</span>
                 <span>·</span>
                 <span>{round?.tradeCount ?? 0} predictions</span>
               </div>
 
               <div className="flex items-baseline gap-2 font-mono text-right">
                 <span className="text-xs text-[#a1a1aa] font-mono">
-                  ({((1 - priceYes) * 100).toFixed(1)}¢)
+                  ({(1 - priceYes).toFixed(2)} arcs)
                 </span>
                 <span className="text-base sm:text-lg font-black text-[#EF4444]">
                   {formatProbability(1 - priceYes, 1)}
@@ -419,14 +426,14 @@ function HeaderTimer({
   const remaining = useCountdown(target, clockOffsetMs);
 
   const phaseLabels: Record<string, string> = {
-    waiting: 'Next round',
-    trading: 'Trading closes in',
+    waiting: 'Next round in',
+    trading: 'Trading locks in',
     closing: 'Closing soon',
-    locked: 'Locked — resolving',
-    resolved: 'Next round in',
+    locked: 'Settling outcome',
+    resolved: 'Round resolved',
   };
 
-  const isUrgent = phase === 'closing' || phase === 'locked' || (remaining != null && remaining <= 30);
+  const isUrgent = phase === 'closing' || phase === 'locked' || (remaining != null && remaining <= 30_000);
 
   return (
     <div
@@ -451,7 +458,11 @@ function HeaderTimer({
           isUrgent ? 'text-[#EF4444]' : 'text-white',
         )}
       >
-        {phase === 'resolved' ? '--:--' : formatCountdown(remaining)}
+        {phase === 'resolved'
+          ? 'RESOLVED'
+          : phase === 'locked' && (remaining == null || remaining <= 0)
+            ? 'SETTLING...'
+            : formatCountdown(remaining)}
       </span>
     </div>
   );
@@ -574,7 +585,7 @@ function StagePodiumRail({
                     <span className="font-mono text-xs xl:text-sm font-black text-white">
                       {formatPoints(entry.balance, 0)}
                     </span>
-                    <span className="text-[10px] text-[#71717a] font-mono">pts</span>
+                    <span className="text-[10px] text-[#71717a] font-mono">arcs</span>
                   </div>
                 </div>
               );
@@ -600,7 +611,7 @@ function StagePodiumRail({
                       </span>
                     </div>
                     <span className="font-mono text-[11px] font-bold text-[#c4c7c8] shrink-0">
-                      {formatPoints(entry.balance, 0)} pts
+                      {formatPoints(entry.balance, 0)} arcs
                     </span>
                   </div>
                 ))}
@@ -614,7 +625,7 @@ function StagePodiumRail({
       <div className="pt-3 border-t border-[#27272A]/80 flex flex-col gap-2 shrink-0">
         <div className="flex items-center justify-between text-[11px] font-mono text-[#a1a1aa]">
           <span>Round {currentRound > 0 ? currentRound : 1} of {totalRounds}</span>
-          <span>Volume: <strong className="text-white">{formatPoints(volume, 0)} pts</strong></span>
+          <span>Volume: <strong className="text-white">{formatPoints(volume, 0)} arcs</strong></span>
         </div>
 
         {entries.length > 3 && (

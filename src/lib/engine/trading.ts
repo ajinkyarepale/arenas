@@ -211,14 +211,14 @@ export async function placeTrade(input: PlaceTradeInput): Promise<TradeResult> {
       return {
         ok: false,
         reason: 'stake-too-small',
-        message: `The minimum stake is ${MIN_STAKE} point.`,
+        message: `The minimum stake is ${MIN_STAKE} arc.`,
       };
     }
     if (stake! > event.maxStakePerTrade) {
       return {
         ok: false,
         reason: 'stake-too-large',
-        message: `The maximum stake in this arena is ${event.maxStakePerTrade} points per trade.`,
+        message: `The maximum stake in this arena is ${event.maxStakePerTrade} arcs per trade.`,
       };
     }
   } else if (quantiseShares(requestedShares!) <= 0) {
@@ -241,7 +241,7 @@ export async function placeTrade(input: PlaceTradeInput): Promise<TradeResult> {
     return {
       ok: false,
       reason: 'insufficient-balance',
-      message: 'You have 0 points remaining. You cannot submit any more trades.',
+      message: 'You have 0 arcs remaining. You cannot submit any more trades.',
     };
   }
 

@@ -19,19 +19,26 @@ export default async function AdminPage() {
 
   const now = Date.now();
 
+  const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
+
   // Fetch only real arenas created for this organizer or all for SUPERADMIN
-  const dbArenas = await prisma.event.findMany({
-    where:
-      session?.user?.role === 'SUPERADMIN'
-        ? {}
-        : session?.user?.id
-          ? { organizerId: session.user.id }
-          : {},
-    include: {
-      _count: { select: { participants: true, trades: true, rounds: true } },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+  const [dbArenas, pendingOrganizersCount] = await Promise.all([
+    prisma.event.findMany({
+      where:
+        isSuperAdmin
+          ? {}
+          : session?.user?.id
+            ? { organizerId: session.user.id }
+            : {},
+      include: {
+        _count: { select: { participants: true, trades: true, rounds: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
+    isSuperAdmin
+      ? prisma.organizerRequest.count({ where: { status: 'PENDING' } })
+      : Promise.resolve(0),
+  ]);
 
   const arenas = dbArenas.map((a) => {
     const isEndedByTime = a.endsAt ? new Date(a.endsAt).getTime() <= now : false;
@@ -71,7 +78,20 @@ export default async function AdminPage() {
               ORGANIZER DASHBOARD
             </span>
           </div>
-          <div className="flex items-center gap-4 ml-auto">
+          <div className="flex items-center gap-3 ml-auto">
+            {isSuperAdmin && (
+              <Link
+                href="/admin/organizers"
+                className="bg-[#202024] hover:bg-[#2a2a30] text-[#c4c7c8] hover:text-white border border-[#27272A] font-['Epilogue'] text-xs font-bold px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 shadow"
+              >
+                <span>Approvals</span>
+                {pendingOrganizersCount > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-[#EF4444] text-[10px] text-white font-mono leading-none">
+                    {pendingOrganizersCount}
+                  </span>
+                )}
+              </Link>
+            )}
             <Link
               href="/admin/arenas/new"
               className="bg-white text-[#2f3131] hover:bg-[#c6c6c7] font-['Epilogue'] text-xs font-bold px-4 py-2 rounded-full transition-all flex items-center gap-1 shadow"

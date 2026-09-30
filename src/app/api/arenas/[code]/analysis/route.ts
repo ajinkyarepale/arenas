@@ -73,6 +73,7 @@ export interface TournamentAnalysisPayload {
     liquidityParamB: number;
     collegeName: string | null;
     organizerName: string | null;
+    marketCategory: string;
   };
   summary: {
     totalVolume: number;
@@ -327,6 +328,7 @@ export async function GET(
       liquidityParamB: event.liquidityParamB,
       collegeName: event.collegeName,
       organizerName: event.hostName ?? event.organizer.name,
+      marketCategory: event.marketCategory,
     },
     summary: {
       totalVolume: tournamentTotalVolume,

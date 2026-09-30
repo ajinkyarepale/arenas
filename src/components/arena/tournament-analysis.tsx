@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 
 import type { TournamentAnalysisPayload, RoundAnalysisItem } from '@/app/api/arenas/[code]/analysis/route';
@@ -67,20 +68,29 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-[#e5e2e1] font-['Geist'] pb-12 antialiased selection:bg-[#22C55E]/30">
+    <div className="min-h-screen bg-[#131313] text-[#e5e2e1] font-['Geist'] pb-12 antialiased selection:bg-[#22C55E]/30">
       {/* Top Header / View Switcher Bar */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#27272A] bg-[#0c0c0e]/95 px-4 sm:px-6 py-2.5 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#27272A] bg-[rgba(20,20,20,0.85)] px-4 sm:px-6 py-2.5 backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          {onBack && (
+          {onBack ? (
             <button
               type="button"
               onClick={onBack}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#141417] hover:bg-[#1f1f23] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all active:scale-95 shadow-sm"
-              title="Return to All Events Overview"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all active:scale-95 shadow-sm"
+              title="Return to Overview"
             >
               <span>←</span>
               <span className="hidden sm:inline font-mono">Overview</span>
             </button>
+          ) : (
+            <Link
+              href={`/arenas/${initialArena.code}`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all shadow-sm"
+              title="Return to Arena"
+            >
+              <span>←</span>
+              <span className="hidden sm:inline font-mono">Arena</span>
+            </Link>
           )}
 
           <div className="flex flex-col">
@@ -155,108 +165,112 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
 
         {data && !loading && (
           <>
-            {/* Streamlined Tournament Overview Card */}
-            <section className="bg-[#101014] border border-[#27272A] rounded-xl p-3 sm:p-3.5 shadow-md">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[#27272A]/70 pb-2.5">
+            {/* Streamlined Tournament Overview Card (Arena Creation Style) */}
+            <section className="bg-[rgba(20,20,20,0.85)] border border-[#27272A] backdrop-blur-2xl rounded-2xl p-5 sm:p-6 shadow-2xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#27272A] pb-4 mb-4">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
-                    <h2 className="font-['Geist'] text-sm sm:text-base font-bold text-white">
-                      {data.arena.name}
-                    </h2>
-                    <span className="text-xs text-[#71717a]">·</span>
-                    <span className="font-['Epilogue'] text-[11px] text-[#a1a1aa]">
-                      {data.arena.asset} · b={data.arena.liquidityParamB}
+                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-['Epilogue'] font-bold uppercase tracking-wider bg-[#201f1f] text-[#c4c7c8] border border-[#27272A]">
+                      {data.arena.marketCategory === 'CRYPTO_PRICE' ? 'Live Crypto Oracle' : 'Campus Prediction'}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-[#38BDF8]/10 border border-[#38BDF8]/25 font-mono text-[10px] font-bold text-[#38BDF8]">
+                      {data.arena.asset}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-mono text-[10px] text-[#71717a]">
+                      b={data.arena.liquidityParamB}
                     </span>
                   </div>
+                  <h2 className="font-['Geist'] text-xl sm:text-2xl font-bold text-white tracking-tight">
+                    {data.arena.name}
+                  </h2>
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2 shrink-0">
                   <button
                     type="button"
                     onClick={() => toggleAll(true)}
-                    className="px-2 py-0.5 rounded bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-[10px] font-['Epilogue'] font-medium text-white transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-xs font-['Epilogue'] font-bold text-white transition-colors cursor-pointer"
                   >
                     Expand All
                   </button>
                   <button
                     type="button"
                     onClick={() => toggleAll(false)}
-                    className="px-2 py-0.5 rounded bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-[10px] font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-xs font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white transition-colors cursor-pointer"
                   >
                     Collapse
                   </button>
                   <button
                     type="button"
                     onClick={() => void fetchAnalysis()}
-                    className="p-1 rounded bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-[#22C55E] transition-colors cursor-pointer"
+                    className="p-1.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-[#22C55E] transition-colors cursor-pointer"
                     title="Refresh analysis data"
                   >
-                    <span className="material-symbols-outlined text-[15px]">refresh</span>
+                    <span className="material-symbols-outlined text-[18px]">refresh</span>
                   </button>
                 </div>
               </div>
 
-              {/* Minimalist Summary KPI Ribbon */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-2.5">
-                <div className="bg-[#141418] border border-[#27272A]/80 rounded-lg px-2.5 py-1.5 flex flex-col justify-center">
-                  <span className="font-['Epilogue'] text-[9px] font-bold uppercase tracking-wider text-[#a1a1aa]">
+              {/* Arena Creation Style Metric Tiles */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div className="p-3.5 bg-[#202024] rounded-xl border border-[#2e2e33] flex flex-col justify-center">
+                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
                     TOTAL VOLUME
                   </span>
-                  <span className="font-mono text-xs sm:text-sm font-bold text-white mt-0.5">
-                    {formatPoints(data.summary.totalVolume, 0)} pts
+                  <span className="font-mono text-base font-black text-white mt-1">
+                    {formatPoints(data.summary.totalVolume, 0)} arcs
                   </span>
                 </div>
 
-                <div className="bg-[#141418] border border-[#27272A]/80 rounded-lg px-2.5 py-1.5 flex flex-col justify-center">
-                  <span className="font-['Epilogue'] text-[9px] font-bold uppercase tracking-wider text-[#a1a1aa]">
+                <div className="p-3.5 bg-[#202024] rounded-xl border border-[#2e2e33] flex flex-col justify-center">
+                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
                     TRADES
                   </span>
-                  <span className="font-mono text-xs sm:text-sm font-bold text-white mt-0.5">
+                  <span className="font-mono text-base font-black text-white mt-1">
                     {data.summary.totalTrades}
                   </span>
                 </div>
 
-                <div className="bg-[#141418] border border-[#27272A]/80 rounded-lg px-2.5 py-1.5 flex flex-col justify-center">
-                  <span className="font-['Epilogue'] text-[9px] font-bold uppercase tracking-wider text-[#a1a1aa]">
+                <div className="p-3.5 bg-[#202024] rounded-xl border border-[#2e2e33] flex flex-col justify-center">
+                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
                     ROUNDS
                   </span>
-                  <span className="font-mono text-xs sm:text-sm font-bold text-white mt-0.5">
+                  <span className="font-mono text-base font-black text-white mt-1">
                     {data.summary.resolvedRounds} / {data.summary.totalRounds}
                   </span>
                 </div>
 
-                <div className="bg-[#141418] border border-[#27272A]/80 rounded-lg px-2.5 py-1.5 flex flex-col justify-center">
-                  <span className="font-['Epilogue'] text-[9px] font-bold uppercase tracking-wider text-[#a1a1aa]">
+                <div className="p-3.5 bg-[#202024] rounded-xl border border-[#2e2e33] flex flex-col justify-center">
+                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
                     ACCURACY
                   </span>
-                  <span className="font-mono text-xs sm:text-sm font-bold text-[#22C55E] mt-0.5">
+                  <span className="font-mono text-base font-black text-[#22C55E] mt-1">
                     {data.summary.accuracyRate != null
                       ? `${(data.summary.accuracyRate * 100).toFixed(0)}%`
                       : '—'}
-                    <span className="text-[10px] text-[#71717a] ml-1 font-normal">
+                    <span className="text-[10px] text-[#71717a] ml-1 font-normal font-sans">
                       ({data.summary.correctPredictions}/{data.summary.resolvedRounds})
                     </span>
                   </span>
                 </div>
 
-                <div className="bg-[#141418] border border-[#27272A]/80 rounded-lg px-2.5 py-1.5 flex flex-col justify-center">
-                  <span className="font-['Epilogue'] text-[9px] font-bold uppercase tracking-wider text-[#a1a1aa]">
+                <div className="p-3.5 bg-[#202024] rounded-xl border border-[#2e2e33] flex flex-col justify-center">
+                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
                     BRIER SCORE
                   </span>
-                  <span className="font-mono text-xs sm:text-sm font-bold text-[#38BDF8] mt-0.5">
+                  <span className="font-mono text-base font-black text-[#38BDF8] mt-1">
                     {data.summary.averageBrierScore != null
                       ? data.summary.averageBrierScore.toFixed(3)
                       : '—'}
                   </span>
                 </div>
 
-                <div className="bg-[#141418] border border-[#27272A]/80 rounded-lg px-2.5 py-1.5 flex flex-col justify-center">
-                  <span className="font-['Epilogue'] text-[9px] font-bold uppercase tracking-wider text-[#a1a1aa]">
-                    PAYOUTS
+                <div className="p-3.5 bg-[#202024] rounded-xl border border-[#2e2e33] flex flex-col justify-center">
+                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
+                    TOTAL PAYOUTS
                   </span>
-                  <span className="font-mono text-xs sm:text-sm font-bold text-[#F59E0B] mt-0.5">
-                    {formatPoints(data.summary.totalPayouts, 0)} pts
+                  <span className="font-mono text-base font-black text-[#F59E0B] mt-1">
+                    {formatPoints(data.summary.totalPayouts, 0)} arcs
                   </span>
                 </div>
               </div>
@@ -425,7 +439,7 @@ function RoundAnalysisCard({
           {/* Volume */}
           <div className="flex items-center gap-1 bg-[#141418] border border-[#27272A] px-2 py-0.5 rounded-md text-[11px]">
             <span className="text-[#a1a1aa] text-[9px] uppercase font-['Epilogue']">Vol</span>
-            <span className="font-bold text-white">{formatPoints(round.totalVolume, 0)} pts</span>
+            <span className="font-bold text-white">{formatPoints(round.totalVolume, 0)} arcs</span>
           </div>
 
           {/* Chevron */}
@@ -520,7 +534,7 @@ function RoundAnalysisCard({
                 <div className="mt-1 flex items-baseline justify-between font-mono">
                   <span className="text-[11px] text-[#a1a1aa]">Traded:</span>
                   <span className="text-xs font-bold text-white">
-                    {formatPoints(round.totalVolume, 0)} pts
+                    {formatPoints(round.totalVolume, 0)} arcs
                   </span>
                 </div>
                 <div className="mt-0.5 flex items-baseline justify-between font-mono">
@@ -583,7 +597,7 @@ function RoundAnalysisCard({
                   Traders: <strong className="text-white">{round.uniqueParticipants}</strong>
                 </span>
                 <span className="text-[#a1a1aa]">
-                  Payout: <strong className="text-[#22C55E]">{formatPoints(round.totalPayout, 0)} pts</strong>
+                  Payout: <strong className="text-[#22C55E]">{formatPoints(round.totalPayout, 0)} arcs</strong>
                 </span>
               </div>
             </div>
@@ -631,10 +645,10 @@ function RoundAnalysisCard({
                           )}
                         </td>
                         <td className="py-1.5 px-2 text-white text-[11px]">
-                          {formatPoints(performer.cost, 0)} pts
+                          {formatPoints(performer.cost, 0)} arcs
                         </td>
                         <td className="py-1.5 px-2 text-[#F59E0B] font-bold text-[11px]">
-                          {formatPoints(performer.payout, 0)} pts
+                          {formatPoints(performer.payout, 0)} arcs
                         </td>
                         <td
                           className={cx(
@@ -646,7 +660,7 @@ function RoundAnalysisCard({
                                 : 'text-[#a1a1aa]',
                           )}
                         >
-                          {performer.pnl > 0 ? `+${formatPoints(performer.pnl, 0)}` : formatPoints(performer.pnl, 0)} pts
+                          {performer.pnl > 0 ? `+${formatPoints(performer.pnl, 0)}` : formatPoints(performer.pnl, 0)} arcs
                         </td>
                       </tr>
                     ))}

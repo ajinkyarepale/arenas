@@ -23,7 +23,7 @@ export default async function DashboardPage() {
   ]);
 
   const roleTitle = isOrganizer(session.user.role) ? 'ORGANIZER' : 'PRO TRADER';
-  const netPnlText = analytics.settledTrades > 0 ? formatSignedPoints(analytics.netPnl, 0) : '0 pts';
+  const netPnlText = analytics.settledTrades > 0 ? `${formatSignedPoints(analytics.netPnl, 0)} arcs` : '0 arcs';
 
   return (
     <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
@@ -171,7 +171,7 @@ export default async function DashboardPage() {
                             </span>
                           </td>
                           <td className="py-3 text-right font-medium text-white">
-                            <div>{formatPoints(p.cost, 0)} pts</div>
+                            <div>{formatPoints(p.cost, 0)} arcs</div>
                             <div className="text-[11px] text-[#8e9192]">{p.shares.toFixed(1)} shs</div>
                           </td>
                           <td className="py-3 text-[#c4c7c8]">
@@ -195,11 +195,11 @@ export default async function DashboardPage() {
                           <td className="py-3 text-right font-bold">
                             {isWon ? (
                               <span className="text-[#22C55E]">
-                                +{p.payout ? (p.payout - p.cost).toFixed(0) : '—'} pts (Won)
+                                +{p.payout ? (p.payout - p.cost).toFixed(0) : '—'} arcs (Won)
                               </span>
                             ) : isLost ? (
                               <span className="text-[#ef4444]">
-                                -{p.cost.toFixed(0)} pts (Lost)
+                                -{p.cost.toFixed(0)} arcs (Lost)
                               </span>
                             ) : (
                               <span className="text-[#c4c7c8] font-normal">Pending</span>

@@ -240,7 +240,7 @@ export function TradePanel({
               }`}
             >
               <span className="font-['Epilogue'] text-sm">PREDICT YES</span>
-              <span className="font-mono text-xs">{(pYes * 100).toFixed(1)}¢ / share</span>
+              <span className="font-mono text-xs">{pYes.toFixed(2)} arcs / sh</span>
             </button>
 
             <button
@@ -253,7 +253,7 @@ export function TradePanel({
               }`}
             >
               <span className="font-['Epilogue'] text-sm">PREDICT NO</span>
-              <span className="font-mono text-xs">{(pNo * 100).toFixed(1)}¢ / share</span>
+              <span className="font-mono text-xs">{pNo.toFixed(2)} arcs / sh</span>
             </button>
           </div>
 
@@ -261,9 +261,9 @@ export function TradePanel({
           {mode === 'POINTS' ? (
             <div className="flex flex-col gap-2">
               <div className="flex justify-between items-center font-['Epilogue'] text-xs text-[#c4c7c8]">
-                <span>POINTS BUDGET</span>
+                <span>ARCS BUDGET</span>
                 <span>
-                  Available: <span className="text-white font-bold">{formatPoints(balance, 0)} pts</span>
+                  Available: <span className="text-white font-bold">{formatPoints(balance, 0)} arcs</span>
                 </span>
               </div>
 
@@ -274,9 +274,9 @@ export function TradePanel({
                   max={ceiling}
                   value={pointsInput}
                   onChange={(e) => setPointsInput(Math.max(1, Math.min(Number(e.target.value), ceiling)))}
-                  className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-3 text-white font-mono text-base font-bold focus:outline-none focus:border-[#22C55E] pr-14 min-h-[44px]"
+                  className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-3 text-white font-mono text-base font-bold focus:outline-none focus:border-[#22C55E] pr-16 min-h-[44px]"
                 />
-                <span className="absolute right-4 top-3.5 text-[#8e9192] font-mono text-xs">PTS</span>
+                <span className="absolute right-4 top-3.5 text-[#8e9192] font-mono text-xs font-bold">ARCS</span>
               </div>
 
               <div className="flex gap-2">
@@ -316,7 +316,7 @@ export function TradePanel({
                   max={Math.max(1, Math.floor(maxSharesAffordable))}
                   value={sharesInput}
                   onChange={(e) => setSharesInput(Math.max(1, Number(e.target.value)))}
-                  className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-3 text-white font-mono text-base font-bold focus:outline-none focus:border-[#22C55E] pr-14 min-h-[44px]"
+                  className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-3 text-white font-mono text-base font-bold focus:outline-none focus:border-[#22C55E] pr-16 min-h-[44px]"
                 />
                 <span className="absolute right-4 top-3.5 text-[#8e9192] font-mono text-xs">SHARES</span>
               </div>
@@ -349,7 +349,7 @@ export function TradePanel({
             <div className="flex justify-between text-[#c4c7c8]">
               <span>REQUIRED MARGIN</span>
               <span className="text-white font-mono font-semibold">
-                {effectiveStake.toFixed(0)} pts
+                {effectiveStake.toFixed(0)} arcs
               </span>
             </div>
             <div className="flex justify-between text-[#c4c7c8]">
@@ -361,7 +361,7 @@ export function TradePanel({
             <div className="flex justify-between text-[#c4c7c8]">
               <span>POTENTIAL PAYOUT (IF {selectedSide})</span>
               <span className="text-[#22C55E] font-bold font-mono">
-                {potentialPayout.toFixed(0)} pts
+                {potentialPayout.toFixed(0)} arcs
               </span>
             </div>
             <div className="flex justify-between text-[#c4c7c8]">
@@ -399,11 +399,11 @@ export function TradePanel({
             ) : !tradingOpen ? (
               <span>{disabledReason || 'Trading Closed'}</span>
             ) : isZeroBalance ? (
-              <span>0 Points Available</span>
+              <span>0 Arcs Available</span>
             ) : mode === 'POINTS' ? (
               <span>PREDICT {selectedSide} (≈{effectiveShares.toFixed(1)} sh)</span>
             ) : (
-              <span>PREDICT {selectedSide} ({effectiveStake.toFixed(0)} pts margin)</span>
+              <span>PREDICT {selectedSide} ({effectiveStake.toFixed(0)} arcs margin)</span>
             )}
           </button>
         </>

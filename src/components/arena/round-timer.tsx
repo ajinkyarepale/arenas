@@ -28,11 +28,11 @@ export function roundPhase(round: RoundPayload | null, now: number): RoundPhase 
 }
 
 const PHASE_LABEL: Record<RoundPhase, string> = {
-  waiting: 'Next round',
-  trading: 'Trading closes in',
-  closing: 'Closing',
-  locked: 'Locked — resolving in',
-  resolved: 'Next round starts in',
+  waiting: 'Next round in',
+  trading: 'Trading locks in',
+  closing: 'Closing soon',
+  locked: 'Settling outcome in',
+  resolved: 'Round resolved',
 };
 
 export function RoundTimer({
@@ -92,7 +92,11 @@ export function RoundTimer({
         // Announced politely so a screen reader is not interrupted every second.
         aria-live="off"
       >
-        {phase === 'resolved' ? '--:--' : formatCountdown(remaining)}
+        {phase === 'resolved'
+          ? (remaining > 0 ? formatCountdown(remaining) : '--:--')
+          : phase === 'locked' && remaining <= 0
+            ? 'SETTLING...'
+            : formatCountdown(remaining)}
       </div>
     </div>
   );

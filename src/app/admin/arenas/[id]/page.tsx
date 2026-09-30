@@ -92,6 +92,15 @@ export default async function ManageArenaPage({ params }: { params: { id: string
           </div>
         </header>
 
+        {/* Mobile Back Bar */}
+        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl">
+          <Link href="/admin" className="flex items-center gap-1.5 text-[#c4c7c8] hover:text-white font-['Epilogue'] text-xs font-bold transition-colors">
+            <span className="material-symbols-outlined text-base">arrow_back</span>
+            <span>Back to Arenas</span>
+          </Link>
+          <span className="text-[11px] font-mono text-[#22C55E] font-bold">{arena.code}</span>
+        </div>
+
         {/* Content Container */}
         <main className="flex-1 p-4 sm:p-6 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-6 md:gap-8">
           {/* Masthead */}

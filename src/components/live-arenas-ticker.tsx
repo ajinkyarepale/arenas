@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { cx, formatPoints } from '@/lib/format';
@@ -61,11 +62,12 @@ export function LiveArenasTicker() {
         className="pointer-events-none absolute inset-y-0 w-24 animate-sweep bg-gradient-to-r from-transparent via-accent/10 to-transparent"
         aria-hidden
       />
-      <div className="flex w-max animate-marquee items-center gap-8 whitespace-nowrap px-4 motion-reduce:animate-none">
+      <div className="flex w-max animate-marquee items-center gap-8 whitespace-nowrap px-4 hover:[animation-play-state:paused]">
         {items.map((arena, i) => (
-          <span
+          <Link
             key={`${arena.id}-${i}`}
-            className="flex items-center gap-2 font-mono text-xs text-fg-muted"
+            href={`/arenas/${arena.code}`}
+            className="flex items-center gap-2 font-mono text-xs text-fg-muted hover:text-white transition-colors cursor-pointer group"
           >
             <span
               className={cx(
@@ -74,17 +76,17 @@ export function LiveArenasTicker() {
               )}
               aria-hidden
             />
-            <span className="font-semibold text-fg">{arena.code}</span>
+            <span className="font-semibold text-fg group-hover:text-accent transition-colors">{arena.code}</span>
             <span>{arena.name}</span>
             <span className="text-fg-faint">
               {arena.status === 'LIVE'
                 ? `round ${arena.currentRound}/${arena.totalRounds}`
-                : `${formatPoints(arena.startingBalance, 0)} pt start`}
+                : `${formatPoints(arena.startingBalance, 0)} arcs start`}
             </span>
-            <span className="text-line-strong" aria-hidden>
+            <span className="text-line-strong ml-2" aria-hidden>
               /
             </span>
-          </span>
+          </Link>
         ))}
       </div>
     </div>

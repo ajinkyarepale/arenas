@@ -801,7 +801,7 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
             </div>
             <div>
               <span className="text-[10px] font-bold text-[#c4c7c8] uppercase block">ROUND VOLUME</span>
-              <span className="text-white font-bold">{formatPoints(round?.volume ?? 0, 0)} pts</span>
+              <span className="text-white font-bold">{formatPoints(round?.volume ?? 0, 0)} arcs</span>
             </div>
           </div>
         </div>
@@ -830,7 +830,7 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
                       </span>
                       <span className="text-white font-medium">{p.name || p.email}</span>
                     </div>
-                    <span className="font-bold text-[#22C55E]">{formatPoints(p.balance, 0)} pts</span>
+                    <span className="font-bold text-[#22C55E]">{formatPoints(p.balance, 0)} arcs</span>
                   </div>
                 ))}
               </div>
@@ -884,8 +884,8 @@ export function ArenaControl({ arenaId, code }: { arenaId: string; code: string 
                       </span>
                     </td>
                     <td className="py-2.5 text-right font-mono">{formatShares(t.shares)}</td>
-                    <td className="py-2.5 text-right font-medium text-white">{formatPoints(t.cost, 0)} pts</td>
-                    <td className="py-2.5 text-right font-mono">{Math.round(t.priceAtFill * 100)}¢</td>
+                    <td className="py-2.5 text-right font-medium text-white">{formatPoints(t.cost, 0)} arcs</td>
+                    <td className="py-2.5 text-right font-mono">{(t.priceAtFill).toFixed(2)} arcs</td>
                   </tr>
                 ))}
               </tbody>

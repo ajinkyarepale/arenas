@@ -129,10 +129,11 @@ export default function AdminOrganizersPage() {
 
           <div className="flex items-center gap-3">
             <Link
-              href="/admin/arenas"
-              className="px-4 py-2 rounded-full border border-[#3f3f46] text-[#e4e4e7] font-['Epilogue'] text-xs font-bold hover:bg-[#27272A] transition-all"
+              href="/admin"
+              className="px-4 py-2 rounded-full border border-[#3f3f46] text-[#e4e4e7] font-['Epilogue'] text-xs font-bold hover:bg-[#27272A] transition-all flex items-center gap-1.5"
             >
-              All Arenas
+              <span>←</span>
+              <span>Back to Arenas</span>
             </Link>
             <Link
               href="/admin/arenas/new"

@@ -159,8 +159,6 @@ export function BeamsBackground({
       if (!(canvas && ctx)) return;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Soft, refined blur for beautiful ambient lighting
-      ctx.filter = 'blur(28px)';
 
       const totalBeams = beamsRef.current.length;
       beamsRef.current.forEach((beam, index) => {
@@ -189,9 +187,9 @@ export function BeamsBackground({
 
   return (
     <div className="relative w-full min-h-screen overflow-hidden bg-[#131313]">
-      {/* Ambient beams canvas */}
+      {/* Ambient beams canvas with GPU-accelerated blur */}
       <canvas
-        className="pointer-events-none fixed inset-0 z-0 opacity-60"
+        className="pointer-events-none fixed inset-0 z-0 opacity-60 blur-[28px] transform-gpu will-change-transform"
         ref={canvasRef}
       />
 

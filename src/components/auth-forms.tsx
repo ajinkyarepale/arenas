@@ -21,6 +21,7 @@ export function SignInForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [showForgotTip, setShowForgotTip] = useState(false);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -70,9 +71,13 @@ export function SignInForm() {
             <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase">
               Password
             </label>
-            <span className="font-['Epilogue'] text-[11px] text-[#c4c7c8] hover:text-white cursor-pointer transition-colors">
+            <button
+              type="button"
+              onClick={() => setShowForgotTip((prev) => !prev)}
+              className="font-['Epilogue'] text-[11px] text-[#c4c7c8] hover:text-white cursor-pointer transition-colors"
+            >
               Forgot?
-            </span>
+            </button>
           </div>
           <input
             type="password"
@@ -83,6 +88,11 @@ export function SignInForm() {
             className="w-full bg-[#201f1f] border border-[#27272A] rounded-[12px] px-4 py-3 font-['Epilogue'] text-xs focus:outline-none focus:border-white transition-colors text-white placeholder-[#8e9192]"
             placeholder="••••••••"
           />
+          {showForgotTip && (
+            <p className="mt-2 text-[11px] text-[#a1a1aa] bg-[#18181b] border border-[#27272A] rounded-lg p-2.5 leading-relaxed">
+              For campus tournament security, account passwords can be reset directly by your campus tournament organizer or event administrator.
+            </p>
+          )}
         </div>
 
         <ErrorNote>{error}</ErrorNote>

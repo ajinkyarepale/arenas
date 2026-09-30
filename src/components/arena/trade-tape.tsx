@@ -90,7 +90,7 @@ const TapeRow = memo(function TapeRow({
       </span>
       <span className="tnum shrink-0 text-fg-faint">{formatShares(fill.shares)}sh</span>
       <span className="tnum shrink-0 font-semibold text-fg">
-        {formatPoints(fill.cost, 0)}pts
+        {formatPoints(fill.cost, 0)} arcs
       </span>
     </li>
   );

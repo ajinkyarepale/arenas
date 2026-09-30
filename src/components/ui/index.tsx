@@ -5,6 +5,7 @@ export * from './card-stack';
 export * from './slide-text-button';
 export * from './switch-button';
 export * from './kokonut-loader';
+export * from './skeleton';
 
 // Legacy UI helpers compatibility
 export function Spinner({ className = '' }: { className?: string }) {

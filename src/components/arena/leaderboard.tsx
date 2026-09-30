@@ -150,7 +150,7 @@ export const LeaderboardRow = memo(function LeaderboardRow({
         )}
       >
         <span>{formatPoints(entry.balance, 0)}</span>
-        <span className="text-[#71717a] text-[10px] xl:text-xs font-normal">pts</span>
+        <span className="text-[#71717a] text-[10px] xl:text-xs font-normal">arcs</span>
       </div>
     </li>
   );
@@ -213,7 +213,7 @@ export const LeaderboardStrip = memo(function LeaderboardStrip({
           <span className="font-mono text-xs font-black text-[#22C55E]">#{rank}</span>
           <span className="text-xs font-bold text-white">You</span>
           {me ? (
-            <span className="font-mono text-xs font-semibold text-[#a1a1aa]">{formatPoints(me.balance, 0)} pts</span>
+            <span className="font-mono text-xs font-semibold text-[#a1a1aa]">{formatPoints(me.balance, 0)} arcs</span>
           ) : null}
         </div>
       ) : null}
@@ -241,7 +241,7 @@ export const LeaderboardStrip = memo(function LeaderboardStrip({
           <span className="max-w-[7rem] truncate text-xs font-bold text-white">
             {entry.participantId === participantId ? 'You' : entry.displayName}
           </span>
-          <span className="font-mono text-xs font-semibold text-[#a1a1aa]">{formatPoints(entry.balance, 0)} pts</span>
+          <span className="font-mono text-xs font-semibold text-[#a1a1aa]">{formatPoints(entry.balance, 0)} arcs</span>
         </div>
       ))}
 

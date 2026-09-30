@@ -201,7 +201,7 @@ export function CardStack({ className, items = DEFAULT_ITEMS }: CardStackProps) 
               className={cn(
                 'absolute inset-0 w-full rounded-2xl p-6 text-left cursor-pointer',
                 'bg-[#18181b]/95 backdrop-blur-2xl backdrop-saturate-150',
-                'border transition-[border-color,box-shadow,transform] duration-300 ease-out',
+                'border transition-[border-color,box-shadow] duration-200 ease-out',
                 'transform-gpu overflow-hidden',
                 isActive
                   ? 'border-[#22C55E] shadow-[0_16px_50px_rgba(34,197,94,0.18)] ring-1 ring-[#22C55E]/40'

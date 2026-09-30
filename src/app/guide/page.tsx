@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { SiteNavAuth } from '@/components/site-nav-auth';
 import { SiteSidebar } from '@/components/site-sidebar';
 
 export const metadata: Metadata = {
@@ -24,12 +25,7 @@ export default function GuidePage() {
             </span>
           </div>
           <div className="flex items-center gap-4 ml-auto">
-            <Link href="/signin" className="text-sm font-semibold text-[#c4c7c8] hover:text-white transition-colors">
-              Sign in
-            </Link>
-            <Link href="/signup" className="px-4 py-2 rounded-full bg-[#22C55E] text-[#131313] font-bold text-xs hover:bg-emerald-400 transition-colors shadow">
-              Sign up
-            </Link>
+            <SiteNavAuth />
           </div>
         </header>
 
@@ -84,7 +80,7 @@ export default function GuidePage() {
                 <span className="font-['Epilogue'] text-xs font-bold text-[#EF4444]">SETTLEMENT</span>
                 <h3 className="font-['Geist'] text-lg font-semibold text-white">Green vs Red Candle</h3>
                 <p className="text-xs text-[#c4c7c8] leading-relaxed">
-                  If closing spot price S_final &ge; S_0, YES resolves to 100 points per share. If S_final &lt; S_0, NO resolves to 100 points.
+                  If closing spot price S_final &ge; S_0, YES resolves to 1 arc per share. If S_final &lt; S_0, NO resolves to 1 arc per share.
                 </p>
               </div>
             </div>
@@ -100,7 +96,7 @@ export default function GuidePage() {
               </li>
               <li className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#22C55E] text-[18px]">check_circle</span>
-                <span className="text-sm text-[#c4c7c8]">Configurable starting points per participant</span>
+                <span className="text-sm text-[#c4c7c8]">Configurable starting arcs per participant</span>
               </li>
               <li className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#22C55E] text-[18px]">check_circle</span>

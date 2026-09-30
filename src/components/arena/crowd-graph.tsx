@@ -503,19 +503,19 @@ export const CrowdGraph = memo(function CrowdGraph({
         <div className="bg-[#1c1b1b] border border-[#27272A] rounded-lg p-2.5 flex flex-col gap-0.5">
           <span className="text-[#8e9192] text-[10px] uppercase font-bold">YES Volume</span>
           <span className="font-mono text-sm font-bold text-[#22C55E]">
-            {formatPoints(stats.yesVolume, 0)} pts ({stats.yesPercent.toFixed(1)}%)
+            {formatPoints(stats.yesVolume, 0)} arcs ({stats.yesPercent.toFixed(1)}%)
           </span>
         </div>
         <div className="bg-[#1c1b1b] border border-[#27272A] rounded-lg p-2.5 flex flex-col gap-0.5">
           <span className="text-[#8e9192] text-[10px] uppercase font-bold">NO Volume</span>
           <span className="font-mono text-sm font-bold text-[#ef4444]">
-            {formatPoints(stats.noVolume, 0)} pts ({stats.noPercent.toFixed(1)}%)
+            {formatPoints(stats.noVolume, 0)} arcs ({stats.noPercent.toFixed(1)}%)
           </span>
         </div>
         <div className="bg-[#1c1b1b] border border-[#27272A] rounded-lg p-2.5 flex flex-col gap-0.5">
           <span className="text-[#8e9192] text-[10px] uppercase font-bold">Total Stake</span>
           <span className="font-mono text-sm font-bold text-white">
-            {formatPoints(stats.totalVolume, 0)} pts
+            {formatPoints(stats.totalVolume, 0)} arcs
           </span>
         </div>
         <div className="bg-[#1c1b1b] border border-[#27272A] rounded-lg p-2.5 flex flex-col gap-0.5">

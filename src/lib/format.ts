@@ -1,16 +1,19 @@
 /** Display helpers. Every number a participant reads goes through one of these. */
 
-export function formatPoints(value: number, decimals = 2): string {
+export function formatArcs(value: number, decimals = 2): string {
   return value.toLocaleString('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
 }
 
-export function formatSignedPoints(value: number, decimals = 2): string {
+export function formatSignedArcs(value: number, decimals = 2): string {
   const sign = value > 0 ? '+' : value < 0 ? '−' : '';
-  return `${sign}${formatPoints(Math.abs(value), decimals)}`;
+  return `${sign}${formatArcs(Math.abs(value), decimals)}`;
 }
+
+export const formatPoints = formatArcs;
+export const formatSignedPoints = formatSignedArcs;
 
 /** Implied probability as a percentage, e.g. 0.6234 -> "62.3%". */
 export function formatProbability(value: number, decimals = 1): string {

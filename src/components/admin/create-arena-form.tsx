@@ -132,7 +132,7 @@ export function CreateArenaForm() {
         return false;
       }
       if (form.startingBalance < 100) {
-        setError('Starting balance must be at least 100 points.');
+        setError('Starting balance must be at least 100 arcs.');
         return false;
       }
       if (form.totalRounds < 1) {
@@ -196,18 +196,18 @@ export function CreateArenaForm() {
       {/* Header */}
       <div>
         <h1 className="font-['Geist'] text-3xl font-bold text-white mb-1.5 tracking-tight">Create an Arena</h1>
-        <p className="font-['Geist'] text-sm text-[#9ca3af]">
+        <p className="font-['Geist'] text-sm text-[#c4c7c8]">
           Set up a live prediction tournament in 4 simple, guided steps.
         </p>
       </div>
 
       {/* Step Indicator Bar */}
-      <div className="grid grid-cols-4 gap-2 bg-[#18181B]/80 p-1.5 rounded-2xl border border-[#27272A]">
+      <div className="grid grid-cols-4 gap-2 bg-[rgba(20,20,20,0.7)] p-1.5 rounded-xl border border-[#27272A] backdrop-blur-md">
         {[
           { num: 1, label: '1. Market Type' },
-          { num: 2, label: '2. Question & Details' },
-          { num: 3, label: '3. Timer & Economy' },
-          { num: 4, label: '4. Review & Launch' },
+          { num: 2, label: '2. Details' },
+          { num: 3, label: '3. Timer & Stakes' },
+          { num: 4, label: '4. Review' },
         ].map((s) => {
           const isActive = step === s.num;
           const isDone = step > s.num;
@@ -219,16 +219,16 @@ export function CreateArenaForm() {
                 if (s.num < step) setStep(s.num as 1 | 2 | 3 | 4);
                 else if (validateStep(step)) setStep(s.num as 1 | 2 | 3 | 4);
               }}
-              className={`py-2 px-3 rounded-xl font-['Epilogue'] text-[11px] font-bold transition-all text-center flex items-center justify-center gap-1.5 ${
+              className={`py-2 px-3 rounded-lg font-['Epilogue'] text-[11px] font-bold transition-all text-center flex items-center justify-center gap-1.5 border ${
                 isActive
-                  ? 'bg-white text-black shadow-md shadow-white/10'
+                  ? 'bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/30'
                   : isDone
-                  ? 'bg-[#27272A] text-[#e4e4e7] hover:bg-[#323236]'
-                  : 'text-[#71717A] hover:text-[#a1a1aa]'
+                  ? 'bg-[#18181b] text-[#c4c7c8] border-[#27272A]'
+                  : 'text-[#71717a] border-transparent hover:text-[#a1a1aa]'
               }`}
             >
               <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] ${
-                isActive ? 'bg-black text-white' : isDone ? 'bg-[#22c55e] text-black font-extrabold' : 'bg-[#27272A] text-[#71717A]'
+                isActive ? 'bg-[#22C55E] text-[#131313] font-bold' : isDone ? 'bg-[#22c55e]/20 text-[#22c55e]' : 'bg-[#27272A] text-[#71717A]'
               }`}>
                 {isDone ? <span className="material-symbols-outlined text-[10px]">check</span> : s.num}
               </span>
@@ -239,7 +239,7 @@ export function CreateArenaForm() {
       </div>
 
       {/* Main Form Content */}
-      <form onSubmit={submit} className="glass-panel p-6 sm:p-8 border border-[#27272A] bg-[rgba(20,20,20,0.85)] backdrop-blur-2xl rounded-2xl flex flex-col gap-6 shadow-2xl">
+      <form onSubmit={submit} className="p-6 sm:p-8 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl flex flex-col gap-6">
         {/* STEP 1: MARKET TYPE */}
         {step === 1 && (
           <div className="flex flex-col gap-5">
@@ -254,15 +254,15 @@ export function CreateArenaForm() {
               {/* Campus / Custom Event Option */}
               <div
                 onClick={() => handleCategorySelect('CAMPUS_EVENT')}
-                className={`p-5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-4 ${
+                className={`p-5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-4 ${
                   form.marketCategory === 'CAMPUS_EVENT'
-                    ? 'border-white bg-[#27272A]/70 shadow-lg shadow-white/5 ring-1 ring-white/30'
-                    : 'border-[#27272A] bg-[#1a1a1c]/60 hover:border-[#3f3f46] hover:bg-[#202022]'
+                    ? 'border-[#22C55E]/50 bg-[#22C55E]/10 shadow-[0_0_20px_-4px_rgba(34,197,94,0.25)]'
+                    : 'border-[#27272A] bg-[#141414] hover:border-[#3f3f46]'
                 }`}
               >
                 <div className="flex flex-col gap-2">
-                  <h3 className="font-['Epilogue'] text-base font-bold text-white">Campus & Custom Event</h3>
-                  <p className="text-[#a1a1aa] text-xs leading-relaxed">
+                  <h3 className="font-['Geist'] text-base font-bold text-white">Campus &amp; Custom Event</h3>
+                  <p className="text-[#c4c7c8] text-xs leading-relaxed">
                     Create questions for hackathons, club elections, sports matches, or custom trivia. You declare the winning outcome with 1-click settlement.
                   </p>
                 </div>
@@ -275,15 +275,15 @@ export function CreateArenaForm() {
               {/* Crypto Price Oracle Option */}
               <div
                 onClick={() => handleCategorySelect('CRYPTO_PRICE')}
-                className={`p-5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-4 ${
+                className={`p-5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-4 ${
                   form.marketCategory === 'CRYPTO_PRICE'
-                    ? 'border-white bg-[#27272A]/70 shadow-lg shadow-white/5 ring-1 ring-white/30'
-                    : 'border-[#27272A] bg-[#1a1a1c]/60 hover:border-[#3f3f46] hover:bg-[#202022]'
+                    ? 'border-[#22C55E]/50 bg-[#22C55E]/10 shadow-[0_0_20px_-4px_rgba(34,197,94,0.25)]'
+                    : 'border-[#27272A] bg-[#141414] hover:border-[#3f3f46]'
                 }`}
               >
                 <div className="flex flex-col gap-2">
-                  <h3 className="font-['Epilogue'] text-base font-bold text-white">Live Crypto Oracle</h3>
-                  <p className="text-[#a1a1aa] text-xs leading-relaxed">
+                  <h3 className="font-['Geist'] text-base font-bold text-white">Live Crypto Oracle</h3>
+                  <p className="text-[#c4c7c8] text-xs leading-relaxed">
                     Continuous sequential trading on BTC, ETH, or SOL. Rounds resolve automatically against live Binance spot candlestick oracles.
                   </p>
                 </div>
@@ -320,7 +320,7 @@ export function CreateArenaForm() {
                 value={form.name}
                 onChange={(e) => set('name', e.target.value)}
                 placeholder={form.marketCategory === 'CRYPTO_PRICE' ? "e.g. Fall '26 Quant Trading Open" : "e.g. TreeHacks 2026 Grand Finale"}
-                className="w-full bg-[#18181B] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Geist'] text-sm focus:border-white focus:outline-none transition-colors placeholder-[#71717A]"
+                className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-['Geist'] text-xs focus:border-[#22C55E] focus:outline-none transition-colors placeholder-[#71717A]"
               />
             </div>
 
@@ -336,7 +336,7 @@ export function CreateArenaForm() {
                     value={form.question}
                     onChange={(e) => set('question', e.target.value)}
                     placeholder="e.g. Will Team NeuroMesh win 1st Place in the AI Track?"
-                    className="w-full bg-[#18181B] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Geist'] text-sm focus:border-white focus:outline-none transition-colors placeholder-[#71717A]"
+                    className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-['Geist'] text-xs focus:border-[#22C55E] focus:outline-none transition-colors placeholder-[#71717A]"
                   />
                   <p className="text-[10px] text-[#71717A] mt-1">
                     This will be prominently spotlighted on all participant screens and the big auditorium display.
@@ -352,7 +352,7 @@ export function CreateArenaForm() {
                     value={form.resolutionCriteria}
                     onChange={(e) => set('resolutionCriteria', e.target.value)}
                     placeholder="e.g. Official announcement by judges on stage at closing ceremony"
-                    className="w-full bg-[#18181B] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Geist'] text-sm focus:border-white focus:outline-none transition-colors placeholder-[#71717A]"
+                    className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-['Geist'] text-xs focus:border-[#22C55E] focus:outline-none transition-colors placeholder-[#71717A]"
                   />
                 </div>
               </>
@@ -367,10 +367,10 @@ export function CreateArenaForm() {
                       key={pair}
                       type="button"
                       onClick={() => set('asset', pair)}
-                      className={`py-3 px-4 rounded-xl border font-['Epilogue'] text-xs font-bold transition-all ${
+                      className={`py-2.5 px-4 rounded-xl border font-['Epilogue'] text-xs font-bold transition-all ${
                         form.asset === pair
-                          ? 'border-white bg-[#27272A] text-white shadow'
-                          : 'border-[#27272A] bg-[#18181B] text-[#a1a1aa] hover:border-[#3f3f46]'
+                          ? 'border-[#22C55E]/50 bg-[#22C55E]/15 text-[#22C55E]'
+                          : 'border-[#27272A] bg-[#141414] text-[#a1a1aa] hover:border-[#3f3f46]'
                       }`}
                     >
                       {pair.replace('USDT', ' / USDT')}
@@ -390,7 +390,7 @@ export function CreateArenaForm() {
                   value={form.hostName}
                   onChange={(e) => set('hostName', e.target.value)}
                   placeholder="e.g. Stanford FinTech Club"
-                  className="w-full bg-[#18181B] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Geist'] text-sm focus:border-white focus:outline-none transition-colors placeholder-[#71717A]"
+                  className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-['Geist'] text-xs focus:border-[#22C55E] focus:outline-none transition-colors placeholder-[#71717A]"
                 />
               </div>
 
@@ -402,8 +402,8 @@ export function CreateArenaForm() {
                   type="text"
                   value={form.collegeName}
                   onChange={(e) => set('collegeName', e.target.value)}
-                  placeholder="e.g. MIT / IIT Delhi"
-                  className="w-full bg-[#18181B] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Geist'] text-sm focus:border-white focus:outline-none transition-colors placeholder-[#71717A]"
+                  placeholder="e.g. MIT / Stanford"
+                  className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-['Geist'] text-xs focus:border-[#22C55E] focus:outline-none transition-colors placeholder-[#71717A]"
                 />
               </div>
             </div>
@@ -417,7 +417,7 @@ export function CreateArenaForm() {
                 value={form.description}
                 onChange={(e) => set('description', e.target.value)}
                 placeholder="Brief context or instructions for attendees..."
-                className="w-full bg-[#18181B] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Geist'] text-sm focus:border-white focus:outline-none transition-colors placeholder-[#71717A]"
+                className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-['Geist'] text-xs focus:border-[#22C55E] focus:outline-none transition-colors placeholder-[#71717A]"
               />
             </div>
           </div>
@@ -448,8 +448,8 @@ export function CreateArenaForm() {
                       onClick={() => handleDurationSelect(preset.sec)}
                       className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
                         isSelected
-                          ? 'border-white bg-[#27272A] text-white shadow ring-1 ring-white/20'
-                          : 'border-[#27272A] bg-[#18181B] text-[#a1a1aa] hover:border-[#3f3f46] hover:bg-[#1f1f23]'
+                          ? 'border-[#22C55E]/50 bg-[#22C55E]/15 text-[#22C55E]'
+                          : 'border-[#27272A] bg-[#141414] text-[#a1a1aa] hover:border-[#3f3f46]'
                       }`}
                     >
                       <span className="font-['Epilogue'] text-xs font-bold">{preset.label}</span>
@@ -466,8 +466,8 @@ export function CreateArenaForm() {
                   onClick={() => setIsCustomDuration(true)}
                   className={`px-3 py-1.5 rounded-lg border font-['Epilogue'] text-[11px] font-bold transition-all flex items-center gap-1.5 ${
                     isCustomDuration
-                      ? 'border-white bg-[#27272A] text-white'
-                      : 'border-[#27272A] bg-[#18181B] text-[#71717A] hover:text-[#a1a1aa]'
+                      ? 'border-[#22C55E]/50 bg-[#22C55E]/15 text-[#22C55E]'
+                      : 'border-[#27272A] bg-[#141414] text-[#71717A] hover:text-[#a1a1aa]'
                   }`}
                 >
                   <span className="material-symbols-outlined text-[14px]">tune</span>
@@ -483,7 +483,7 @@ export function CreateArenaForm() {
                       value={customDurationMin}
                       onChange={(e) => handleCustomDurationChange(e.target.value)}
                       placeholder="Minutes"
-                      className="w-24 bg-[#18181B] border border-[#27272A] rounded-lg px-3 py-1.5 text-white font-['Geist'] text-xs focus:border-white focus:outline-none"
+                      className="w-24 bg-[#141414] border border-[#27272A] rounded-lg px-3 py-1.5 text-white font-['Geist'] text-xs focus:border-[#22C55E] focus:outline-none"
                     />
                     <span className="text-[#a1a1aa] text-xs">minutes ({form.roundDurationSec} seconds)</span>
                   </div>
@@ -495,7 +495,7 @@ export function CreateArenaForm() {
               {/* STARTING BALANCE */}
               <div>
                 <label className="block font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">
-                  Starting Points Balance
+                  Starting Arcs Balance
                 </label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {STARTING_BALANCE_PRESETS.map((pts) => (
@@ -505,8 +505,8 @@ export function CreateArenaForm() {
                       onClick={() => set('startingBalance', pts)}
                       className={`px-3 py-1.5 rounded-lg border font-['Epilogue'] text-xs font-bold transition-all ${
                         form.startingBalance === pts
-                          ? 'border-white bg-[#27272A] text-white'
-                          : 'border-[#27272A] bg-[#18181B] text-[#a1a1aa] hover:border-[#3f3f46]'
+                          ? 'border-[#22C55E]/50 bg-[#22C55E]/15 text-[#22C55E]'
+                          : 'border-[#27272A] bg-[#141414] text-[#a1a1aa] hover:border-[#3f3f46]'
                       }`}
                     >
                       {formatPoints(pts)}
@@ -519,7 +519,7 @@ export function CreateArenaForm() {
                   max={1000000}
                   value={form.startingBalance}
                   onChange={(e) => set('startingBalance', Number(e.target.value))}
-                  className="w-full bg-[#18181B] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-['Geist'] text-xs focus:border-white focus:outline-none"
+                  className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-['Geist'] text-xs focus:border-[#22C55E] focus:outline-none"
                 />
               </div>
 
@@ -536,8 +536,8 @@ export function CreateArenaForm() {
                       onClick={() => set('totalRounds', count)}
                       className={`flex-1 py-1.5 rounded-lg border font-['Epilogue'] text-xs font-bold transition-all ${
                         form.totalRounds === count
-                          ? 'border-white bg-[#27272A] text-white'
-                          : 'border-[#27272A] bg-[#18181B] text-[#a1a1aa] hover:border-[#3f3f46]'
+                          ? 'border-[#22C55E]/50 bg-[#22C55E]/15 text-[#22C55E]'
+                          : 'border-[#27272A] bg-[#141414] text-[#a1a1aa] hover:border-[#3f3f46]'
                       }`}
                     >
                       {count} {count === 1 ? 'Round' : 'Rounds'}
@@ -550,21 +550,21 @@ export function CreateArenaForm() {
                   max={100}
                   value={form.totalRounds}
                   onChange={(e) => set('totalRounds', Number(e.target.value))}
-                  className="w-full bg-[#18181B] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-['Geist'] text-xs focus:border-white focus:outline-none"
+                  className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-['Geist'] text-xs focus:border-[#22C55E] focus:outline-none"
                 />
               </div>
             </div>
 
             {/* AI NOISE TRADER & LIQUIDITY BOT TOGGLE */}
-            <div className="p-4 bg-[#18181B] border border-[#27272A] rounded-xl flex flex-col gap-4">
+            <div className="p-4 bg-[#141414] border border-[#27272A] rounded-xl flex flex-col gap-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-2">
                     <span className="font-['Epilogue'] text-xs font-bold text-white uppercase flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-[15px] text-[#22C55E]">smart_toy</span>
-                      Liquidity Bot & Market Maker
+                      Liquidity Bot &amp; Market Maker
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-[#27272A] text-[#c4c7c8] border border-[#3f3f46] text-[9px] font-bold uppercase font-['Epilogue']">
+                    <span className="px-2 py-0.5 rounded-full bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/20 text-[9px] font-bold uppercase font-['Epilogue']">
                       LMSR Adaptive
                     </span>
                   </div>
@@ -604,9 +604,9 @@ export function CreateArenaForm() {
                         min={100}
                         value={form.botStartingBalance}
                         onChange={(e) => set('botStartingBalance', Number(e.target.value))}
-                        className="w-full bg-[#121214] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-mono text-xs focus:border-white focus:outline-none"
+                        className="w-full bg-[#181818] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-mono text-xs focus:border-[#22C55E] focus:outline-none"
                       />
-                      <span className="text-[10px] text-[#71717a]">Dedicated points budget for liquidity</span>
+                      <span className="text-[10px] text-[#71717a]">Dedicated arcs budget for liquidity</span>
                     </div>
 
                     <div className="flex flex-col gap-1.5">
@@ -618,7 +618,7 @@ export function CreateArenaForm() {
                         min={50}
                         value={form.botMaxExposure}
                         onChange={(e) => set('botMaxExposure', Number(e.target.value))}
-                        className="w-full bg-[#121214] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-mono text-xs focus:border-white focus:outline-none"
+                        className="w-full bg-[#181818] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-mono text-xs focus:border-[#22C55E] focus:outline-none"
                       />
                       <span className="text-[10px] text-[#71717a]">Maximum net round risk headroom</span>
                     </div>
@@ -636,15 +636,15 @@ export function CreateArenaForm() {
                           onClick={() => set('botStrategy', strat)}
                           className={`py-2 px-3 rounded-lg text-xs font-['Epilogue'] font-bold uppercase tracking-wider transition-all border ${
                             form.botStrategy === strat
-                              ? 'bg-white text-black border-white shadow-sm'
-                              : 'bg-[#18181B] text-[#a1a1aa] border-[#27272A] hover:border-[#3f3f46]'
+                              ? 'bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/30'
+                              : 'bg-[#181818] text-[#a1a1aa] border-[#27272A] hover:border-[#3f3f46]'
                           }`}
                         >
                           {strat}
                         </button>
                       ))}
                     </div>
-                    <div className="p-2.5 rounded-lg bg-[#121214] border border-[#27272A] text-[11px] text-[#a1a1aa]">
+                    <div className="p-2.5 rounded-lg bg-[#181818] border border-[#27272A] text-[11px] text-[#a1a1aa]">
                       {form.botStrategy === 'CONSERVATIVE' && 'Conservative: Triggers only at heavy imbalance (>=70% skew). Small conservative stake sizes.'}
                       {form.botStrategy === 'BALANCED' && 'Balanced: Triggers at moderate imbalance (>=60% skew). Balanced stake sizes.'}
                       {form.botStrategy === 'ADAPTIVE' && 'Adaptive: Dynamic stakes based on book depth, implied probability delta, and round volatility.'}
@@ -655,15 +655,15 @@ export function CreateArenaForm() {
             </div>
 
             {/* DEMO ARENA MODE TOGGLE */}
-            <div className="p-4 bg-[#18181B] border border-[#27272A] rounded-xl flex flex-col gap-4">
+            <div className="p-4 bg-[#141414] border border-[#27272A] rounded-xl flex flex-col gap-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-2">
                     <span className="font-['Epilogue'] text-xs font-bold text-white uppercase flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[15px] text-[#60a5fa]">sports_esports</span>
+                      <span className="material-symbols-outlined text-[15px] text-[#22C55E]">sports_esports</span>
                       Demo Arena Mode (Virtual Participants)
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-[#3b82f6]/10 text-[#60a5fa] border border-[#3b82f6]/30 text-[9px] font-bold uppercase font-['Epilogue']">
+                    <span className="px-2 py-0.5 rounded-full bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/20 text-[9px] font-bold uppercase font-['Epilogue']">
                       Simulation
                     </span>
                   </div>
@@ -676,7 +676,7 @@ export function CreateArenaForm() {
                   type="button"
                   onClick={() => set('isDemoMode', !form.isDemoMode)}
                   className={`w-12 h-6 rounded-full transition-colors relative shrink-0 p-0.5 ${
-                    form.isDemoMode ? 'bg-[#3b82f6]' : 'bg-[#27272A]'
+                    form.isDemoMode ? 'bg-[#22C55E]' : 'bg-[#27272A]'
                   }`}
                 >
                   <div
@@ -700,13 +700,13 @@ export function CreateArenaForm() {
                         max={200}
                         value={form.demoParticipantCount}
                         onChange={(e) => set('demoParticipantCount', Number(e.target.value))}
-                        className="w-32 bg-[#121214] border border-[#27272A] rounded-xl px-4 py-2 text-white font-mono text-xs focus:border-white focus:outline-none"
+                        className="w-32 bg-[#181818] border border-[#27272A] rounded-xl px-4 py-2 text-white font-mono text-xs focus:border-[#22C55E] focus:outline-none"
                       />
                       <span className="text-xs text-[#a1a1aa] font-['Geist']">virtual traders provisioned (DEMO_001 to DEMO_xxx)</span>
                     </div>
                   </div>
-                  <div className="p-3 rounded-lg bg-[#3b82f6]/10 border border-[#3b82f6]/20 text-[11px] text-[#93c5fd]">
-                    <strong>Active Demo Mode:</strong> Provisioned traders trade with varied profiles (Momentum, Contrarian, Large/Small, Balanced) to showcase realistic market dynamics and depth.
+                  <div className="p-3 rounded-lg bg-[#181818] border border-[#27272A] text-[11px] text-[#c4c7c8]">
+                    <strong className="text-white">Active Demo Mode:</strong> Provisioned traders trade with varied profiles (Momentum, Contrarian, Large/Small, Balanced) to showcase realistic market dynamics and depth.
                   </div>
                 </div>
               )}
@@ -725,7 +725,7 @@ export function CreateArenaForm() {
             </div>
 
             {/* Summary Card */}
-            <div className="bg-[#18181B] border border-[#27272A] rounded-2xl p-5 flex flex-col gap-4">
+            <div className="bg-[#141414] border border-[#27272A] rounded-xl p-5 flex flex-col gap-4">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -733,12 +733,12 @@ export function CreateArenaForm() {
                       {form.marketCategory === 'CRYPTO_PRICE' ? 'Live Crypto Oracle' : 'Campus / Custom Prediction'}
                     </span>
                     {(form.enableBots || form.botsEnabled) && (
-                      <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] text-[#22C55E] text-[10px] font-['Epilogue'] font-bold uppercase flex items-center gap-1">
+                      <span className="px-2 py-0.5 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#22C55E] text-[10px] font-['Epilogue'] font-bold uppercase flex items-center gap-1">
                         Bot ({form.botStrategy})
                       </span>
                     )}
                     {form.isDemoMode && (
-                      <span className="px-2 py-0.5 rounded-full bg-[#3b82f6]/20 border border-[#3b82f6]/40 text-[#93c5fd] text-[10px] font-['Epilogue'] font-bold uppercase flex items-center gap-1">
+                      <span className="px-2 py-0.5 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#22C55E] text-[10px] font-['Epilogue'] font-bold uppercase flex items-center gap-1">
                         Demo ({form.demoParticipantCount} traders)
                       </span>
                     )}
@@ -752,7 +752,7 @@ export function CreateArenaForm() {
               </div>
 
               {form.marketCategory !== 'CRYPTO_PRICE' && form.question && (
-                <div className="p-3.5 bg-[#202024] rounded-xl border border-[#2e2e33]">
+                <div className="p-3.5 bg-[#181818] rounded-xl border border-[#27272A]">
                   <span className="text-[10px] font-['Epilogue'] font-bold text-[#a1a1aa] uppercase tracking-wider block mb-1">
                     Prediction Question
                   </span>
@@ -766,15 +766,15 @@ export function CreateArenaForm() {
               )}
 
               <div className="grid grid-cols-3 gap-3 pt-2 border-t border-[#27272A] text-center">
-                <div className="p-2.5 bg-[#202024] rounded-xl">
+                <div className="p-2.5 bg-[#181818] border border-[#27272A] rounded-xl">
                   <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold block">Duration</span>
                   <span className="font-['Geist'] text-sm font-bold text-white">{formatDuration(form.roundDurationSec)}</span>
                 </div>
-                <div className="p-2.5 bg-[#202024] rounded-xl">
-                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold block">Points</span>
+                <div className="p-2.5 bg-[#181818] border border-[#27272A] rounded-xl">
+                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold block">Arcs</span>
                   <span className="font-['Geist'] text-sm font-bold text-white">{formatPoints(form.startingBalance)}</span>
                 </div>
-                <div className="p-2.5 bg-[#202024] rounded-xl">
+                <div className="p-2.5 bg-[#181818] border border-[#27272A] rounded-xl">
                   <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold block">Rounds</span>
                   <span className="font-['Geist'] text-sm font-bold text-white">{form.totalRounds}</span>
                 </div>
@@ -791,7 +791,7 @@ export function CreateArenaForm() {
                 value={form.code}
                 onChange={(e) => set('code', e.target.value.toUpperCase())}
                 placeholder="e.g. HACK26"
-                className="w-full bg-[#18181B] border border-[#27272A] rounded-xl px-4 py-3 text-white font-['Epilogue'] text-sm font-bold uppercase tracking-widest focus:border-white focus:outline-none transition-colors placeholder-[#71717A]"
+                className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-['Epilogue'] text-xs font-bold uppercase tracking-widest focus:border-[#22C55E] focus:outline-none transition-colors placeholder-[#71717A]"
               />
               <p className="text-[10px] text-[#71717A] mt-1">
                 Leave blank to automatically generate a clean 4-character join code.
@@ -808,7 +808,7 @@ export function CreateArenaForm() {
             <button
               type="button"
               onClick={prevStep}
-              className="px-5 py-2.5 rounded-full border border-[#3f3f46] text-[#e4e4e7] font-['Epilogue'] text-xs font-bold hover:bg-[#27272A] transition-all"
+              className="px-5 py-2.5 rounded-full border border-[#27272A] bg-[#141414] text-[#c4c7c8] font-['Epilogue'] text-xs font-bold hover:bg-[#201f1f] hover:text-white transition-all"
             >
               ← Back
             </button>
@@ -828,7 +828,7 @@ export function CreateArenaForm() {
             <button
               type="submit"
               disabled={pending}
-              className="px-8 py-3 rounded-full bg-white text-black font-['Epilogue'] text-sm font-bold hover:bg-[#e4e4e7] transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/20"
+              className="px-8 py-3 rounded-full bg-[#22C55E] text-[#131313] font-['Epilogue'] text-sm font-bold hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(34,197,94,0.3)]"
             >
               {pending ? <Spinner className="border-black border-t-transparent" /> : null}
               <span>{pending ? 'Creating Arena…' : 'Launch Arena Lobby'}</span>

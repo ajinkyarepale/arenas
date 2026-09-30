@@ -16,7 +16,7 @@ const reviewSchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const user = await requireUser();
@@ -29,7 +29,7 @@ export async function POST(
       return NextResponse.json({ error: 'SuperAdmin permission required' }, { status: 403 });
     }
 
-    const { id } = await params;
+    const { id } = params;
     const body = await request.json();
     const parsed = reviewSchema.safeParse(body);
     if (!parsed.success) {
