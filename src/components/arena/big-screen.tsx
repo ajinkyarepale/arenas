@@ -400,6 +400,19 @@ function HeaderTimer({
   clockOffsetMs: number;
   isEnded?: boolean;
 }) {
+  const now = Date.now() + clockOffsetMs;
+  const phase = roundPhase(round, now);
+  const target = isEnded
+    ? null
+    : phase === 'resolved'
+      ? (round?.settledAt
+          ? new Date(new Date(round.settledAt).getTime() + 30_000).toISOString()
+          : null)
+      : phase === 'locked'
+        ? (round?.resolvesAt ?? null)
+        : (round?.locksAt ?? null);
+  const remaining = useCountdown(target, clockOffsetMs);
+
   if (isEnded) {
     return (
       <div className="flex flex-col items-center justify-center px-6 py-2 rounded-2xl border border-[#27272A] bg-[#141418] shadow-xl">
@@ -412,18 +425,6 @@ function HeaderTimer({
       </div>
     );
   }
-
-  const now = Date.now() + clockOffsetMs;
-  const phase = roundPhase(round, now);
-  const target =
-    phase === 'resolved'
-      ? (round?.settledAt
-          ? new Date(new Date(round.settledAt).getTime() + 30_000).toISOString()
-          : null)
-      : phase === 'locked'
-        ? (round?.resolvesAt ?? null)
-        : (round?.locksAt ?? null);
-  const remaining = useCountdown(target, clockOffsetMs);
 
   const phaseLabels: Record<string, string> = {
     waiting: 'Next round in',
