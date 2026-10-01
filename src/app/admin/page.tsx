@@ -114,13 +114,28 @@ export default async function AdminPage() {
                 Manage your prediction market tournaments, generate QR codes, and monitor live trading.
               </p>
             </div>
-            <Link
-              href="/admin/arenas/new"
-              className="bg-white text-[#2f3131] font-['Epilogue'] text-sm font-bold px-6 py-3 rounded-full flex items-center justify-center gap-2 hover:bg-[#c6c6c7] transition-colors self-start md:self-auto shadow-lg"
-            >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              New Arena
-            </Link>
+            <div className="flex items-center gap-3 self-start md:self-auto flex-wrap">
+              {isSuperAdmin && (
+                <Link
+                  href="/admin/organizers"
+                  className="md:hidden bg-[#202024] hover:bg-[#2a2a30] text-[#c4c7c8] hover:text-white border border-[#27272A] font-['Epilogue'] text-xs font-bold px-3.5 py-2.5 rounded-full transition-all flex items-center gap-1.5 shadow"
+                >
+                  <span>Approvals</span>
+                  {pendingOrganizersCount > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-[#EF4444] text-[10px] text-white font-mono leading-none">
+                      {pendingOrganizersCount}
+                    </span>
+                  )}
+                </Link>
+              )}
+              <Link
+                href="/admin/arenas/new"
+                className="bg-white text-[#2f3131] font-['Epilogue'] text-sm font-bold px-6 py-2.5 sm:py-3 rounded-full flex items-center justify-center gap-2 hover:bg-[#c6c6c7] transition-colors shadow-lg"
+              >
+                <span className="material-symbols-outlined text-[18px]">add</span>
+                New Arena
+              </Link>
+            </div>
           </div>
 
           {/* Metrics Row */}

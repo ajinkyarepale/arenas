@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { SwitchButton } from '@/components/ui';
 
@@ -154,47 +154,94 @@ export function SiteSidebar() {
         </nav>
 
         {/* Profile & Auth at Bottom */}
-        <div className="mt-auto border-t border-[#27272A] pt-4 space-y-1.5">
+        <div className="mt-auto border-t border-[#27272A] pt-4 space-y-2">
           {session ? (
-            <Link
-              href="/dashboard"
-              onClick={() => setMobileOpen(false)}
-              title={collapsed ? 'Profile' : undefined}
-              className={cx(
-                'flex items-center rounded-xl font-["Epilogue"] text-sm transition-all',
-                collapsed
-                  ? 'w-10 h-10 p-0 justify-center mx-auto'
-                  : 'gap-3 px-3 py-2.5',
-                pathname === '/dashboard'
-                  ? 'text-[#22C55E] font-bold bg-[#22C55E]/15 border border-[#22C55E]/30'
-                  : 'text-[#c4c7c8] hover:bg-[#201f1f] hover:text-white border border-transparent',
-              )}
-            >
-              <div className="w-6 h-6 rounded-full bg-[#201f1f] border border-[#27272A] flex items-center justify-center text-xs font-bold text-white shrink-0 uppercase">
-                {session.user?.name?.[0] ?? session.user?.email?.[0] ?? 'U'}
-              </div>
-              <div className={`flex flex-col min-w-0 ${collapsed ? 'md:hidden' : 'flex'}`}>
-                <span className="text-white text-xs font-bold truncate">
-                  {session.user?.name ?? 'My Profile'}
+            <div className="flex flex-col gap-1.5">
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileOpen(false)}
+                title={collapsed ? 'Profile' : undefined}
+                className={cx(
+                  'flex items-center rounded-xl font-["Epilogue"] text-sm transition-all',
+                  collapsed
+                    ? 'w-10 h-10 p-0 justify-center mx-auto'
+                    : 'gap-3 px-3 py-2.5',
+                  pathname === '/dashboard'
+                    ? 'text-[#22C55E] font-bold bg-[#22C55E]/15 border border-[#22C55E]/30'
+                    : 'text-[#c4c7c8] hover:bg-[#201f1f] hover:text-white border border-transparent',
+                )}
+              >
+                <div className="w-7 h-7 rounded-full bg-[#201f1f] border border-[#27272A] flex items-center justify-center text-xs font-bold text-white shrink-0 uppercase">
+                  {session.user?.name?.[0] ?? session.user?.email?.[0] ?? 'U'}
+                </div>
+                <div className={`flex flex-col min-w-0 flex-1 ${collapsed ? 'md:hidden' : 'flex'}`}>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-white text-xs font-bold truncate">
+                      {session.user?.name ?? 'My Profile'}
+                    </span>
+                    {session.user?.role && session.user.role !== 'PARTICIPANT' && (
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold uppercase bg-[#22C55E]/20 text-[#22C55E] border border-[#22C55E]/30">
+                        {session.user.role === 'SUPERADMIN' ? 'SUPER' : 'ORG'}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-[#8e9192] truncate">{session.user?.email}</span>
+                </div>
+              </Link>
+
+              {/* Sign Out Button (Visible on Mobile Drawer & Desktop) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  void signOut({ callbackUrl: '/' });
+                }}
+                className={cx(
+                  'flex items-center rounded-xl text-[#c4c7c8] hover:text-[#EF4444] hover:bg-[#EF4444]/10 border border-transparent hover:border-[#EF4444]/20 font-["Epilogue"] text-xs font-semibold transition-all',
+                  collapsed
+                    ? 'w-10 h-10 p-0 justify-center mx-auto'
+                    : 'gap-2 px-3 py-2 w-full',
+                )}
+                title="Sign Out"
+              >
+                <span className="material-symbols-outlined text-[18px] shrink-0 text-[#8e9192] group-hover:text-[#EF4444]">
+                  logout
                 </span>
-                <span className="text-[10px] text-[#8e9192] truncate">{session.user?.email}</span>
-              </div>
-            </Link>
+                <span className={collapsed ? 'md:hidden' : 'inline'}>Sign Out</span>
+              </button>
+            </div>
           ) : (
-            <Link
-              href="/signin"
-              onClick={() => setMobileOpen(false)}
-              title={collapsed ? 'Sign In' : undefined}
-              className={cx(
-                'flex items-center rounded-xl text-[#c4c7c8] font-["Epilogue"] text-sm hover:bg-[#201f1f] hover:text-white border border-transparent transition-colors',
-                collapsed
-                  ? 'w-10 h-10 p-0 justify-center mx-auto'
-                  : 'gap-3 px-3 py-2.5',
-              )}
-            >
-              <span className="material-symbols-outlined text-[20px] shrink-0">login</span>
-              <span className={collapsed ? 'md:hidden' : 'block'}>Sign In</span>
-            </Link>
+            <div className={cx('flex flex-col gap-2', collapsed ? 'md:items-center' : '')}>
+              {/* Logged-out buttons (Mobile drawer & Desktop expanded) */}
+              <div className={cx('flex gap-2 w-full', collapsed ? 'md:hidden' : 'flex')}>
+                <Link
+                  href="/signin"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex-1 text-center py-2 px-3 rounded-xl text-xs font-['Epilogue'] font-bold text-[#c4c7c8] bg-[#201f1f] hover:text-white hover:bg-[#27272A] border border-[#27272A] transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex-1 text-center py-2 px-3 rounded-xl text-xs font-['Epilogue'] font-bold text-[#131313] bg-[#22C55E] hover:bg-emerald-400 transition-colors shadow"
+                >
+                  Sign Up
+                </Link>
+              </div>
+
+              {/* Collapsed desktop icon only */}
+              <Link
+                href="/signin"
+                title="Sign In"
+                className={cx(
+                  'items-center justify-center rounded-xl text-[#c4c7c8] hover:bg-[#201f1f] hover:text-white transition-colors w-10 h-10',
+                  collapsed ? 'hidden md:flex' : 'hidden',
+                )}
+              >
+                <span className="material-symbols-outlined text-[20px]">login</span>
+              </Link>
+            </div>
           )}
         </div>
       </aside>

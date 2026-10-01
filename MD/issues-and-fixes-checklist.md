@@ -168,3 +168,19 @@ This document tracks all identified bugs, lagging features, missing links, anima
   - [x] Replaced multi-line wrapping textual badges (`R1: NO · WON ...`) with a compact, uniform round calibration strip (`flex items-center gap-1.5 h-4` with `h-2 rounded-full` indicators).
   - [x] Green for Won, Red for Miss, Neutral for Pending/Void with full hover tooltip information.
   - [x] Normalized card heights to a uniform geometry across all screen sizes.
+
+---
+
+## Stage 12: Mobile Actions Polish & Landing Page Card Feature Removal
+- [x] **12.1 Landing Page Card Feature Removal (`src/app/page.tsx`)**:
+  - [x] Removed interactive `CardStack` component and section from landing page.
+- [x] **12.2 Mobile Navigation Drawer Actions (`src/components/site-sidebar.tsx`)**:
+  - [x] Added visible `Sign Out` button with `logout` icon calling `signOut({ callbackUrl: '/' })`.
+  - [x] Added user role indicator badge (`SUPER` / `ORG`).
+  - [x] Added side-by-side `Sign In` and emerald `Sign Up` buttons for logged-out visitors.
+- [x] **12.3 Dashboard Profile Card Mobile Sign Out (`src/app/dashboard/page.tsx`)**:
+  - [x] Added mobile `Sign out` action directly inside the user profile masthead card.
+- [x] **12.4 Analytics Mobile Telemetry Refresh (`src/app/analytics/page.tsx`)**:
+  - [x] Placed a compact mobile `↻ Refresh` button alongside the hero title.
+- [x] **12.5 Admin Panel Mobile Approvals Shortcut (`src/app/admin/page.tsx`)**:
+  - [x] Added mobile `Approvals` counter badge button for SuperAdmins next to `+ New Arena`.

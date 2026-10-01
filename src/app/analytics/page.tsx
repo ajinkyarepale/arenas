@@ -172,10 +172,22 @@ export default function AnalyticsOverviewPage() {
         <AppContent>
           {/* Hero Title */}
           <div className="flex flex-col gap-2">
-            <h1 className="font-['Geist'] text-3xl md:text-4xl font-semibold text-white tracking-tight">
-              Event Overview &amp; Intelligence
-            </h1>
-            <p className="font-['Geist'] text-sm text-[#c4c7c8] leading-relaxed max-w-2xl">
+            <div className="flex items-center justify-between gap-4">
+              <h1 className="font-['Geist'] text-2xl sm:text-3xl md:text-4xl font-semibold text-white tracking-tight">
+                Event Overview &amp; Intelligence
+              </h1>
+              {/* Mobile Refresh Button */}
+              <button
+                type="button"
+                onClick={() => void fetchOverview()}
+                className="md:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#201f1f] hover:bg-[#27272A] text-xs font-['Epilogue'] font-bold text-[#c4c7c8] hover:text-white border border-[#27272A] transition-all shrink-0"
+                title="Refresh Analytics"
+              >
+                <span className={cx('text-sm', loading && 'animate-spin')}>↻</span>
+                <span>Refresh</span>
+              </button>
+            </div>
+            <p className="font-['Geist'] text-xs sm:text-sm text-[#c4c7c8] leading-relaxed max-w-2xl">
               Aggregated market telemetry across all prediction tournaments. Click any tournament card below to inspect its round-by-round calibration curve, PnL tape, and crowd sentiment.
             </p>
           </div>

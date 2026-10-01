@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { LiveArenasTicker } from '@/components/live-arenas-ticker';
 import { SiteNavAuth } from '@/components/site-nav-auth';
-import { BeamsBackground, CardStack, SlideTextButton, SwitchButton } from '@/components/ui';
+import { BeamsBackground, SlideTextButton, SwitchButton } from '@/components/ui';
 
 export const metadata: Metadata = {
   title: 'Arenas - Campus Prediction Market',
@@ -71,25 +71,6 @@ export default function LandingPage() {
 
       {/* Live Marquee Ticker */}
       <LiveArenasTicker />
-
-      {/* Interactive Expandable Card Stack Section */}
-      <section className="py-16 px-4 sm:px-6 w-full max-w-[1280px] mx-auto flex flex-col items-center gap-6">
-        <div className="text-center max-w-xl mx-auto flex flex-col items-center gap-2">
-          <span className="px-2.5 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] text-[#c4c7c8] font-['Epilogue'] text-[10px] font-bold uppercase tracking-wider">
-            PLATFORM ARCHITECTURE
-          </span>
-          <h2 className="font-['Geist'] text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            Engineered for Campus Tournaments
-          </h2>
-          <p className="text-xs text-[#a1a1aa] leading-relaxed">
-            Click the interactive card stack below to inspect the real-time LMSR mechanics, automated Binance TWAP settlement, and projector display feeds.
-          </p>
-        </div>
-
-        <div className="w-full mt-4">
-          <CardStack />
-        </div>
-      </section>
 
       {/* Main Content Canvas */}
       <main className="flex-grow w-full max-w-[1280px] mx-auto px-6 py-12 flex flex-col gap-16">

@@ -69,6 +69,13 @@ export default async function DashboardPage() {
                   </span>
                 </div>
                 <p className="font-['Geist'] text-xs text-[#c4c7c8]">{session.user.email}</p>
+                <Link
+                  href="/signout"
+                  className="md:hidden inline-flex items-center gap-1.5 text-xs text-[#c4c7c8] hover:text-[#EF4444] font-['Epilogue'] font-semibold mt-1 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[16px]">logout</span>
+                  <span>Sign out</span>
+                </Link>
               </div>
             </div>
 
