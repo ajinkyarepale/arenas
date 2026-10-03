@@ -135,6 +135,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
   }, []);
 
   const now = currentTime + clockOffsetMs;
+  const status = arena?.status ?? initialArena.status;
   const phase = roundPhase(round, now);
   const tradingOpen = status === 'LIVE' && phase === 'trading';
   const effectivePriceYes = optimisticPriceYes ?? (round?.priceYes ?? 0.5);

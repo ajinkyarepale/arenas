@@ -231,6 +231,56 @@ export async function POST(
         });
       }
 
+      case 'archive': {
+        // Only SUPERADMIN can archive arenas.
+        if (user.role !== 'SUPERADMIN') {
+          return forbidden('Only a superadmin can archive arenas.');
+        }
+        if (arena.status === 'ARCHIVED') {
+          return apiError('This arena is already archived.', 409);
+        }
+        const archived = await prisma.event.update({
+          where: { id: arena.id },
+          data: { status: 'ARCHIVED' },
+          select: { id: true, status: true },
+        });
+        void createAuditLog({
+          actorId: user.id,
+          action: 'ARENA_STATUS_CHANGED',
+          resourceType: 'EVENT',
+          resourceId: arena.id,
+          previousData: { status: arena.status },
+          newData: { status: 'ARCHIVED' },
+          metadata: { code: arena.code, name: arena.name, action: 'archive' },
+        });
+        return NextResponse.json({ arena: archived });
+      }
+
+      case 'unarchive': {
+        // Only SUPERADMIN can unarchive arenas.
+        if (user.role !== 'SUPERADMIN') {
+          return forbidden('Only a superadmin can unarchive arenas.');
+        }
+        if (arena.status !== 'ARCHIVED') {
+          return apiError('This arena is not archived.', 409);
+        }
+        const unarchived = await prisma.event.update({
+          where: { id: arena.id },
+          data: { status: 'ENDED' },
+          select: { id: true, status: true },
+        });
+        void createAuditLog({
+          actorId: user.id,
+          action: 'ARENA_STATUS_CHANGED',
+          resourceType: 'EVENT',
+          resourceId: arena.id,
+          previousData: { status: 'ARCHIVED' },
+          newData: { status: 'ENDED' },
+          metadata: { code: arena.code, name: arena.name, action: 'unarchive' },
+        });
+        return NextResponse.json({ arena: unarchived });
+      }
+
       default:
         return apiError('Unknown action.', 400);
     }

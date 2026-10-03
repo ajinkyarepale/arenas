@@ -61,9 +61,10 @@ export default async function AdminPage() {
     };
   });
 
-  const totalArenas = arenas.length;
-  const liveCount = arenas.filter((a) => a.status === 'LIVE').length;
-  const totalParticipants = arenas.reduce((sum, a) => sum + a.participantCount, 0);
+  const activeArenas = arenas.filter((a) => a.status !== 'ARCHIVED');
+  const totalArenas = activeArenas.length;
+  const liveCount = activeArenas.filter((a) => a.status === 'LIVE').length;
+  const totalParticipants = activeArenas.reduce((sum, a) => sum + a.participantCount, 0);
 
   return (
     <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
@@ -162,7 +163,7 @@ export default async function AdminPage() {
           </div>
 
           {/* Arenas List with Interactive QR & Share Actions */}
-          <AdminArenaList arenas={arenas} />
+          <AdminArenaList arenas={arenas} isSuperAdmin={isSuperAdmin} />
         </AppContent>
       </AppShell>
     </div>

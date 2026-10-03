@@ -21,11 +21,18 @@ export interface AdminArenaSummary {
   endsAt: string | null;
 }
 
-export function AdminArenaList({ arenas: initialArenas }: { arenas: AdminArenaSummary[] }) {
+export function AdminArenaList({
+  arenas: initialArenas,
+  isSuperAdmin = false,
+}: {
+  arenas: AdminArenaSummary[];
+  isSuperAdmin?: boolean;
+}) {
   const router = useRouter();
   const [arenas, setArenas] = useState(initialArenas);
   const [shareArena, setShareArena] = useState<{ code: string; name: string } | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [archivingId, setArchivingId] = useState<string | null>(null);
 
   const handleDelete = async (arenaId: string, arenaName: string) => {
     if (
@@ -55,6 +62,40 @@ export function AdminArenaList({ arenas: initialArenas }: { arenas: AdminArenaSu
     }
   };
 
+  const handleArchive = async (arenaId: string, arenaName: string, currentStatus: string) => {
+    const isArchiving = currentStatus !== 'ARCHIVED';
+    const confirmMsg = isArchiving
+      ? `Archive "${arenaName}"? Users will no longer be able to view or join this arena. Only a superadmin can unarchive it.`
+      : `Unarchive "${arenaName}"? It will be restored to ENDED status and become visible again.`;
+
+    if (!window.confirm(confirmMsg)) return;
+
+    setArchivingId(arenaId);
+    try {
+      const res = await fetch(`/api/admin/arenas/${arenaId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: isArchiving ? 'archive' : 'unarchive' }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        alert(body.error ?? `Could not ${isArchiving ? 'archive' : 'unarchive'} arena`);
+        return;
+      }
+      // Optimistically update status in the list
+      setArenas((prev) =>
+        prev.map((a) =>
+          a.id === arenaId ? { ...a, status: isArchiving ? 'ARCHIVED' : 'ENDED' } : a,
+        ),
+      );
+      router.refresh();
+    } catch {
+      alert(`Network error while ${isArchiving ? 'archiving' : 'unarchiving'} arena`);
+    } finally {
+      setArchivingId(null);
+    }
+  };
+
   if (arenas.length === 0) {
     return (
       <div className="rounded-xl border border-[#27272A] bg-[#201f1f]/40 p-12 text-center flex flex-col items-center">
@@ -69,17 +110,27 @@ export function AdminArenaList({ arenas: initialArenas }: { arenas: AdminArenaSu
   return (
     <div className="flex flex-col gap-4">
       {arenas.map((arena) => {
+        const isArchived = arena.status === 'ARCHIVED';
         const isResolved = arena.status === 'ENDED' && arena.resolvedOutcome !== null;
         const isAwaitingResolution = arena.status === 'ENDED' && arena.resolvedOutcome === null;
 
         return (
           <div
             key={arena.id}
-            className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-xl p-5 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center hover:border-[#444748] transition-colors backdrop-blur-md"
+            className={`border rounded-xl p-5 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center transition-colors backdrop-blur-md ${
+              isArchived
+                ? 'bg-[rgba(15,15,15,0.5)] border-[#1e1e1e] opacity-60'
+                : 'bg-[rgba(20,20,20,0.7)] border-[#27272A] hover:border-[#444748]'
+            }`}
           >
             <div className="flex flex-col gap-2 w-full md:w-auto">
-              <div className="flex items-center gap-3">
-                {arena.status === 'LIVE' ? (
+              <div className="flex items-center gap-3 flex-wrap">
+                {isArchived ? (
+                  <span className="bg-[#1a1a1a] text-[#6b7280] border border-[#374151]/40 px-2 py-0.5 rounded-full font-['Epilogue'] text-[10px] font-bold tracking-widest flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[12px]">inventory_2</span>
+                    ARCHIVED
+                  </span>
+                ) : arena.status === 'LIVE' ? (
                   <span className="bg-[#201f1f] text-[#22C55E] border border-[#22C55E]/30 px-2 py-0.5 rounded-full font-['Epilogue'] text-[10px] font-bold tracking-widest flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" /> LIVE
                   </span>
@@ -109,7 +160,9 @@ export function AdminArenaList({ arenas: initialArenas }: { arenas: AdminArenaSu
                 </span>
               </div>
 
-              <h3 className="font-['Geist'] text-xl font-medium text-white">{arena.name}</h3>
+              <h3 className={`font-['Geist'] text-xl font-medium ${isArchived ? 'text-[#6b7280]' : 'text-white'}`}>
+                {arena.name}
+              </h3>
 
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-['Epilogue'] text-xs text-[#c4c7c8]">
                 <span className="flex items-center gap-1.5">
@@ -128,41 +181,73 @@ export function AdminArenaList({ arenas: initialArenas }: { arenas: AdminArenaSu
             </div>
 
             <div className="flex items-center gap-2.5 w-full md:w-auto justify-end mt-2 md:mt-0">
-              <button
-                type="button"
-                onClick={() => setShareArena({ code: arena.code, name: arena.name })}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-[#27272A] bg-[#201f1f] text-xs font-['Epilogue'] font-bold text-white hover:bg-[#2a2a2a] transition-colors"
-                title="View QR Code & Share"
-              >
-                <span className="material-symbols-outlined text-[16px] text-[#22C55E]">qr_code_2</span>
-                <span>QR / Share</span>
-              </button>
-              <Link
-                href={`/arenas/${arena.code}/screen`}
-                className="flex items-center justify-center w-9 h-9 rounded-full border border-[#27272A] bg-[#201f1f] text-[#c4c7c8] hover:text-white hover:bg-[#2a2a2a] transition-colors"
-                title="Auditorium Big Screen View"
-              >
-                <span className="material-symbols-outlined text-lg">desktop_windows</span>
-              </Link>
-              <Link
-                href={`/admin/arenas/${arena.code}`}
-                className="bg-white text-[#2f3131] font-['Epilogue'] text-xs font-bold px-5 py-2.5 rounded-full hover:bg-[#c6c6c7] transition-all whitespace-nowrap"
-              >
-                Control Panel
-              </Link>
-              <button
-                type="button"
-                onClick={() => handleDelete(arena.id, arena.name)}
-                disabled={deletingId === arena.id}
-                className="w-9 h-9 rounded-full border border-red-500/30 bg-red-950/20 text-red-400 hover:bg-red-950/40 hover:border-red-500/50 flex items-center justify-center transition-colors shrink-0"
-                title="Delete Arena"
-              >
-                {deletingId === arena.id ? (
-                  <span className="w-4 h-4 rounded-full border-2 border-red-400 border-t-transparent animate-spin" />
-                ) : (
-                  <span className="material-symbols-outlined text-lg">delete</span>
-                )}
-              </button>
+              {/* Actions are hidden for archived arenas unless SUPERADMIN */}
+              {!isArchived && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShareArena({ code: arena.code, name: arena.name })}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-[#27272A] bg-[#201f1f] text-xs font-['Epilogue'] font-bold text-white hover:bg-[#2a2a2a] transition-colors"
+                    title="View QR Code & Share"
+                  >
+                    <span className="material-symbols-outlined text-[16px] text-[#22C55E]">qr_code_2</span>
+                    <span>QR / Share</span>
+                  </button>
+                  <Link
+                    href={`/arenas/${arena.code}/screen`}
+                    className="flex items-center justify-center w-9 h-9 rounded-full border border-[#27272A] bg-[#201f1f] text-[#c4c7c8] hover:text-white hover:bg-[#2a2a2a] transition-colors"
+                    title="Auditorium Big Screen View"
+                  >
+                    <span className="material-symbols-outlined text-lg">desktop_windows</span>
+                  </Link>
+                  <Link
+                    href={`/admin/arenas/${arena.code}`}
+                    className="bg-white text-[#2f3131] font-['Epilogue'] text-xs font-bold px-5 py-2.5 rounded-full hover:bg-[#c6c6c7] transition-all whitespace-nowrap"
+                  >
+                    Control Panel
+                  </Link>
+                </>
+              )}
+
+              {/* SUPERADMIN: Archive / Unarchive button */}
+              {isSuperAdmin && (
+                <button
+                  type="button"
+                  onClick={() => handleArchive(arena.id, arena.name, arena.status)}
+                  disabled={archivingId === arena.id}
+                  className={`w-9 h-9 rounded-full border flex items-center justify-center transition-colors shrink-0 ${
+                    isArchived
+                      ? 'border-amber-500/30 bg-amber-950/20 text-amber-400 hover:bg-amber-950/40 hover:border-amber-500/50'
+                      : 'border-[#374151]/50 bg-[#1a1a1a] text-[#6b7280] hover:bg-[#1f1f1f] hover:text-[#9ca3af] hover:border-[#374151]'
+                  }`}
+                  title={isArchived ? 'Unarchive Arena' : 'Archive Arena'}
+                >
+                  {archivingId === arena.id ? (
+                    <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                  ) : (
+                    <span className="material-symbols-outlined text-lg">
+                      {isArchived ? 'unarchive' : 'inventory_2'}
+                    </span>
+                  )}
+                </button>
+              )}
+
+              {/* Delete button — shown for non-archived only, or always for SUPERADMIN */}
+              {(!isArchived || isSuperAdmin) && (
+                <button
+                  type="button"
+                  onClick={() => handleDelete(arena.id, arena.name)}
+                  disabled={deletingId === arena.id}
+                  className="w-9 h-9 rounded-full border border-red-500/30 bg-red-950/20 text-red-400 hover:bg-red-950/40 hover:border-red-500/50 flex items-center justify-center transition-colors shrink-0"
+                  title="Delete Arena"
+                >
+                  {deletingId === arena.id ? (
+                    <span className="w-4 h-4 rounded-full border-2 border-red-400 border-t-transparent animate-spin" />
+                  ) : (
+                    <span className="material-symbols-outlined text-lg">delete</span>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         );
@@ -180,3 +265,4 @@ export function AdminArenaList({ arenas: initialArenas }: { arenas: AdminArenaSu
     </div>
   );
 }
+

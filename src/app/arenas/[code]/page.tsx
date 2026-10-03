@@ -53,6 +53,9 @@ export default async function ArenaJoinPage({ params }: { params: { code: string
   const arena = await findArenaByCode(parsed.data);
   if (!arena) notFound();
 
+  // Archived arenas are invisible to the public — treat as not found.
+  if (arena.status === 'ARCHIVED') notFound();
+
   const session = await getServerSession(authOptions);
   const info = toPublicInfo(arena);
 

@@ -49,6 +49,9 @@ export default async function LiveArenaPage({ params }: { params: { code: string
   const arena = await findArenaByCode(parsed.data);
   if (!arena) notFound();
 
+  // Archived arenas are inaccessible — treat as not found.
+  if (arena.status === 'ARCHIVED') notFound();
+
   // The join gate. Middleware confirms there is a session; this confirms the
   // session belongs to somebody who actually entered this arena's code.
   const participant = await prisma.eventParticipant.findUnique({

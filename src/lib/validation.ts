@@ -183,7 +183,7 @@ export const createArenaSchema = z
 export type CreateArenaInput = z.infer<typeof createArenaSchema>;
 
 export const updateArenaSchema = z.object({
-  action: z.enum(['start', 'start-round', 'pause', 'resume', 'end', 'publish', 'update-rules']).optional(),
+  action: z.enum(['start', 'start-round', 'pause', 'resume', 'end', 'publish', 'update-rules', 'archive', 'unarchive']).optional(),
   tradesPerMinuteLimit: z.number().int().min(0).max(600).optional(),
 });
 
