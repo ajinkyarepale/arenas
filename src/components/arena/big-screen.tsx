@@ -134,14 +134,26 @@ export function BigScreen({
         {/* Right: Join Beacon, Exit Link, and View Switcher Tabs */}
         <div className="flex shrink-0 items-center justify-end gap-2 xl:gap-2.5">
           {/* Exit Big Screen Button */}
-          <Link
-            href={`/arenas/${info.code}`}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#18181b] hover:bg-[#222228] border border-[#27272A] text-xs font-['Epilogue'] font-medium text-[#c4c7c8] hover:text-white transition-all cursor-pointer"
-            title="Exit Big Screen View"
-          >
-            <span className="material-symbols-outlined text-[15px]">arrow_back</span>
-            <span className="hidden sm:inline">Exit</span>
-          </Link>
+          {onSelectView ? (
+            <button
+              type="button"
+              onClick={() => onSelectView('live')}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#18181b] hover:bg-[#222228] border border-[#27272A] text-xs font-['Epilogue'] font-medium text-[#c4c7c8] hover:text-white transition-all cursor-pointer"
+              title="Return to Live Arena Terminal"
+            >
+              <span className="material-symbols-outlined text-[15px]">arrow_back</span>
+              <span className="hidden sm:inline">Exit</span>
+            </button>
+          ) : (
+            <Link
+              href={`/arenas/${info.code}/live`}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#18181b] hover:bg-[#222228] border border-[#27272A] text-xs font-['Epilogue'] font-medium text-[#c4c7c8] hover:text-white transition-all cursor-pointer"
+              title="Exit Big Screen View"
+            >
+              <span className="material-symbols-outlined text-[15px]">arrow_back</span>
+              <span className="hidden sm:inline">Exit</span>
+            </Link>
+          )}
 
           {/* Join QR Beacon (Clickable for Room Attendees) */}
           <button

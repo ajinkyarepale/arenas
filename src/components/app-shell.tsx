@@ -29,7 +29,7 @@ export function AppShell({
   return (
     <div
       className={cx(
-        'flex-1 flex flex-col min-h-screen min-w-0 pt-16 md:pt-0 transition-[margin] duration-300 ease-in-out',
+        'flex-1 flex flex-col min-h-screen min-w-0 w-full max-w-full pt-16 md:pt-0 transition-[margin] duration-300 ease-in-out',
         collapsed ? 'md:ml-16' : 'md:ml-64',
         className,
       )}
@@ -61,7 +61,7 @@ export function AppContent({
   return (
     <main
       className={cx(
-        'flex-1 w-full mx-auto p-4 sm:p-6 md:p-10 flex flex-col gap-6 md:gap-8',
+        'flex-1 w-full max-w-full min-w-0 mx-auto p-4 sm:p-6 md:p-10 flex flex-col gap-6 md:gap-8',
         maxWClass,
         className,
       )}

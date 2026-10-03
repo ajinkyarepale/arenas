@@ -68,24 +68,34 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
   };
 
   return (
-    <div className="min-h-screen bg-[#131313] text-[#e5e2e1] font-['Geist'] pb-12 antialiased selection:bg-[#22C55E]/30">
+    <div className="min-h-screen bg-[#131313] text-[#e5e2e1] font-['Geist'] pb-12 antialiased selection:bg-[#22C55E]/30 w-full max-w-full">
       {/* Top Header / View Switcher Bar */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#27272A] bg-[rgba(20,20,20,0.85)] px-4 sm:px-6 py-2.5 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#27272A] bg-[rgba(20,20,20,0.85)] px-3 sm:px-6 py-2.5 backdrop-blur-xl w-full max-w-full">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {onBack ? (
             <button
               type="button"
               onClick={onBack}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all active:scale-95 shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all active:scale-95 shadow-sm shrink-0"
               title="Return to Overview"
             >
               <span>←</span>
               <span className="hidden sm:inline font-mono">Overview</span>
             </button>
+          ) : onSelectView ? (
+            <button
+              type="button"
+              onClick={() => onSelectView('live')}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all active:scale-95 shadow-sm shrink-0"
+              title="Return to Live Arena"
+            >
+              <span>←</span>
+              <span className="hidden sm:inline font-mono">Arena</span>
+            </button>
           ) : (
             <Link
-              href={`/arenas/${initialArena.code}`}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all shadow-sm"
+              href={`/arenas/${initialArena.code}/live`}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all shadow-sm shrink-0"
               title="Return to Arena"
             >
               <span>←</span>
@@ -93,7 +103,7 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
             </Link>
           )}
 
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="font-['Epilogue'] text-[10px] font-bold uppercase tracking-widest text-[#22C55E]">
                 POST-ROUND AUDIT
@@ -102,38 +112,41 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
                 {initialArena.code}
               </span>
             </div>
-            <h1 className="font-['Geist'] text-sm sm:text-base font-bold text-white tracking-tight">
-              {data?.arena?.name ?? initialArena.name} — Analysis
+            <h1 className="font-['Geist'] text-xs sm:text-base font-bold text-white tracking-tight truncate">
+              {data?.arena?.name ?? initialArena.name}
             </h1>
           </div>
         </div>
 
         {/* View Switcher Tabs */}
-        <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#141417] border border-[#27272A]">
+        <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#141417] border border-[#27272A] shrink-0">
           <button
             type="button"
             onClick={() => onSelectView?.('live')}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white hover:bg-[#1f1f23] transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white hover:bg-[#1f1f23] transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-[14px] text-[#22C55E]">bolt</span>
-            <span>Live Arena</span>
+            <span className="hidden sm:inline">Live Arena</span>
+            <span className="sm:hidden text-[10px]">Live</span>
           </button>
 
           <button
             type="button"
             onClick={() => onSelectView?.('screen')}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white hover:bg-[#1f1f23] transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white hover:bg-[#1f1f23] transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-[14px] text-[#38BDF8]">tv</span>
-            <span>Big Screen</span>
+            <span className="hidden sm:inline">Big Screen</span>
+            <span className="sm:hidden text-[10px]">Screen</span>
           </button>
 
           <button
             type="button"
-            className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-bold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
+            className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-bold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
           >
             <span className="material-symbols-outlined text-[14px]">analytics</span>
-            <span>Analysis</span>
+            <span className="hidden sm:inline">Analysis</span>
+            <span className="sm:hidden text-[10px]">Audit</span>
           </button>
         </div>
       </header>

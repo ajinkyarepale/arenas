@@ -250,7 +250,7 @@ export const CrowdGraph = memo(function CrowdGraph({
         mouseWheel: true,
         pressedMouseMove: true,
         horzTouchDrag: true,
-        vertTouchDrag: true,
+        vertTouchDrag: false,
       },
       handleScale: {
         axisPressedMouseMove: {
@@ -258,7 +258,7 @@ export const CrowdGraph = memo(function CrowdGraph({
           price: true,
         },
         mouseWheel: true,
-        pinch: true,
+        pinch: false,
       },
       autoSize: false,
       width: container.clientWidth,

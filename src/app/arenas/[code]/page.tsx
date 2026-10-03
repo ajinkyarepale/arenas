@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 
 import { AppShell } from '@/components/app-shell';
@@ -65,6 +65,10 @@ export default async function ArenaJoinPage({ params }: { params: { code: string
         select: { id: true, balance: true },
       })
     : null;
+
+  if (participant) {
+    redirect(`/arenas/${arena.code}/live`);
+  }
 
   return (
     <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex">

@@ -33,9 +33,24 @@
   body {
     @apply antialiased;
     font-family: var(--font-sans);
-    /* Prevent the pull-to-refresh gesture from firing mid-round. */
-    overscroll-behavior-y: none;
     position: relative;
+    overflow-x: clip;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* Prevent double tap zoom delays on interactive elements */
+  a, button, input, select, textarea {
+    touch-action: manipulation;
+  }
+
+  /* Prevent iOS Safari from automatically zooming in on inputs with <16px font */
+  @media (max-width: 768px) {
+    input,
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
   }
 
   html.dark body {

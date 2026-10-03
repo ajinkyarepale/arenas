@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 
 import { LiveArena } from '@/components/arena/live-arena';
-import { auth } from '@/lib/auth';
+import { auth, isOrganizer } from '@/lib/auth';
 import { findArenaByCode, toPublicInfo } from '@/lib/engine/snapshot';
 import { prisma } from '@/lib/prisma';
 import { joinCodeSchema } from '@/lib/validation';
@@ -62,5 +62,7 @@ export default async function LiveArenaPage({ params }: { params: { code: string
     redirect(`/arenas/${arena.code}`);
   }
 
-  return <LiveArena initialArena={toPublicInfo(arena)} />;
+  const userIsOrganizer = isOrganizer(session.user.role) || arena.organizerId === session.user.id;
+
+  return <LiveArena initialArena={toPublicInfo(arena)} isOrganizer={userIsOrganizer} />;
 }

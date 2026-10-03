@@ -150,7 +150,7 @@ export function CandleChart({
         mouseWheel: true,
         pressedMouseMove: true,
         horzTouchDrag: true,
-        vertTouchDrag: true,
+        vertTouchDrag: false,
       },
       handleScale: {
         axisPressedMouseMove: {
@@ -158,7 +158,7 @@ export function CandleChart({
           price: true,
         },
         mouseWheel: true,
-        pinch: true,
+        pinch: false,
       },
     });
 

@@ -30,7 +30,13 @@ const CandleChart = dynamic(
   },
 );
 
-export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
+export function LiveArena({
+  initialArena,
+  isOrganizer = false,
+}: {
+  initialArena: ArenaPublicInfo;
+  isOrganizer?: boolean;
+}) {
   const code = initialArena.code;
   const {
     snapshot,
@@ -51,18 +57,22 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
   const [tradeFilledBalance, setTradeFilledBalance] = useState<number | null>(null);
   const [tradeFilledPosition, setTradeFilledPosition] = useState<PositionSummary | null>(null);
 
-  // Sync initial view from URL query param ?view=screen|analysis|live
+  // Sync initial view from URL query param ?view=screen|analysis|live (only for organizers)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && isOrganizer) {
       const params = new URLSearchParams(window.location.search);
       const viewParam = params.get('view');
       if (viewParam === 'screen' || viewParam === 'analysis' || viewParam === 'live') {
         setActiveView(viewParam);
       }
     }
-  }, []);
+  }, [isOrganizer]);
 
   const handleViewChange = (view: 'live' | 'screen' | 'analysis') => {
+    if (!isOrganizer) {
+      setActiveView('live');
+      return;
+    }
     setActiveView(view);
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
@@ -173,17 +183,23 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
         : `Buy YES if you predict this outcome will occur, or NO if not. Winning outcome pays 1 point per share.`)
     : `Polymarket binary market: Buy YES if you predict ${info.asset.replace('USDT', '')} will rise, or NO if it falls. Winning outcome pays 1 point per share at round settlement.`;
 
-  // Direct inline view delegation:
-  if (activeView === 'screen') {
+  // Direct inline view delegation (only available to organizers):
+  if (isOrganizer && activeView === 'screen') {
     return <BigScreen initialArena={initialArena} onSelectView={handleViewChange} />;
   }
 
-  if (activeView === 'analysis') {
-    return <TournamentAnalysis initialArena={initialArena} onSelectView={handleViewChange} />;
+  if (isOrganizer && activeView === 'analysis') {
+    return (
+      <TournamentAnalysis
+        initialArena={initialArena}
+        onSelectView={handleViewChange}
+        onBack={() => handleViewChange('live')}
+      />
+    );
   }
 
   return (
-    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
+    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased w-full max-w-full">
       {/* SideNavBar */}
       <SiteSidebar />
 
@@ -210,35 +226,37 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
             </div>
           </div>
 
-          {/* 3 Main Views Switcher */}
-          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#141418] border border-[#27272A]">
-            <button
-              type="button"
-              onClick={() => handleViewChange('live')}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-bold transition-all cursor-pointer bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
-            >
-              <span className="material-symbols-outlined text-[14px]">bolt</span>
-              <span>Live Arena</span>
-            </button>
+          {/* 3 Main Views Switcher - Only visible to Organizers */}
+          {isOrganizer && (
+            <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#141418] border border-[#27272A]">
+              <button
+                type="button"
+                onClick={() => handleViewChange('live')}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-bold transition-all cursor-pointer bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
+              >
+                <span className="material-symbols-outlined text-[14px]">bolt</span>
+                <span>Live Arena</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => handleViewChange('screen')}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium transition-all cursor-pointer text-[#a1a1aa] hover:text-white hover:bg-[#201f1f]"
-            >
-              <span className="material-symbols-outlined text-[14px]">tv</span>
-              <span>Big Screen</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => handleViewChange('screen')}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium transition-all cursor-pointer text-[#a1a1aa] hover:text-white hover:bg-[#201f1f]"
+              >
+                <span className="material-symbols-outlined text-[14px]">tv</span>
+                <span>Big Screen</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => handleViewChange('analysis')}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium transition-all cursor-pointer text-[#a1a1aa] hover:text-white hover:bg-[#201f1f]"
-            >
-              <span className="material-symbols-outlined text-[14px]">analytics</span>
-              <span>Analysis</span>
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => handleViewChange('analysis')}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium transition-all cursor-pointer text-[#a1a1aa] hover:text-white hover:bg-[#201f1f]"
+              >
+                <span className="material-symbols-outlined text-[14px]">analytics</span>
+                <span>Analysis</span>
+              </button>
+            </div>
+          )}
 
           <div className="flex items-center gap-6">
             <div className="hidden sm:flex items-center gap-4">
@@ -281,7 +299,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
         )}
 
         {/* Page Content Canvas */}
-        <div className="flex-1 p-3 sm:p-6 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-4 sm:gap-6">
+        <div className="flex-1 p-3 sm:p-6 md:p-12 max-w-[1280px] mx-auto w-full min-w-0 max-w-full flex flex-col gap-4 sm:gap-6">
           {/* Mobile Status Strip */}
           <div className="md:hidden flex flex-col gap-2.5 bg-[#141414] border border-[#27272A] rounded-xl p-3 font-['Epilogue'] text-xs">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -305,30 +323,32 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
               </div>
             </div>
 
-            {/* Mobile View Switcher Buttons */}
-            <div className="flex items-center gap-1 pt-1.5 border-t border-[#27272A]/70">
-              <button
-                type="button"
-                onClick={() => handleViewChange('live')}
-                className="flex-1 py-1 rounded-md text-center font-bold text-[10px] transition-colors bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
-              >
-                Live
-              </button>
-              <button
-                type="button"
-                onClick={() => handleViewChange('screen')}
-                className="flex-1 py-1 rounded-md text-center font-medium text-[10px] transition-colors bg-[#18181c] text-[#a1a1aa] border border-[#27272A]"
-              >
-                Big Screen
-              </button>
-              <button
-                type="button"
-                onClick={() => handleViewChange('analysis')}
-                className="flex-1 py-1 rounded-md text-center font-medium text-[10px] transition-colors bg-[#18181c] text-[#a1a1aa] border border-[#27272A]"
-              >
-                Analysis
-              </button>
-            </div>
+            {/* Mobile View Switcher Buttons - Only visible to Organizers */}
+            {isOrganizer && (
+              <div className="flex items-center gap-1 pt-1.5 border-t border-[#27272A]/70">
+                <button
+                  type="button"
+                  onClick={() => handleViewChange('live')}
+                  className="flex-1 py-1 rounded-md text-center font-bold text-[10px] transition-colors bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
+                >
+                  Live
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleViewChange('screen')}
+                  className="flex-1 py-1 rounded-md text-center font-medium text-[10px] transition-colors bg-[#18181c] text-[#a1a1aa] border border-[#27272A]"
+                >
+                  Big Screen
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleViewChange('analysis')}
+                  className="flex-1 py-1 rounded-md text-center font-medium text-[10px] transition-colors bg-[#18181c] text-[#a1a1aa] border border-[#27272A]"
+                >
+                  Analysis
+                </button>
+              </div>
+            )}
           </div>
           {/* Header Title & Timer Bar */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
@@ -352,7 +372,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
               </p>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
               {/* Real-time Winning Price Indicator Beside Timer */}
               {price?.price != null && round?.openPrice != null ? (
                 (() => {
@@ -361,7 +381,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
                   return (
                     <div
                       className={cx(
-                        'flex flex-col items-start justify-center px-4 py-2 rounded-xl border shadow-lg backdrop-blur-xl transition-all duration-150 shrink-0 h-[52px]',
+                        'flex flex-col items-start justify-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border shadow-lg backdrop-blur-xl transition-all duration-150 flex-1 sm:flex-initial h-[52px]',
                         isYesWinning
                           ? 'bg-[#22C55E]/15 border-[#22C55E]/40 text-[#22C55E]'
                           : 'bg-[#EF4444]/15 border-[#EF4444]/40 text-[#EF4444]',
@@ -391,7 +411,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
           {/* Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left Column: Chart, Crowd Graph & Positions */}
-            <div className="lg:col-span-8 flex flex-col gap-6">
+            <div className="lg:col-span-8 flex flex-col gap-6 min-w-0">
               {/* Spotlight Question & Probability Meter (Custom) or Candlestick Chart (Crypto) */}
               {isCustomMarket ? (
                 <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.85)] backdrop-blur-xl rounded-xl flex flex-col gap-4 shadow-xl">
@@ -464,7 +484,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
               </div>
 
               {/* My Positions Table */}
-              <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl">
+              <div className="glass-panel p-4 sm:p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl min-w-0 overflow-hidden">
                 <h3 className="font-['Geist'] text-lg font-bold text-white mb-4">My Positions</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left font-['Epilogue'] text-xs">
@@ -537,7 +557,7 @@ export function LiveArena({ initialArena }: { initialArena: ArenaPublicInfo }) {
             </div>
 
             {/* Right Column: Order Entry & Feed/Leaderboard */}
-            <div className="lg:col-span-4 flex flex-col gap-6">
+            <div className="lg:col-span-4 flex flex-col gap-6 min-w-0">
               {/* Order Entry Panel */}
               <TradePanel
                 code={info.code}
@@ -703,7 +723,7 @@ const ParticipantTimer = memo(function ParticipantTimer({
         : 'TRADING LOCKS IN';
 
   return (
-    <div className="flex items-center gap-4 bg-[#201f1f] px-4 py-2 rounded-xl border border-[#27272A] shrink-0 h-[52px]">
+    <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-4 bg-[#201f1f] px-3 sm:px-4 py-2 rounded-xl border border-[#27272A] flex-1 sm:flex-initial h-[52px]">
       <div className="text-right">
         <div className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8]">
           {timerLabel}
