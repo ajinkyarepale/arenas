@@ -43,17 +43,17 @@ export function SiteNavAuth() {
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <SwitchButton size="default" />
+    <div className="flex items-center gap-2 sm:gap-3">
+      <SwitchButton size="sm" showLabel={false} />
       <Link
         href="/signin"
-        className="text-sm font-semibold text-[#c4c7c8] hover:text-white transition-colors"
+        className="text-xs sm:text-sm font-semibold text-[#c4c7c8] hover:text-white transition-colors"
       >
         Sign in
       </Link>
       <Link
         href="/signup"
-        className="px-4 py-2 rounded-full bg-[#22C55E] text-[#131313] font-bold text-xs hover:bg-emerald-400 transition-colors shadow"
+        className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-[#22C55E] text-[#131313] font-bold text-xs hover:bg-emerald-400 transition-colors shadow whitespace-nowrap"
       >
         Sign up
       </Link>
