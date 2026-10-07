@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { LandingNavbar } from '@/components/landing-navbar';
 import { LiveArenasTicker } from '@/components/live-arenas-ticker';
-import { SiteNavAuth } from '@/components/site-nav-auth';
 import { BeamsBackground, SlideTextButton, SwitchButton } from '@/components/ui';
 
 export const metadata: Metadata = {
@@ -15,22 +15,7 @@ export default function LandingPage() {
   return (
     <BeamsBackground intensity="medium" className="min-h-screen flex flex-col antialiased text-[#e5e2e1] font-['Geist']">
       {/* TopNavBar */}
-      <nav className="bg-transparent backdrop-blur-sm border-b border-white/[0.08] sticky top-0 flex justify-between items-center h-16 px-6 z-50">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="font-['Geist'] text-2xl font-black text-white hover:text-white transition-colors">
-            Arenas
-          </Link>
-          <div className="hidden sm:flex items-center gap-6 text-sm font-semibold text-[#c4c7c8]">
-            <Link href="/markets" className="hover:text-white transition-colors">
-              Explore Markets
-            </Link>
-            <Link href="/host" className="hover:text-white transition-colors">
-              Host on Campus
-            </Link>
-          </div>
-        </div>
-        <SiteNavAuth />
-      </nav>
+      <LandingNavbar />
 
       {/* Hero Section */}
       <section className="relative py-24 px-6 flex flex-col items-center text-center overflow-hidden min-h-[600px] justify-center">

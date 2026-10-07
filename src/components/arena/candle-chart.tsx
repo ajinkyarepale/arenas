@@ -149,7 +149,7 @@ export function CandleChart({
       handleScroll: {
         mouseWheel: true,
         pressedMouseMove: true,
-        horzTouchDrag: true,
+        horzTouchDrag: false,
         vertTouchDrag: false,
       },
       handleScale: {
@@ -458,9 +458,9 @@ export function CandleChart({
     <div className="relative w-full h-full flex flex-col min-h-0 select-none">
       {/* TradingView Action Header Toolbar */}
       {/* Header: OHLC Readout and optional desktop controls */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 bg-[#0c0c0e]/95 border-b border-[#27272A]/80 text-xs font-mono shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-[#0c0c0e]/95 border-b border-[#27272A]/80 text-xs font-mono shrink-0">
         {/* Left: Dynamic TradingView OHLC Readout */}
-        <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-0.5">
+        <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-0.5 w-full sm:w-auto">
           {activeBar ? (
             <div className="flex items-center gap-3 text-xs sm:text-sm font-medium text-[#a1a1aa] whitespace-nowrap">
               <span>O <strong className="text-white font-mono">{formatPrice(activeBar.open)}</strong></span>
@@ -478,7 +478,7 @@ export function CandleChart({
 
         {/* Right: Timeframe, Chart Style & Zoom Controls (Hidden on projector/display mode) */}
         {!isDisplay && (
-          <div className="flex items-center gap-1.5 ml-auto shrink-0">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 sm:ml-auto shrink-0 max-w-full">
           {/* Timeframe Pills */}
           <div className="flex items-center bg-[#18181b] rounded-md p-0.5 border border-[#27272A]">
             {TIMEFRAMES.map((tf) => (
@@ -566,7 +566,7 @@ export function CandleChart({
       </div>
 
       {/* Main Canvas Container */}
-      <div ref={containerRef} className="w-full flex-1 min-h-[160px] relative" />
+      <div ref={containerRef} className="w-full flex-1 min-h-[160px] relative touch-pan-y" />
 
       {/* Floating Snap to Live Indicator */}
       {isPanned && (

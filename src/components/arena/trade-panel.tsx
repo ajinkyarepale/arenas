@@ -26,6 +26,9 @@ export interface TradePanelProps {
   tradesPerMinuteLimit?: number;
   onFilled: (result: { balance: number; position: PositionSummary; priceYes: number }) => void;
   onOptimisticPrice?: (price: number | null) => void;
+  initialSide?: 'YES' | 'NO';
+  isSheet?: boolean;
+  onCloseSheet?: () => void;
 }
 
 const QUICK_STAKES = [50, 100, 250];
@@ -46,11 +49,21 @@ export function TradePanel({
   tradesPerMinuteLimit = 0,
   onFilled,
   onOptimisticPrice,
+  initialSide,
+  isSheet = false,
+  onCloseSheet,
 }: TradePanelProps) {
   const ceiling = Math.max(0, Math.min(maxStakePerTrade, Math.floor(balance)));
   const [mode, setMode] = useState<'ARCS' | 'SHARES'>('ARCS');
-  const [selectedSide, setSelectedSide] = useState<'YES' | 'NO'>('YES');
+  const [selectedSide, setSelectedSide] = useState<'YES' | 'NO'>(initialSide ?? 'YES');
   const [optimisticPriceYes, setOptimisticPriceYes] = useState<number | null>(null);
+
+  // Sync selectedSide when initialSide changes externally
+  useEffect(() => {
+    if (initialSide) {
+      setSelectedSide(initialSide);
+    }
+  }, [initialSide]);
 
   // Input states
   const [pointsInput, setPointsInput] = useState(() => Math.min(DEFAULT_STAKE, Math.max(1, ceiling)));
@@ -171,7 +184,38 @@ export function TradePanel({
   };
 
   return (
-    <div className="glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl flex flex-col gap-5 font-['Geist'] text-xs">
+    <div
+      className={
+        isSheet
+          ? "p-4 sm:p-5 flex flex-col gap-4 font-['Geist'] text-xs max-h-[85vh] overflow-y-auto"
+          : "glass-panel p-6 border border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl rounded-xl flex flex-col gap-5 font-['Geist'] text-xs"
+      }
+    >
+      {/* Mobile Drawer Grab Handle & Header */}
+      {isSheet && (
+        <div className="flex flex-col items-center gap-2 -mt-1 pb-1 border-b border-[#27272A]">
+          <div className="w-10 h-1 rounded-full bg-[#3f3f46]" />
+          <div className="w-full flex items-center justify-between pt-0.5">
+            <div className="flex items-center gap-2">
+              <span className="font-['Geist'] text-sm sm:text-base font-bold text-white">Place Prediction</span>
+              <span className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8] bg-[#201f1f] px-2 py-0.5 rounded-full border border-[#27272A]">
+                {formatPoints(balance, 0)} arcs
+              </span>
+            </div>
+            {onCloseSheet && (
+              <button
+                type="button"
+                onClick={onCloseSheet}
+                className="w-7 h-7 rounded-full bg-[#201f1f] border border-[#27272A] flex items-center justify-center text-[#c4c7c8] hover:text-white transition-colors"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Header: Mode Toggle & Rule Badge */}
       <div className="flex items-center justify-between border-b border-[#27272A] pb-3">
         {/* Mode Selector */}
