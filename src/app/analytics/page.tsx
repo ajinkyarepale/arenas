@@ -189,113 +189,99 @@ export default function AnalyticsOverviewPage() {
 
         {/* Dashboard Body */}
         <AppContent>
-          {/* Hero Title */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-4">
-              <h1 className="font-['Geist'] text-2xl sm:text-3xl md:text-4xl font-semibold text-white tracking-tight">
-                Event Overview &amp; Intelligence
+          {/* Header matching Admin Dashboard */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <h1 className="font-['Geist'] text-3xl md:text-4xl font-bold text-white tracking-tight">
+                Market Analytics
               </h1>
-              {/* Mobile Refresh Button */}
+              <p className="font-['Geist'] text-sm text-[#c4c7c8] mt-1">
+                Cross-tournament telemetry, crowd accuracy benchmarks, and post-round audit logs.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => void fetchOverview()}
-                className="md:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#201f1f] hover:bg-[#27272A] text-xs font-['Epilogue'] font-bold text-[#c4c7c8] hover:text-white border border-[#27272A] transition-all shrink-0"
-                title="Refresh Analytics"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#201f1f] hover:bg-[#2a2a2a] text-xs font-['Epilogue'] font-bold text-white border border-[#27272A] transition-all active:scale-95 shadow-sm"
+                title="Refresh Analytics Data"
               >
-                <span className={cx('text-sm', loading && 'animate-spin')}>↻</span>
-                <span>Refresh</span>
+                <span className={cx('material-symbols-outlined text-[16px] text-[#22C55E]', loading && 'animate-spin')}>
+                  refresh
+                </span>
+                <span>Refresh Data</span>
               </button>
             </div>
-            <p className="font-['Geist'] text-xs sm:text-sm text-[#c4c7c8] leading-relaxed max-w-2xl">
-              Aggregated market telemetry across all prediction tournaments. Click any tournament card below to inspect its round-by-round calibration curve, PnL tape, and crowd sentiment.
-            </p>
           </div>
 
-          {/* KPI Summary Grid */}
+          {/* Metrics Row matching Admin Dashboard */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Total Volume Traded */}
-            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-xl p-5 backdrop-blur-md">
-              <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">
-                Total Volume Traded
-              </p>
+            {/* Total Volume */}
+            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-2xl p-5 backdrop-blur-md hover:border-[#38BDF8]/40 transition-all">
+              <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">Total Volume</p>
               {data ? (
-                <p className="font-mono text-3xl font-bold text-white tracking-tight flex items-baseline gap-1.5">
+                <p className="font-['Epilogue'] text-3xl font-bold text-white flex items-baseline gap-1.5">
                   {formatPoints(data.summary.totalVolume, 0)}
                   <span className="text-xs text-[#8e9192] font-normal font-sans">arcs</span>
                 </p>
               ) : (
-                <div className="h-9 w-32 bg-[#27272A]/70 rounded-lg animate-pulse mt-1" />
+                <div className="h-9 w-32 bg-[#27272A]/70 rounded-lg animate-pulse" />
               )}
             </div>
 
-            {/* Total Predictions / Trades */}
-            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-xl p-5 backdrop-blur-md">
-              <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">
-                Total Predictions
-              </p>
-              {data ? (
-                <p className="font-mono text-3xl font-bold text-white tracking-tight flex items-baseline gap-1.5">
-                  {data.summary.totalPredictions.toLocaleString()}
-                  <span className="text-xs text-[#8e9192] font-normal font-sans">trades</span>
-                </p>
-              ) : (
-                <div className="h-9 w-28 bg-[#27272A]/70 rounded-lg animate-pulse mt-1" />
-              )}
-            </div>
-
-            {/* Tournaments Hosted */}
-            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-xl p-5 backdrop-blur-md">
+            {/* Live Arenas */}
+            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-2xl p-5 backdrop-blur-md hover:border-[#22C55E]/40 transition-all">
               <div className="flex items-center justify-between mb-2">
-                <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase">
-                  Tournaments Hosted
-                </p>
+                <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase">Live Now</p>
                 {data && data.summary.liveEvents > 0 && (
-                  <span className="flex items-center gap-1.5 text-[#22C55E] text-[10px] font-bold font-mono">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
-                    {data.summary.liveEvents} LIVE
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22C55E] opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#22C55E]" />
                   </span>
                 )}
               </div>
               {data ? (
-                <p className="font-mono text-3xl font-bold text-white tracking-tight flex items-baseline gap-1.5">
-                  {data.summary.totalEvents}
-                  <span className="text-xs text-[#8e9192] font-normal font-sans">arenas</span>
-                </p>
+                <p className="font-['Epilogue'] text-3xl font-bold text-white">{data.summary.liveEvents}</p>
               ) : (
-                <div className="h-9 w-20 bg-[#27272A]/70 rounded-lg animate-pulse mt-1" />
+                <div className="h-9 w-16 bg-[#27272A]/70 rounded-lg animate-pulse" />
               )}
             </div>
 
-            {/* Overall Accuracy / Calibration */}
-            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-xl p-5 backdrop-blur-md">
-              <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">
-                Crowd Accuracy
-              </p>
+            {/* Total Predictions */}
+            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-2xl p-5 backdrop-blur-md hover:border-[#38BDF8]/40 transition-all">
+              <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">Total Predictions</p>
               {data ? (
-                <p className="font-mono text-3xl font-bold text-[#22C55E] tracking-tight flex items-baseline gap-1.5">
-                  {data.summary.overallAccuracyRate != null
-                    ? `${Math.round(data.summary.overallAccuracyRate * 100)}%`
-                    : 'N/A'}
-                  <span className="text-xs text-[#8e9192] font-normal font-sans">consensus</span>
+                <p className="font-['Epilogue'] text-3xl font-bold text-white">{data.summary.totalPredictions.toLocaleString()}</p>
+              ) : (
+                <div className="h-9 w-28 bg-[#27272A]/70 rounded-lg animate-pulse" />
+              )}
+            </div>
+
+            {/* Crowd Accuracy */}
+            <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-2xl p-5 backdrop-blur-md hover:border-[#22C55E]/40 transition-all">
+              <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">Crowd Accuracy</p>
+              {data ? (
+                <p className="font-['Epilogue'] text-3xl font-bold text-[#22C55E]">
+                  {data.summary.overallAccuracyRate != null ? `${Math.round(data.summary.overallAccuracyRate * 100)}%` : 'N/A'}
                 </p>
               ) : (
-                <div className="h-9 w-24 bg-[#27272A]/70 rounded-lg animate-pulse mt-1" />
+                <div className="h-9 w-24 bg-[#27272A]/70 rounded-lg animate-pulse" />
               )}
             </div>
           </div>
 
           {/* Filter & Search Bar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[rgba(20,20,20,0.7)] p-2 rounded-xl border border-[#27272A] backdrop-blur-md">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[rgba(20,20,20,0.7)] p-2 rounded-2xl border border-[#27272A] backdrop-blur-md">
             {/* Status Pills */}
-            <div className="flex items-center gap-1 p-1 bg-[#141414] rounded-lg border border-[#27272A]">
+            <div className="flex items-center gap-1 p-1 bg-[#141414] rounded-xl border border-[#27272A]">
               {(['ALL', 'LIVE', 'ENDED'] as const).map((filter) => (
                 <button
                   key={filter}
                   onClick={() => setStatusFilter(filter)}
                   className={cx(
-                    'px-3.5 py-1.5 rounded-md text-xs font-["Epilogue"] font-bold transition-all',
+                    'px-3.5 py-1.5 rounded-lg text-xs font-["Epilogue"] font-bold transition-all active:scale-95',
                     statusFilter === filter
-                      ? 'bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30'
+                      ? 'bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30 shadow-sm'
                       : 'text-[#c4c7c8] hover:text-white border border-transparent',
                   )}
                 >
@@ -315,7 +301,7 @@ export default function AnalyticsOverviewPage() {
                 placeholder="Search tournament, asset, or college…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#141414] border border-[#27272A] rounded-lg px-3.5 py-2 text-xs text-white placeholder-[#8e9192] focus:outline-none focus:border-white transition-colors font-['Geist']"
+                className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-2 text-xs text-white placeholder-[#8e9192] focus:outline-none focus:border-[#22C55E] transition-colors font-['Geist']"
               />
               {searchQuery && (
                 <button
@@ -328,23 +314,23 @@ export default function AnalyticsOverviewPage() {
             </div>
           </div>
 
-          {/* Tournaments Grid */}
+          {/* Tournament Cards List matching AdminArenaList Card Style */}
           {loading && !data ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-64 rounded-xl border border-[#27272A] bg-[#141417]/50 animate-pulse" />
+            <div className="flex flex-col gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-36 rounded-2xl border border-[#27272A] bg-[#141417]/50 animate-pulse" />
               ))}
             </div>
           ) : filteredEvents.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 rounded-xl border border-dashed border-[#27272A] text-center gap-3 bg-[rgba(20,20,20,0.4)]">
+            <div className="rounded-2xl border border-dashed border-[#27272A] bg-[#201f1f]/30 p-12 text-center flex flex-col items-center gap-2">
               <span className="material-symbols-outlined text-3xl text-[#71717a]">search</span>
-              <p className="text-base font-bold text-white">No tournaments matched your criteria</p>
-              <p className="text-xs text-[#a1a1aa] max-w-xs">
-                Try searching with a different keyword or resetting your filter.
+              <p className="font-['Geist'] text-base font-bold text-white">No tournaments matched your search</p>
+              <p className="font-['Geist'] text-xs text-[#a1a1aa] max-w-sm">
+                Try searching for a different keyword or toggle back to All tournaments.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div key={statusFilter} className="flex flex-col gap-4 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
               {filteredEvents.map((ev) => {
                 const isLive = ev.status === 'LIVE';
                 const hasAccuracy = ev.accuracyRate != null;
@@ -353,108 +339,82 @@ export default function AnalyticsOverviewPage() {
                   <div
                     key={ev.id}
                     onClick={() => handleOpenEventAnalytics(ev)}
-                    className="group flex flex-col justify-between p-5 rounded-xl border border-[#27272A] bg-[rgba(20,20,20,0.7)] hover:bg-[#18181b] hover:border-[#3f3f46] transition-colors cursor-pointer"
+                    className="border border-[#27272A] bg-[rgba(20,20,20,0.7)] hover:border-[#38BDF8]/40 hover:bg-[#18181c] rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row gap-5 justify-between items-start md:items-center backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 shadow-sm hover:shadow-lg cursor-pointer group"
                   >
-                    {/* Top Row: Code Pill & Status Badge */}
-                    <div className="flex items-center justify-between gap-2 mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 rounded-lg bg-[#201f1f] border border-[#27272A] font-mono text-xs font-bold text-white tracking-wider">
+                    {/* Left Details Column */}
+                    <div className="flex flex-col gap-2.5 w-full md:w-auto flex-1 min-w-0">
+                      {/* Top Badges Strip */}
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        {isLive ? (
+                          <span className="bg-[#201f1f] text-[#22C55E] border border-[#22C55E]/30 px-2.5 py-0.5 rounded-full font-['Epilogue'] text-[10px] font-bold tracking-widest flex items-center gap-1.5 uppercase">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
+                            LIVE NOW
+                          </span>
+                        ) : (
+                          <span className="bg-[#201f1f] text-[#8e9192] border border-[#27272A] px-2.5 py-0.5 rounded-full font-['Epilogue'] text-[10px] font-bold tracking-widest uppercase">
+                            {ev.status}
+                          </span>
+                        )}
+
+                        <span className="font-mono text-xs font-bold text-white bg-[#201f1f] border border-[#27272A] px-2.5 py-0.5 rounded-lg">
                           {ev.code}
                         </span>
-                        <span className="text-[11px] font-mono font-bold text-[#c4c7c8] bg-[#201f1f] border border-[#27272A] px-2 py-0.5 rounded-md">
+
+                        <span className="font-mono text-xs font-bold text-[#38BDF8] bg-[#38BDF8]/10 border border-[#38BDF8]/20 px-2.5 py-0.5 rounded-lg">
                           {ev.asset}
                         </span>
+
+                        {ev.collegeName && (
+                          <span className="text-[11px] text-[#8e9192] font-['Geist'] hidden sm:inline">
+                            · {ev.collegeName}
+                          </span>
+                        )}
                       </div>
 
-                      {isLive ? (
-                        <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E] font-['Epilogue'] text-[10px] font-bold uppercase tracking-wider">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
-                          LIVE NOW
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] text-[#8e9192] font-mono text-[10px] font-semibold uppercase">
-                          {ev.status}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Tournament Title & College */}
-                    <div className="mb-4">
-                      <h3 className="font-['Geist'] text-base font-bold text-white group-hover:text-[#22C55E] transition-colors tracking-tight line-clamp-1">
+                      {/* Tournament Title */}
+                      <h3 className="font-['Geist'] text-lg sm:text-xl font-bold text-white group-hover:text-[#22C55E] transition-colors tracking-tight truncate">
                         {ev.name}
                       </h3>
-                      <p className="font-['Geist'] text-xs text-[#c4c7c8] mt-0.5">
-                        {ev.collegeName || ev.organizerName || 'Campus FinTech Event'}
-                      </p>
-                    </div>
 
-                    {/* Mini Round Calibration Strip */}
-                    <div className="mb-4 pt-3 border-t border-[#27272A]/60">
-                      <div className="flex items-center justify-between text-[11px] text-[#71717a] font-mono mb-2">
-                        <span>Round Calibration</span>
-                        <span>
-                          {ev.roundOutcomes.length === 0
-                            ? `${ev.totalRounds} Rounds`
-                            : `${ev.roundOutcomes.filter((ro) => ro.isCorrect).length}/${ev.roundOutcomes.filter((ro) => ro.outcome && ro.outcome !== 'VOID').length || ev.totalRounds} Won`}
+                      {/* Telemetry Stats Row matching Admin style */}
+                      <div className="flex items-center gap-4 sm:gap-6 flex-wrap text-xs text-[#c4c7c8] font-['Epilogue'] pt-1">
+                        <span className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[16px] text-[#38BDF8]">paid</span>
+                          <strong className="text-white font-mono">{formatPoints(ev.totalVolume, 0)}</strong> arcs Vol
+                        </span>
+
+                        <span className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[16px] text-[#8e9192]">group</span>
+                          <strong className="text-white font-mono">{ev.participantCount}</strong> Traders
+                        </span>
+
+                        <span className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[16px] text-[#8e9192]">layers</span>
+                          <strong className="text-white font-mono">{ev.totalRounds}</strong> Rounds
+                        </span>
+
+                        <span className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[16px] text-[#22C55E]">verified</span>
+                          <strong className={cx('font-mono', hasAccuracy ? 'text-[#22C55E]' : 'text-[#8e9192]')}>
+                            {hasAccuracy ? `${Math.round(ev.accuracyRate! * 100)}% Accuracy` : 'Pending'}
+                          </strong>
                         </span>
                       </div>
-
-                      {ev.roundOutcomes.length === 0 ? (
-                        <div className="h-4 flex items-center">
-                          <span className="text-xs text-[#52525b] italic">No rounds played yet</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1.5 h-4">
-                          {ev.roundOutcomes.map((ro) => {
-                            const isResolved = ro.outcome && ro.outcome !== 'VOID';
-                            return (
-                              <div
-                                key={ro.roundNumber}
-                                title={`Round ${ro.roundNumber}: ${ro.outcome || 'Pending'}${isResolved ? (ro.isCorrect ? ' (WON)' : ' (MISS)') : ''}`}
-                                className={cx(
-                                  'flex-1 h-2 rounded-full transition-all duration-200 cursor-help',
-                                  isResolved
-                                    ? ro.isCorrect
-                                      ? 'bg-[#22C55E]'
-                                      : 'bg-[#EF4444]'
-                                    : 'bg-[#27272A]/80 border border-[#3f3f46]',
-                                )}
-                              />
-                            );
-                          })}
-                        </div>
-                      )}
                     </div>
 
-                    {/* Metrics Row: Volume, Traders, Accuracy */}
-                    <div className="pt-3 border-t border-[#27272A]/60 grid grid-cols-3 gap-2 text-center font-mono">
-                      <div className="bg-[#141414] p-2 rounded-lg border border-[#27272A]">
-                        <p className="text-[10px] text-[#71717a] font-sans">Volume</p>
-                        <p className="text-xs font-bold text-white mt-0.5">{formatPoints(ev.totalVolume, 0)}</p>
-                      </div>
-
-                      <div className="bg-[#141414] p-2 rounded-lg border border-[#27272A]">
-                        <p className="text-[10px] text-[#71717a] font-sans">Traders</p>
-                        <p className="text-xs font-bold text-white mt-0.5">{ev.participantCount}</p>
-                      </div>
-
-                      <div className="bg-[#141414] p-2 rounded-lg border border-[#27272A]">
-                        <p className="text-[10px] text-[#71717a] font-sans">Accuracy</p>
-                        <p
-                          className={cx(
-                            'text-xs font-bold mt-0.5',
-                            hasAccuracy ? 'text-[#EAB308]' : 'text-[#71717a]',
-                          )}
-                        >
-                          {hasAccuracy ? `${Math.round(ev.accuracyRate! * 100)}%` : '—'}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Drilldown Action Footer */}
-                    <div className="mt-4 pt-2.5 flex items-center justify-between text-xs font-['Epilogue'] font-bold text-[#c4c7c8] group-hover:text-[#22C55E] transition-colors border-t border-[#27272A]/40">
-                      <span>Explore Tournament Analytics</span>
-                      <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                    {/* Right Action Column */}
+                    <div className="flex items-center gap-3 self-end md:self-center shrink-0">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenEventAnalytics(ev);
+                        }}
+                        className="bg-white text-[#131313] hover:bg-[#e4e4e7] font-['Epilogue'] text-xs font-bold px-5 py-2.5 rounded-full transition-all flex items-center gap-1.5 shadow-md active:scale-95 group-hover:bg-[#22C55E] group-hover:text-[#131313]"
+                      >
+                        <span>Inspect Analytics</span>
+                        <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+                      </button>
                     </div>
                   </div>
                 );

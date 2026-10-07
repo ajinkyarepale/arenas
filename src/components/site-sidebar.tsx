@@ -41,7 +41,7 @@ export function SiteSidebar() {
     { href: '/analytics', label: 'Analytics', icon: 'analytics' },
     { href: '/guide', label: 'Guide', icon: 'menu_book' },
     { href: '/info', label: 'About', icon: 'info' },
-    ...(isOrganizer ? [{ href: '/admin', label: 'Admin Panel', icon: 'admin_panel_settings' }] : []),
+    { href: '/admin', label: 'Admin Panel', icon: 'admin_panel_settings' },
     ...(isSuperAdmin ? [{ href: '/admin/organizers', label: 'Approvals', icon: 'verified_user' }] : []),
   ];
 
