@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { AppShell, AppContent } from '@/components/app-shell';
 import { SiteSidebar } from '@/components/site-sidebar';
 import { SiteNavAuth } from '@/components/site-nav-auth';
+import { SwitchButton } from '@/components/ui';
 import { TournamentAnalysis } from '@/components/arena/tournament-analysis';
 import { cx, formatDateTime, formatPoints } from '@/lib/format';
 import type { AnalyticsOverviewPayload, EventOverviewItem } from '@/app/api/analytics/overview/route';
@@ -98,44 +99,62 @@ export default function AnalyticsOverviewPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // If a tournament is selected for deep-dive, show the rich tournament analytics view
+  // If a tournament is selected for deep-dive, show the rich tournament analytics view inside standard App layout
   if (selectedArena) {
     return (
-      <div className="min-h-screen bg-[#131313] text-[#e5e2e1] font-['Geist']">
-        {/* Top return banner */}
-        <div className="sticky top-0 z-40 bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] px-4 sm:px-8 py-3 flex items-center justify-between backdrop-blur-xl">
-          <button
-            onClick={() => setSelectedArena(null)}
-            className="flex items-center gap-2 text-xs font-['Epilogue'] font-bold text-[#c4c7c8] hover:text-white bg-[#201f1f] hover:bg-[#27272A] px-3.5 py-1.5 rounded-full border border-[#27272A] transition-all"
-          >
-            <span>←</span>
-            <span>Back to All Tournaments Overview</span>
-          </button>
+      <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
+        {/* Sidebar Navigation */}
+        <SiteSidebar />
 
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-xs text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 px-2.5 py-1 rounded-full font-bold">
-              {selectedArena.code}
-            </span>
-            <Link
-              href={`/arenas/${selectedArena.code}/screen`}
-              target="_blank"
-              className="text-xs text-[#c4c7c8] hover:text-white hover:underline hidden sm:inline"
-            >
-              Open Big Screen ↗
-            </Link>
-          </div>
-        </div>
+        {/* Main Content Area */}
+        <AppShell>
+          {/* Top return banner */}
+          <header className="sticky top-0 z-30 bg-[rgba(20,20,20,0.85)] border-b border-[#27272A] px-4 sm:px-6 h-16 flex items-center justify-between backdrop-blur-xl">
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                onClick={() => setSelectedArena(null)}
+                className="flex items-center gap-1.5 text-xs font-['Epilogue'] font-bold text-[#c4c7c8] hover:text-white bg-[#201f1f] hover:bg-[#27272A] px-3.5 py-1.5 rounded-full border border-[#27272A] active:scale-95 transition-all shadow-sm shrink-0"
+              >
+                <span className="material-symbols-outlined text-sm">arrow_back</span>
+                <span>Back to Overview</span>
+              </button>
+              <div className="h-4 w-px bg-[#27272A] hidden sm:block" />
+              <span className="font-['Epilogue'] text-xs font-bold text-white tracking-wider uppercase truncate hidden sm:inline">
+                {selectedArena.name}
+              </span>
+            </div>
 
-        <TournamentAnalysis
-          initialArena={selectedArena}
-          onSelectView={(view) => {
-            if (view === 'live') {
-              window.open(`/arenas/${selectedArena.code}/live`, '_blank');
-            } else if (view === 'screen') {
-              window.open(`/arenas/${selectedArena.code}/screen`, '_blank');
-            }
-          }}
-        />
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="font-mono text-xs text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 px-2.5 py-1 rounded-full font-bold">
+                {selectedArena.code}
+              </span>
+              <Link
+                href={`/arenas/${selectedArena.code}/screen`}
+                target="_blank"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#201f1f] hover:bg-[#27272A] border border-[#27272A] text-xs font-['Epilogue'] font-bold text-[#c4c7c8] hover:text-white transition-all active:scale-95"
+              >
+                <span className="material-symbols-outlined text-[15px] text-[#38BDF8]">desktop_windows</span>
+                <span>Big Screen ↗</span>
+              </Link>
+              <SwitchButton size="sm" showLabel={false} />
+            </div>
+          </header>
+
+          <main className="flex-1 w-full max-w-[1440px] mx-auto p-3 sm:p-6 md:p-8 flex flex-col gap-6 animate-in fade-in-50 duration-200">
+            <TournamentAnalysis
+              initialArena={selectedArena}
+              hideHeader={true}
+              onBack={() => setSelectedArena(null)}
+              onSelectView={(view) => {
+                if (view === 'live') {
+                  window.open(`/arenas/${selectedArena.code}/live`, '_blank');
+                } else if (view === 'screen') {
+                  window.open(`/arenas/${selectedArena.code}/screen`, '_blank');
+                }
+              }}
+            />
+          </main>
+        </AppShell>
       </div>
     );
   }

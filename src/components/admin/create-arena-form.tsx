@@ -157,6 +157,10 @@ export function CreateArenaForm() {
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (step < 4) {
+      nextStep();
+      return;
+    }
     if (!validateStep(step)) return;
 
     setPending(true);
@@ -419,6 +423,28 @@ export function CreateArenaForm() {
                 placeholder="Brief context or instructions for attendees..."
                 className="w-full bg-[#141414] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-['Geist'] text-xs focus:border-[#22C55E] focus:outline-none transition-colors placeholder-[#71717A]"
               />
+            </div>
+
+            {/* Custom Join Code in Step 2 */}
+            <div className="p-4 rounded-xl bg-[#141414] border border-[#27272A] flex flex-col gap-2 hover:border-[#38BDF8]/40 transition-colors">
+              <div className="flex items-center justify-between">
+                <label className="block font-['Epilogue'] text-[11px] font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[15px] text-[#22C55E]">key</span>
+                  Custom Join Code (Optional)
+                </label>
+                <span className="text-[10px] font-mono text-[#8e9192]">e.g. HACK26, STANFORD</span>
+              </div>
+              <input
+                type="text"
+                value={form.code}
+                onChange={(e) => set('code', e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ''))}
+                placeholder="Leave blank for automatic 4-character code"
+                maxLength={10}
+                className="w-full bg-[#181818] border border-[#27272A] rounded-xl px-4 py-2.5 text-white font-mono text-sm font-bold uppercase tracking-widest focus:border-[#22C55E] focus:outline-none transition-all placeholder-[#52525b]"
+              />
+              <p className="text-[10px] text-[#a1a1aa] leading-relaxed">
+                Attendees will use this code to join at <span className="font-mono text-[#22C55E]">arenas.live/join</span>. If blank, a unique code is generated.
+              </p>
             </div>
           </div>
         )}
@@ -808,7 +834,7 @@ export function CreateArenaForm() {
             <button
               type="button"
               onClick={prevStep}
-              className="px-5 py-2.5 rounded-full border border-[#27272A] bg-[#141414] text-[#c4c7c8] font-['Epilogue'] text-xs font-bold hover:bg-[#201f1f] hover:text-white transition-all"
+              className="px-5 py-2.5 rounded-full border border-[#27272A] bg-[#141414] text-[#c4c7c8] font-['Epilogue'] text-xs font-bold hover:bg-[#201f1f] hover:text-white active:scale-95 transition-all"
             >
               ← Back
             </button>
@@ -820,7 +846,7 @@ export function CreateArenaForm() {
             <button
               type="button"
               onClick={nextStep}
-              className="px-6 py-2.5 rounded-full bg-white text-black font-['Epilogue'] text-xs font-bold hover:bg-[#e4e4e7] transition-all shadow-md shadow-white/10"
+              className="px-6 py-2.5 rounded-full bg-white text-black font-['Epilogue'] text-xs font-bold hover:bg-[#e4e4e7] active:scale-95 transition-all shadow-md shadow-white/10"
             >
               Continue →
             </button>
@@ -828,7 +854,7 @@ export function CreateArenaForm() {
             <button
               type="submit"
               disabled={pending}
-              className="px-8 py-3 rounded-full bg-[#22C55E] text-[#131313] font-['Epilogue'] text-sm font-bold hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(34,197,94,0.3)]"
+              className="px-8 py-3 rounded-full bg-[#22C55E] text-[#131313] font-['Epilogue'] text-sm font-bold hover:bg-emerald-400 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(34,197,94,0.3)]"
             >
               {pending ? <Spinner className="border-black border-t-transparent" /> : null}
               <span>{pending ? 'Creating Arena…' : 'Launch Arena Lobby'}</span>

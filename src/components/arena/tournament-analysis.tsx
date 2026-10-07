@@ -11,18 +11,21 @@ interface TournamentAnalysisProps {
   initialArena: ArenaPublicInfo;
   onSelectView?: (view: 'live' | 'screen' | 'analysis') => void;
   onBack?: () => void;
+  hideHeader?: boolean;
 }
 
-export function TournamentAnalysis({ initialArena, onSelectView, onBack }: TournamentAnalysisProps) {
+export function TournamentAnalysis({ initialArena, onSelectView, onBack, hideHeader }: TournamentAnalysisProps) {
   const code = initialArena.code;
   const [data, setData] = useState<TournamentAnalysisPayload | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedRounds, setExpandedRounds] = useState<Record<number, boolean>>({});
 
-  const fetchAnalysis = useCallback(async () => {
+  const fetchAnalysis = useCallback(async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
+      else setRefreshing(true);
       const res = await fetch(`/api/arenas/${encodeURIComponent(code)}/analysis`, {
         cache: 'no-store',
       });
@@ -32,24 +35,36 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
       const json: TournamentAnalysisPayload = await res.json();
       setData(json);
 
-      // Default expand all resolved rounds or latest round
-      const initialExpanded: Record<number, boolean> = {};
-      json.rounds.forEach((r, idx) => {
-        if (r.status === 'TRADING' || r.status === 'LOCKED' || idx >= json.rounds.length - 2 || idx === 0) {
-          initialExpanded[r.roundNumber] = true;
-        }
+      // Default expand all resolved rounds or latest round on first load
+      setExpandedRounds((prev) => {
+        if (Object.keys(prev).length > 0) return prev;
+        const initialExpanded: Record<number, boolean> = {};
+        json.rounds.forEach((r, idx) => {
+          if (r.status === 'TRADING' || r.status === 'LOCKED' || idx >= json.rounds.length - 2 || idx === 0) {
+            initialExpanded[r.roundNumber] = true;
+          }
+        });
+        return initialExpanded;
       });
-      setExpandedRounds(initialExpanded);
     } catch (err: any) {
-      setError(err?.message || 'Error loading analysis');
+      if (!isBackground) setError(err?.message || 'Error loading analysis');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [code]);
 
   useEffect(() => {
-    void fetchAnalysis();
-  }, [fetchAnalysis]);
+    void fetchAnalysis(false);
+    // Auto-poll every 5 seconds if tournament is actively LIVE
+    const isLive = initialArena.status === 'LIVE' || data?.arena?.status === 'LIVE';
+    if (isLive) {
+      const interval = setInterval(() => {
+        void fetchAnalysis(true);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [fetchAnalysis, initialArena.status, data?.arena?.status]);
 
   const toggleRound = (roundNumber: number) => {
     setExpandedRounds((prev) => ({
@@ -67,94 +82,98 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
     setExpandedRounds(next);
   };
 
+  const isLive = initialArena.status === 'LIVE' || data?.arena?.status === 'LIVE';
+
   return (
-    <div className="min-h-screen bg-[#131313] text-[#e5e2e1] font-['Geist'] pb-12 antialiased selection:bg-[#22C55E]/30 w-full max-w-full">
-      {/* Top Header / View Switcher Bar */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#27272A] bg-[rgba(20,20,20,0.85)] px-3 sm:px-6 py-2.5 backdrop-blur-xl w-full max-w-full">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          {onBack ? (
-            <button
-              type="button"
-              onClick={onBack}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all active:scale-95 shadow-sm shrink-0"
-              title="Return to Overview"
-            >
-              <span>←</span>
-              <span className="hidden sm:inline font-mono">Overview</span>
-            </button>
-          ) : onSelectView ? (
-            <button
-              type="button"
-              onClick={() => onSelectView('live')}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all active:scale-95 shadow-sm shrink-0"
-              title="Return to Live Arena"
-            >
-              <span>←</span>
-              <span className="hidden sm:inline font-mono">Arena</span>
-            </button>
-          ) : (
-            <Link
-              href={`/arenas/${initialArena.code}/live`}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all shadow-sm shrink-0"
-              title="Return to Arena"
-            >
-              <span>←</span>
-              <span className="hidden sm:inline font-mono">Arena</span>
-            </Link>
-          )}
+    <div className={cx(hideHeader ? "w-full" : "min-h-screen pb-12", "bg-[#131313] text-[#e5e2e1] font-['Geist'] antialiased selection:bg-[#22C55E]/30 w-full max-w-full")}>
+      {/* Top Header / View Switcher Bar (Only when standalone) */}
+      {!hideHeader && (
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#27272A] bg-[rgba(20,20,20,0.85)] px-3 sm:px-6 py-2.5 backdrop-blur-xl w-full max-w-full">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {onBack ? (
+              <button
+                type="button"
+                onClick={onBack}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all active:scale-95 shadow-sm shrink-0"
+                title="Return to Overview"
+              >
+                <span>←</span>
+                <span className="hidden sm:inline font-mono">Overview</span>
+              </button>
+            ) : onSelectView ? (
+              <button
+                type="button"
+                onClick={() => onSelectView('live')}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all active:scale-95 shadow-sm shrink-0"
+                title="Return to Live Arena"
+              >
+                <span>←</span>
+                <span className="hidden sm:inline font-mono">Arena</span>
+              </button>
+            ) : (
+              <Link
+                href={`/arenas/${initialArena.code}/live`}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-xs font-bold text-[#c4c7c8] hover:text-white transition-all shadow-sm shrink-0"
+                title="Return to Arena"
+              >
+                <span>←</span>
+                <span className="hidden sm:inline font-mono">Arena</span>
+              </Link>
+            )}
 
-          <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="font-['Epilogue'] text-[10px] font-bold uppercase tracking-widest text-[#22C55E]">
-                POST-ROUND AUDIT
-              </span>
-              <span className="rounded bg-[#1c1c20] px-1.5 py-0.2 font-mono text-[10px] text-[#a1a1aa] border border-[#27272A]">
-                {initialArena.code}
-              </span>
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="font-['Epilogue'] text-[10px] font-bold uppercase tracking-widest text-[#22C55E]">
+                  POST-ROUND AUDIT
+                </span>
+                <span className="rounded bg-[#1c1c20] px-1.5 py-0.2 font-mono text-[10px] text-[#a1a1aa] border border-[#27272A]">
+                  {initialArena.code}
+                </span>
+              </div>
+              <h1 className="font-['Geist'] text-xs sm:text-base font-bold text-white tracking-tight truncate">
+                {data?.arena?.name ?? initialArena.name}
+              </h1>
             </div>
-            <h1 className="font-['Geist'] text-xs sm:text-base font-bold text-white tracking-tight truncate">
-              {data?.arena?.name ?? initialArena.name}
-            </h1>
           </div>
-        </div>
 
-        {/* View Switcher Tabs */}
-        <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#141417] border border-[#27272A] shrink-0">
-          <button
-            type="button"
-            onClick={() => onSelectView?.('live')}
-            className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white hover:bg-[#1f1f23] transition-colors cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[14px] text-[#22C55E]">bolt</span>
-            <span className="hidden sm:inline">Live Arena</span>
-            <span className="sm:hidden text-[10px]">Live</span>
-          </button>
+          {/* View Switcher Tabs */}
+          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#141417] border border-[#27272A] shrink-0">
+            <button
+              type="button"
+              onClick={() => onSelectView?.('live')}
+              className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white hover:bg-[#1f1f23] transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[14px] text-[#22C55E]">bolt</span>
+              <span className="hidden sm:inline">Live Arena</span>
+              <span className="sm:hidden text-[10px]">Live</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => onSelectView?.('screen')}
-            className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white hover:bg-[#1f1f23] transition-colors cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[14px] text-[#38BDF8]">tv</span>
-            <span className="hidden sm:inline">Big Screen</span>
-            <span className="sm:hidden text-[10px]">Screen</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => onSelectView?.('screen')}
+              className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white hover:bg-[#1f1f23] transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[14px] text-[#38BDF8]">tv</span>
+              <span className="hidden sm:inline">Big Screen</span>
+              <span className="sm:hidden text-[10px]">Screen</span>
+            </button>
 
-          <button
-            type="button"
-            className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-bold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
-          >
-            <span className="material-symbols-outlined text-[14px]">analytics</span>
-            <span className="hidden sm:inline">Analysis</span>
-            <span className="sm:hidden text-[10px]">Audit</span>
-          </button>
-        </div>
-      </header>
+            <button
+              type="button"
+              className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-bold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
+            >
+              <span className="material-symbols-outlined text-[14px]">analytics</span>
+              <span className="hidden sm:inline">Analysis</span>
+              <span className="sm:hidden text-[10px]">Audit</span>
+            </button>
+          </div>
+        </header>
+      )}
 
-      <main className="max-w-5xl mx-auto px-3 sm:px-6 pt-4 sm:pt-5 flex flex-col gap-3.5">
+      <main className={cx(hideHeader ? "w-full p-0" : "max-w-6xl mx-auto px-3 sm:px-6 pt-4 sm:pt-5", "flex flex-col gap-5")}>
         {/* Loading / Error States */}
         {loading && (
-          <div className="p-8 text-center flex flex-col items-center justify-center gap-2 bg-[#111114] border border-[#27272A] rounded-xl">
+          <div className="p-8 text-center flex flex-col items-center justify-center gap-2 bg-[#111114] border border-[#27272A] rounded-xl animate-in fade-in-50 duration-200">
             <span className="material-symbols-outlined text-2xl text-[#22C55E] animate-spin">
               progress_activity
             </span>
@@ -169,7 +188,7 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
             <p className="font-['Epilogue'] text-xs font-bold text-[#EF4444]">{error}</p>
             <button
               onClick={() => void fetchAnalysis()}
-              className="mt-2 px-3 py-1 bg-[#EF4444] text-white rounded-md text-[11px] font-bold"
+              className="mt-2 px-3 py-1 bg-[#EF4444] text-white rounded-md text-[11px] font-bold active:scale-95 transition-transform"
             >
               Retry
             </button>
@@ -179,7 +198,7 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
         {data && !loading && (
           <>
             {/* Streamlined Tournament Overview Card (Arena Creation Style) */}
-            <section className="bg-[rgba(20,20,20,0.85)] border border-[#27272A] backdrop-blur-2xl rounded-2xl p-5 sm:p-6 shadow-2xl">
+            <section className="bg-[rgba(20,20,20,0.85)] border border-[#27272A] backdrop-blur-2xl rounded-2xl p-5 sm:p-6 shadow-2xl transition-all">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#27272A] pb-4 mb-4">
                 <div>
                   <div className="flex flex-wrap items-center gap-2 mb-1.5">
@@ -192,6 +211,12 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
                     <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-mono text-[10px] text-[#71717a]">
                       b={data.arena.liquidityParamB}
                     </span>
+                    {isLive && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#22C55E]/15 border border-[#22C55E]/30 font-mono text-[10px] font-bold text-[#22C55E]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
+                        LIVE TELEMETRY
+                      </span>
+                    )}
                   </div>
                   <h2 className="font-['Geist'] text-xl sm:text-2xl font-bold text-white tracking-tight">
                     {data.arena.name}
@@ -202,31 +227,32 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
                   <button
                     type="button"
                     onClick={() => toggleAll(true)}
-                    className="px-3 py-1.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-xs font-['Epilogue'] font-bold text-white transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-xs font-['Epilogue'] font-bold text-white transition-all active:scale-95 cursor-pointer shadow-sm"
                   >
                     Expand All
                   </button>
                   <button
                     type="button"
                     onClick={() => toggleAll(false)}
-                    className="px-3 py-1.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-xs font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-xs font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
                   >
                     Collapse
                   </button>
                   <button
                     type="button"
-                    onClick={() => void fetchAnalysis()}
-                    className="p-1.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-[#22C55E] transition-colors cursor-pointer"
+                    onClick={() => void fetchAnalysis(true)}
+                    disabled={refreshing}
+                    className="p-1.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-[#22C55E] transition-all active:scale-95 cursor-pointer shadow-sm disabled:opacity-50"
                     title="Refresh analysis data"
                   >
-                    <span className="material-symbols-outlined text-[18px]">refresh</span>
+                    <span className={cx("material-symbols-outlined text-[18px]", refreshing && "animate-spin")}>refresh</span>
                   </button>
                 </div>
               </div>
 
               {/* Arena Creation Style Metric Tiles */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                <div className="p-3.5 bg-[#202024] rounded-xl border border-[#2e2e33] flex flex-col justify-center">
+                <div className="p-3.5 bg-[#18181c] hover:bg-[#202028] rounded-xl border border-[#27272A] hover:border-[#38BDF8]/40 transition-all duration-200 flex flex-col justify-center hover:-translate-y-0.5 shadow-sm">
                   <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
                     TOTAL VOLUME
                   </span>
@@ -235,7 +261,7 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
                   </span>
                 </div>
 
-                <div className="p-3.5 bg-[#202024] rounded-xl border border-[#2e2e33] flex flex-col justify-center">
+                <div className="p-3.5 bg-[#18181c] hover:bg-[#202028] rounded-xl border border-[#27272A] hover:border-[#38BDF8]/40 transition-all duration-200 flex flex-col justify-center hover:-translate-y-0.5 shadow-sm">
                   <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
                     TRADES
                   </span>
@@ -244,7 +270,7 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
                   </span>
                 </div>
 
-                <div className="p-3.5 bg-[#202024] rounded-xl border border-[#2e2e33] flex flex-col justify-center">
+                <div className="p-3.5 bg-[#18181c] hover:bg-[#202028] rounded-xl border border-[#27272A] hover:border-[#38BDF8]/40 transition-all duration-200 flex flex-col justify-center hover:-translate-y-0.5 shadow-sm">
                   <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
                     ROUNDS
                   </span>
@@ -253,7 +279,7 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
                   </span>
                 </div>
 
-                <div className="p-3.5 bg-[#202024] rounded-xl border border-[#2e2e33] flex flex-col justify-center">
+                <div className="p-3.5 bg-[#18181c] hover:bg-[#202028] rounded-xl border border-[#27272A] hover:border-[#38BDF8]/40 transition-all duration-200 flex flex-col justify-center hover:-translate-y-0.5 shadow-sm">
                   <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
                     ACCURACY
                   </span>
@@ -267,7 +293,7 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
                   </span>
                 </div>
 
-                <div className="p-3.5 bg-[#202024] rounded-xl border border-[#2e2e33] flex flex-col justify-center">
+                <div className="p-3.5 bg-[#18181c] hover:bg-[#202028] rounded-xl border border-[#27272A] hover:border-[#38BDF8]/40 transition-all duration-200 flex flex-col justify-center hover:-translate-y-0.5 shadow-sm">
                   <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
                     BRIER SCORE
                   </span>
@@ -278,7 +304,7 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack }: Tourn
                   </span>
                 </div>
 
-                <div className="p-3.5 bg-[#202024] rounded-xl border border-[#2e2e33] flex flex-col justify-center">
+                <div className="p-3.5 bg-[#18181c] hover:bg-[#202028] rounded-xl border border-[#27272A] hover:border-[#38BDF8]/40 transition-all duration-200 flex flex-col justify-center hover:-translate-y-0.5 shadow-sm">
                   <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
                     TOTAL PAYOUTS
                   </span>
@@ -341,10 +367,11 @@ function RoundAnalysisCard({
   return (
     <article
       className={cx(
-        'rounded-xl border transition-all duration-150 overflow-hidden',
+        'rounded-xl border transition-all duration-200 overflow-hidden',
+        isLive && 'ring-1 ring-[#22C55E]/25 shadow-[0_0_15px_-3px_rgba(34,197,94,0.15)]',
         isExpanded
           ? 'bg-[#101014] border-[#3f3f46]'
-          : 'bg-[#0e0e11] border-[#27272A] hover:border-[#38383e]',
+          : 'bg-[#0e0e11] border-[#27272A] hover:border-[#38383e] hover:-translate-y-0.5',
       )}
     >
       {/* Clickable Header Strip */}
