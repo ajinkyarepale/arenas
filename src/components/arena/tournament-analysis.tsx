@@ -88,7 +88,7 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack, hideHea
     <div className={cx(hideHeader ? "w-full" : "min-h-screen pb-12", "bg-[#131313] text-[#e5e2e1] font-['Geist'] antialiased selection:bg-[#22C55E]/30 w-full max-w-full")}>
       {/* Top Header / View Switcher Bar (Only when standalone) */}
       {!hideHeader && (
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#27272A] bg-[rgba(20,20,20,0.85)] px-3 sm:px-6 py-2.5 backdrop-blur-xl w-full max-w-full">
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#27272A] bg-[rgba(20,20,20,0.85)] px-4 sm:px-8 md:px-12 py-3 backdrop-blur-xl w-full max-w-full">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {onBack ? (
               <button
@@ -170,7 +170,7 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack, hideHea
         </header>
       )}
 
-      <main className={cx(hideHeader ? "w-full p-0" : "max-w-6xl mx-auto px-3 sm:px-6 pt-4 sm:pt-5", "flex flex-col gap-5")}>
+      <main className={cx(hideHeader ? "w-full p-0" : "w-full px-4 sm:px-8 md:px-12 py-6", "flex flex-col gap-6 max-w-full")}>
         {/* Loading / Error States */}
         {loading && (
           <div className="p-8 text-center flex flex-col items-center justify-center gap-2 bg-[#111114] border border-[#27272A] rounded-xl animate-in fade-in-50 duration-200">

@@ -140,7 +140,7 @@ export default function AnalyticsOverviewPage() {
             </div>
           </header>
 
-          <main className="flex-1 w-full max-w-[1440px] mx-auto p-3 sm:p-6 md:p-8 flex flex-col gap-6 animate-in fade-in-50 duration-200">
+          <main className="flex-1 w-full p-4 sm:p-6 md:p-8 flex flex-col gap-6 animate-in fade-in-50 duration-200">
             <TournamentAnalysis
               initialArena={selectedArena}
               hideHeader={true}
