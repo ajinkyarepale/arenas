@@ -31,23 +31,23 @@ export function LandingNavbar() {
 
   return (
     <>
-      <nav className="bg-transparent backdrop-blur-md border-b border-white/[0.08] sticky top-0 z-40 px-4 sm:px-6">
+      <nav className="bg-white/70 dark:bg-transparent backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] sticky top-0 z-40 px-4 sm:px-6">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-6">
-            <Link href="/" className="font-['Geist'] text-2xl font-black text-white hover:text-white transition-colors">
+            <Link href="/" className="font-['Geist'] text-2xl font-black text-slate-900 dark:text-white transition-colors">
               Arenas
             </Link>
 
             {/* Desktop Navigation Links — Only visible AFTER signing in */}
             {isLoggedIn && (
-              <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-[#c4c7c8]">
-                <Link href="/markets" className="hover:text-white transition-colors">
+              <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600 dark:text-[#c4c7c8]">
+                <Link href="/markets" className="hover:text-slate-900 dark:hover:text-white transition-colors">
                   Explore Markets
                 </Link>
-                <Link href="/host" className="hover:text-white transition-colors">
+                <Link href="/host" className="hover:text-slate-900 dark:hover:text-white transition-colors">
                   Host on Campus
                 </Link>
-                <Link href="/guide" className="hover:text-white transition-colors">
+                <Link href="/guide" className="hover:text-slate-900 dark:hover:text-white transition-colors">
                   Guide
                 </Link>
               </div>

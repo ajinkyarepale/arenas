@@ -20,16 +20,16 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="relative py-24 px-6 flex flex-col items-center text-center overflow-hidden min-h-[600px] justify-center">
         <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center gap-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#27272A] bg-[#1c1b1b]/80 backdrop-blur-md text-[#22C55E] font-['Epilogue'] text-[11px] font-bold tracking-wider shadow-lg">
-            <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-emerald-200 dark:border-[#27272A] bg-emerald-50 dark:bg-[#1c1b1b]/80 backdrop-blur-md text-emerald-700 dark:text-[#22C55E] font-['Epilogue'] text-[11px] font-bold tracking-wider shadow-sm dark:shadow-lg">
+            <span className="w-2 h-2 rounded-full bg-emerald-600 dark:bg-[#22C55E] animate-pulse" />
             LIVE ROOMS · NOT HOMEWORK
           </div>
 
-          <h1 className="font-['Geist'] text-4xl sm:text-6xl text-white font-bold tracking-tight leading-tight max-w-4xl uppercase">
+          <h1 className="font-['Geist'] text-4xl sm:text-6xl text-slate-900 dark:text-white font-bold tracking-tight leading-tight max-w-4xl uppercase">
             A TRADING FLOOR IN AN AFTERNOON
           </h1>
 
-          <p className="font-['Geist'] text-base sm:text-lg text-[#c4c7c8] max-w-2xl leading-relaxed mt-1">
+          <p className="font-['Geist'] text-base sm:text-lg text-slate-600 dark:text-[#c4c7c8] max-w-2xl leading-relaxed mt-1">
             Experience the intensity of live 5-minute candle trading in a zero-risk campus environment. Compete, analyze, and predict real-time market movements.
           </p>
 
@@ -48,7 +48,7 @@ export default function LandingPage() {
             />
           </div>
 
-          <p className="font-['Epilogue'] text-[11px] font-bold text-[#8e9192] tracking-wider mt-4 uppercase">
+          <p className="font-['Epilogue'] text-[11px] font-bold text-slate-500 dark:text-[#8e9192] tracking-wider mt-4 uppercase">
             FREE · VIRTUAL POINTS ONLY · NO DEPOSITS
           </p>
         </div>

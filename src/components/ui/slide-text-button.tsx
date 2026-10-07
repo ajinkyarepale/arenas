@@ -29,10 +29,10 @@ export function SlideTextButton({
   const slideText = hoverText ?? text;
   const variantStyles =
     variant === 'ghost'
-      ? 'border border-[#3f3f46] text-[#e5e2e1] hover:bg-[#27272A] bg-transparent'
+      ? 'border border-slate-300 dark:border-[#3f3f46] text-slate-800 dark:text-[#e5e2e1] hover:bg-slate-100 dark:hover:bg-[#27272A] bg-white/60 dark:bg-transparent shadow-sm dark:shadow-none'
       : variant === 'emerald'
-      ? 'bg-[#22C55E] text-black hover:bg-[#1ea750] shadow-lg shadow-[#22C55E]/10'
-      : 'bg-white text-black hover:bg-[#e4e4e7] shadow-lg';
+      ? 'bg-[#16a34a] dark:bg-[#22C55E] text-white dark:text-black hover:bg-[#15803d] dark:hover:bg-[#1ea750] shadow-md shadow-[#22C55E]/10'
+      : 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-black dark:hover:bg-[#e4e4e7] shadow-md dark:shadow-lg';
 
   return (
     <motion.div

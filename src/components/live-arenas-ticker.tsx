@@ -54,12 +54,12 @@ export function LiveArenasTicker() {
 
   return (
     <div
-      className="no-scrollbar relative overflow-hidden border-y border-line bg-ink-900/70 py-2.5"
+      className="no-scrollbar relative overflow-hidden border-y border-slate-200 dark:border-line bg-slate-100/90 dark:bg-ink-900/70 py-2.5 backdrop-blur-sm"
       aria-label="Arenas open right now"
     >
       {/* A light bar sweeping the strip, so it reads as a live feed. */}
       <div
-        className="pointer-events-none absolute inset-y-0 w-24 animate-sweep bg-gradient-to-r from-transparent via-accent/10 to-transparent"
+        className="pointer-events-none absolute inset-y-0 w-24 animate-sweep bg-gradient-to-r from-transparent via-emerald-500/10 dark:via-accent/10 to-transparent"
         aria-hidden
       />
       <div className="flex w-max animate-marquee items-center gap-8 whitespace-nowrap px-4 hover:[animation-play-state:paused]">
@@ -67,7 +67,7 @@ export function LiveArenasTicker() {
           <Link
             key={`${arena.id}-${i}`}
             href={`/arenas/${arena.code}`}
-            className="flex items-center gap-2 font-mono text-xs text-fg-muted hover:text-white transition-colors cursor-pointer group"
+            className="flex items-center gap-2 font-mono text-xs text-slate-600 dark:text-fg-muted hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer group"
           >
             <span
               className={cx(

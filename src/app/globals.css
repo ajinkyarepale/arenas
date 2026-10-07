@@ -92,6 +92,13 @@
     color-scheme: light;
   }
 
+  /* Base canvas */
+  html:not(.dark) body {
+    background-color: #f8fafc;
+    color: #0f172a;
+  }
+
+  /* Primary elevated surfaces (cards, sidebars, modals, headers) */
   html:not(.dark) .bg-\[\#131313\],
   html:not(.dark) .bg-\[\#141414\],
   html:not(.dark) .bg-\[\#18181B\],
@@ -102,32 +109,55 @@
     background-color: #ffffff !important;
   }
 
+  /* Secondary recessed surfaces (filter tabs, badges, input backdrops) */
   html:not(.dark) .bg-\[\#201f1f\],
   html:not(.dark) .bg-\[\#2a2a2a\],
+  html:not(.dark) .bg-\[\#3a3939\],
   html:not(.dark) .bg-ink-800,
   html:not(.dark) .bg-ink-750 {
     background-color: #f1f5f9 !important;
   }
 
+  /* Opacity variants — prevent dark pitch-black blocks from staying dark in light mode */
+  html:not(.dark) .bg-\[\#1c1b1b\]\/80,
+  html:not(.dark) .bg-\[\#141414\]\/70,
+  html:not(.dark) .bg-\[\#141414\]\/90,
+  html:not(.dark) .bg-\[\#201f1f\]\/80,
+  html:not(.dark) .bg-\[\#201f1f\]\/40,
+  html:not(.dark) .bg-\[\#201f1f\]\/50,
+  html:not(.dark) .bg-\[\#141417\]\/50,
+  html:not(.dark) .bg-ink-900\/70,
+  html:not(.dark) .bg-ink-950\/80 {
+    background-color: rgba(248, 250, 252, 0.95) !important;
+  }
+
+  /* Translucent glass headers, panels, and drawer backdrops */
   html:not(.dark) .bg-\[rgba\(20\,20\,20\,0\.7\)\],
   html:not(.dark) .bg-\[rgba\(20\,20\,20\,0\.85\)\],
   html:not(.dark) .bg-\[rgba\(20\,20\,20\,0\.9\)\],
   html:not(.dark) .bg-\[rgba\(20\,20\,20\,0\.8\)\],
   html:not(.dark) .bg-\[rgba\(19\,19\,19\,0\.95\)\],
-  html:not(.dark) .bg-\[rgba\(0\,0\,0\,0\.5\)\] {
+  html:not(.dark) .bg-\[rgba\(0\,0\,0\,0\.5\)\],
+  html:not(.dark) .glass-panel {
     background-color: rgba(255, 255, 255, 0.9) !important;
-    backdrop-filter: blur(16px) !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
   }
 
+  /* Crisp structural borders */
   html:not(.dark) .border-\[\#27272A\],
   html:not(.dark) .border-\[\#3f3f46\],
+  html:not(.dark) .border-\[\#444748\],
   html:not(.dark) .border-white\/\[0\.08\],
   html:not(.dark) .border-white\/\[0\.1\],
   html:not(.dark) .border-white\/\[0\.15\],
-  html:not(.dark) .border-white\/\[0\.2\] {
+  html:not(.dark) .border-white\/\[0\.2\],
+  html:not(.dark) .border-line,
+  html:not(.dark) .border-line-strong {
     border-color: #e2e8f0 !important;
   }
 
+  /* Typography scale */
   html:not(.dark) .text-white {
     color: #0f172a !important;
   }
@@ -146,6 +176,7 @@
     color: #64748b !important;
   }
 
+  /* Form controls */
   html:not(.dark) input,
   html:not(.dark) textarea,
   html:not(.dark) select {
@@ -159,10 +190,20 @@
     color: #94a3b8 !important;
   }
 
-  html:not(.dark) .glass-panel {
-    background-color: rgba(255, 255, 255, 0.9) !important;
-    border-color: #e2e8f0 !important;
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+  /* High-contrast brand green for light mode readability */
+  html:not(.dark) .text-\[\#22C55E\] {
+    color: #16a34a !important;
+  }
+
+  html:not(.dark) .bg-\[\#22C55E\]\/10,
+  html:not(.dark) .bg-\[\#22C55E\]\/15,
+  html:not(.dark) .bg-\[\#22C55E\]\/20 {
+    background-color: rgba(22, 163, 74, 0.08) !important;
+  }
+
+  html:not(.dark) .border-\[\#22C55E\]\/20,
+  html:not(.dark) .border-\[\#22C55E\]\/30 {
+    border-color: rgba(22, 163, 74, 0.25) !important;
   }
 
   /* Tap targets should never flash a grey box on iOS. */
