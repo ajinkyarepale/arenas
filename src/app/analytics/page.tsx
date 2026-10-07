@@ -199,10 +199,14 @@ export default function AnalyticsOverviewPage() {
               <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">
                 Total Volume Traded
               </p>
-              <p className="font-mono text-3xl font-bold text-white tracking-tight flex items-baseline gap-1.5">
-                {data ? formatPoints(data.summary.totalVolume, 0) : '—'}
-                <span className="text-xs text-[#8e9192] font-normal font-sans">arcs</span>
-              </p>
+              {data ? (
+                <p className="font-mono text-3xl font-bold text-white tracking-tight flex items-baseline gap-1.5">
+                  {formatPoints(data.summary.totalVolume, 0)}
+                  <span className="text-xs text-[#8e9192] font-normal font-sans">arcs</span>
+                </p>
+              ) : (
+                <div className="h-9 w-32 bg-[#27272A]/70 rounded-lg animate-pulse mt-1" />
+              )}
             </div>
 
             {/* Total Predictions / Trades */}
@@ -210,10 +214,14 @@ export default function AnalyticsOverviewPage() {
               <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">
                 Total Predictions
               </p>
-              <p className="font-mono text-3xl font-bold text-white tracking-tight flex items-baseline gap-1.5">
-                {data ? data.summary.totalPredictions.toLocaleString() : '—'}
-                <span className="text-xs text-[#8e9192] font-normal font-sans">trades</span>
-              </p>
+              {data ? (
+                <p className="font-mono text-3xl font-bold text-white tracking-tight flex items-baseline gap-1.5">
+                  {data.summary.totalPredictions.toLocaleString()}
+                  <span className="text-xs text-[#8e9192] font-normal font-sans">trades</span>
+                </p>
+              ) : (
+                <div className="h-9 w-28 bg-[#27272A]/70 rounded-lg animate-pulse mt-1" />
+              )}
             </div>
 
             {/* Tournaments Hosted */}
@@ -229,10 +237,14 @@ export default function AnalyticsOverviewPage() {
                   </span>
                 )}
               </div>
-              <p className="font-mono text-3xl font-bold text-white tracking-tight flex items-baseline gap-1.5">
-                {data ? data.summary.totalEvents : '—'}
-                <span className="text-xs text-[#8e9192] font-normal font-sans">arenas</span>
-              </p>
+              {data ? (
+                <p className="font-mono text-3xl font-bold text-white tracking-tight flex items-baseline gap-1.5">
+                  {data.summary.totalEvents}
+                  <span className="text-xs text-[#8e9192] font-normal font-sans">arenas</span>
+                </p>
+              ) : (
+                <div className="h-9 w-20 bg-[#27272A]/70 rounded-lg animate-pulse mt-1" />
+              )}
             </div>
 
             {/* Overall Accuracy / Calibration */}
@@ -240,12 +252,16 @@ export default function AnalyticsOverviewPage() {
               <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">
                 Crowd Accuracy
               </p>
-              <p className="font-mono text-3xl font-bold text-[#22C55E] tracking-tight flex items-baseline gap-1.5">
-                {data && data.summary.overallAccuracyRate != null
-                  ? `${Math.round(data.summary.overallAccuracyRate * 100)}%`
-                  : 'N/A'}
-                <span className="text-xs text-[#8e9192] font-normal font-sans">consensus</span>
-              </p>
+              {data ? (
+                <p className="font-mono text-3xl font-bold text-[#22C55E] tracking-tight flex items-baseline gap-1.5">
+                  {data.summary.overallAccuracyRate != null
+                    ? `${Math.round(data.summary.overallAccuracyRate * 100)}%`
+                    : 'N/A'}
+                  <span className="text-xs text-[#8e9192] font-normal font-sans">consensus</span>
+                </p>
+              ) : (
+                <div className="h-9 w-24 bg-[#27272A]/70 rounded-lg animate-pulse mt-1" />
+              )}
             </div>
           </div>
 
