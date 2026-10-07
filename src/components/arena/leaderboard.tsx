@@ -32,7 +32,7 @@ export const Leaderboard = memo(function Leaderboard({
         )}
       >
         <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#1c1c20] border border-[#27272A]">
-          <span className="material-symbols-outlined text-[20px] text-[#F59E0B]">military_tech</span>
+          <span className="material-symbols-outlined text-[20px] text-[#8e9192]">military_tech</span>
         </div>
         <p className={cx('font-medium', isDisplay ? 'text-base text-[#e5e2e1]' : 'text-xs')}>
           Tournament Stage Open
@@ -84,23 +84,18 @@ export const LeaderboardRow = memo(function LeaderboardRow({
         highlighted
           ? 'border-[#22C55E]/60 bg-gradient-to-r from-[#22C55E]/15 via-[#22C55E]/5 to-transparent shadow-[0_0_20px_-6px_rgba(34,197,94,0.4)]'
           : isFirst
-            ? 'border-[#EAB308]/60 bg-gradient-to-r from-[#EAB308]/20 via-[#EAB308]/5 to-[#121215] shadow-[0_0_25px_-8px_rgba(234,179,8,0.4)]'
-            : isSecond
-              ? 'border-[#E2E8F0]/40 bg-gradient-to-r from-[#E2E8F0]/15 via-[#E2E8F0]/5 to-[#121215]'
-              : isThird
-                ? 'border-[#CD7F32]/40 bg-gradient-to-r from-[#CD7F32]/15 via-[#CD7F32]/5 to-[#121215]'
-                : 'border-[#27272A]/70 bg-[#121215]/80 hover:border-[#3f3f46] hover:bg-[#16161a]',
+            ? 'border-[#3f3f46] bg-[#201f1f]'
+            : 'border-[#27272A] bg-[#18181b] hover:border-[#3f3f46] hover:bg-[#201f1f]',
       )}
     >
       {/* Rank Indicator Badge */}
       <div
         className={cx(
-          'flex shrink-0 items-center justify-center rounded-lg font-black border font-mono tracking-tight transition-transform duration-150 group-hover:scale-105',
+          'flex shrink-0 items-center justify-center rounded-lg font-bold border font-mono tracking-tight transition-transform duration-150 group-hover:scale-105',
           isDisplay ? 'h-8 w-8 text-xs xl:h-9 xl:w-9 xl:text-sm' : 'h-6 w-6 text-[10px]',
-          isFirst && 'bg-[#EAB308]/20 border-[#EAB308]/70 text-[#EAB308] shadow-[0_0_12px_rgba(234,179,8,0.4)]',
-          isSecond && 'bg-[#E2E8F0]/15 border-[#E2E8F0]/60 text-[#E2E8F0]',
-          isThird && 'bg-[#CD7F32]/20 border-[#CD7F32]/60 text-[#FFA07A]',
-          entry.rank > 3 && 'bg-[#18181b] border-[#27272A] text-[#71717a]',
+          isFirst
+            ? 'bg-[#27272A] border-[#3f3f46] text-white'
+            : 'bg-[#201f1f] border-[#27272A] text-[#8e9192]',
         )}
       >
         {rankNumber}

@@ -392,12 +392,11 @@ export function BigScreen({
       {/* Settlement Flash */}
       {lastSettled ? <SettlementOverlay settled={lastSettled} /> : null}
 
-      {status !== 'LIVE' ? (
+      {status === 'LOBBY' || status === 'DRAFT' ? (
         <IdleOverlay
           status={status}
           code={info.code}
           name={info.name}
-          onSelectView={handleSelectView}
         />
       ) : null}
     </div>
@@ -696,7 +695,7 @@ function StagePodiumRail({
       <div>
         <div className="flex shrink-0 items-center justify-between font-['Epilogue'] border-b border-[#27272A] pb-2.5 mb-3">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#EAB308] animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
             <span className="font-bold text-white uppercase tracking-wider text-xs sm:text-sm">
               STAGE PODIUM
             </span>
@@ -718,26 +717,24 @@ function StagePodiumRail({
             {/* Top 3 Cards */}
             {top3.map((entry: any, index: number) => {
               const isFirst = index === 0;
-              const isSecond = index === 1;
-              const isThird = index === 2;
 
               return (
                 <div
                   key={entry.participantId}
                   className={cx(
                     'flex items-center justify-between rounded-xl border px-3 py-2 xl:py-2.5 transition-all select-none',
-                    isFirst && 'border-[#EAB308]/60 bg-gradient-to-r from-[#EAB308]/20 via-[#EAB308]/5 to-[#201f1f] shadow-[0_0_20px_-6px_rgba(234,179,8,0.35)]',
-                    isSecond && 'border-[#E2E8F0]/40 bg-gradient-to-r from-[#E2E8F0]/15 via-[#E2E8F0]/5 to-[#201f1f]',
-                    isThird && 'border-[#CD7F32]/40 bg-gradient-to-r from-[#CD7F32]/15 via-[#CD7F32]/5 to-[#201f1f]',
+                    isFirst
+                      ? 'border-[#3f3f46] bg-[#201f1f]'
+                      : 'border-[#27272A] bg-[#18181b]',
                   )}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1 mr-2">
                     <div
                       className={cx(
-                        'flex shrink-0 items-center justify-center rounded-lg font-black border font-mono text-xs w-7 h-7 tracking-tight',
-                        isFirst && 'bg-[#EAB308]/25 border-[#EAB308]/80 text-[#EAB308] shadow-[0_0_10px_rgba(234,179,8,0.5)]',
-                        isSecond && 'bg-[#E2E8F0]/20 border-[#E2E8F0]/60 text-[#E2E8F0]',
-                        isThird && 'bg-[#CD7F32]/25 border-[#CD7F32]/70 text-[#FFA07A]',
+                        'flex shrink-0 items-center justify-center rounded-lg font-bold border font-mono text-xs w-7 h-7 tracking-tight',
+                        isFirst
+                          ? 'bg-[#27272A] border-[#3f3f46] text-white'
+                          : 'bg-[#201f1f] border-[#27272A] text-[#8e9192]',
                       )}
                     >
                       {String(index + 1).padStart(2, '0')}
@@ -782,7 +779,7 @@ function StagePodiumRail({
                 {runnersUp.map((entry: any, i: number) => (
                   <div
                     key={entry.participantId}
-                    className="flex items-center justify-between px-2.5 py-1 rounded-lg bg-[#201f1f] border border-[#27272A]/50 text-xs"
+                    className="flex items-center justify-between px-2.5 py-1 rounded-lg bg-[#18181b] border border-[#27272A]/50 text-xs"
                   >
                     <div className="flex items-center gap-2 truncate min-w-0 flex-1 mr-2">
                       <span className="font-mono text-[10px] font-bold text-[#8e9192]">
@@ -910,12 +907,10 @@ function IdleOverlay({
   status,
   code,
   name,
-  onSelectView,
 }: {
   status: string;
   code: string;
   name: string;
-  onSelectView?: (view: 'live' | 'screen' | 'analysis') => void;
 }) {
   const [origin, setOrigin] = useState(() => {
     const envUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
@@ -923,7 +918,6 @@ function IdleOverlay({
     if (typeof window !== 'undefined' && window.location.origin) return window.location.origin;
     return '';
   });
-  const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
     const envUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
@@ -933,67 +927,6 @@ function IdleOverlay({
       setOrigin(window.location.origin);
     }
   }, []);
-
-  if (status === 'ENDED') {
-    if (dismissed) {
-      return (
-        <div className="fixed bottom-4 left-4 z-40 flex items-center gap-2 bg-[#18181b]/95 border border-[#27272A] p-2 rounded-xl shadow-2xl backdrop-blur-xl">
-          <span className="font-['Epilogue'] text-xs font-bold text-[#8e9192] pl-2">Tournament Ended</span>
-          <button
-            type="button"
-            onClick={() => onSelectView?.('analysis')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#22C55E]/15 hover:bg-[#22C55E]/25 text-[#22C55E] border border-[#22C55E]/40 font-['Epilogue'] text-xs font-bold transition-all cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[15px]">analytics</span>
-            View Analysis
-          </button>
-          <button
-            type="button"
-            onClick={() => setDismissed(false)}
-            className="px-2 py-1 text-xs text-[#8e9192] hover:text-white"
-            title="Expand overlay"
-          >
-            Expand
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#131313]/90 backdrop-blur-md p-6">
-        <div className="text-center font-['Geist'] flex flex-col items-center max-w-md">
-          <div className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase tracking-widest">{name}</div>
-          <div className="font-['Geist'] mt-2 text-2xl sm:text-3xl font-extrabold text-white">
-            Tournament Finished
-          </div>
-          <p className="mt-2 font-['Geist'] text-sm text-[#8e9192]">
-            Final leaderboard and standings are displayed on screen.
-          </p>
-
-          {/* Action Buttons to View Analysis or Final Board */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => onSelectView?.('analysis')}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#22C55E] hover:bg-[#16a34a] text-black font-['Epilogue'] text-xs font-bold shadow-[0_0_20px_rgba(34,197,94,0.35)] transition-all cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[17px]">analytics</span>
-              View Tournament Analysis
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setDismissed(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] text-white font-['Epilogue'] text-xs font-medium transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[16px] text-[#8e9192]">visibility</span>
-              Inspect Standings
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (status === 'LOBBY' || status === 'DRAFT') {
     const joinUrl = origin ? `${origin}/arenas/${code}` : `/arenas/${code}`;
