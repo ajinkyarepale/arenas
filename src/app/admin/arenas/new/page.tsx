@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { CreateArenaForm } from '@/components/admin/create-arena-form';
 import { AppShell } from '@/components/app-shell';
 import { SiteSidebar } from '@/components/site-sidebar';
+import { SwitchButton } from '@/components/ui';
 import { authOptions, isOrganizer } from '@/lib/auth';
 
 export const metadata: Metadata = { title: 'Create Arena — Arenas' };
@@ -36,6 +37,7 @@ export default async function NewArenaPage() {
             </span>
           </div>
           <div className="flex items-center gap-4 ml-auto">
+            <SwitchButton size="sm" showLabel={false} />
             <Link href="/admin" className="text-xs font-semibold text-[#c4c7c8] hover:text-white transition-colors">
               Cancel
             </Link>
@@ -48,7 +50,10 @@ export default async function NewArenaPage() {
             <span className="material-symbols-outlined text-base">arrow_back</span>
             <span>Back to Dashboard</span>
           </Link>
-          <span className="text-[11px] font-mono text-[#8e9192]">New Arena</span>
+          <div className="flex items-center gap-3">
+            <SwitchButton size="sm" showLabel={false} />
+            <span className="text-[11px] font-mono text-[#8e9192]">New Arena</span>
+          </div>
         </div>
 
         {/* Form Container */}

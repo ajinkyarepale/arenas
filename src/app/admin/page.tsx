@@ -6,6 +6,7 @@ import { EventStatus } from '@/generated/client';
 import { AdminArenaList } from '@/components/admin/admin-arena-list';
 import { AppShell, AppContent } from '@/components/app-shell';
 import { SiteSidebar } from '@/components/site-sidebar';
+import { SwitchButton } from '@/components/ui';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
@@ -81,10 +82,11 @@ export default async function AdminPage() {
             </span>
           </div>
           <div className="flex items-center gap-3 ml-auto">
+            <SwitchButton size="sm" showLabel={false} />
             {isSuperAdmin && (
               <Link
                 href="/admin/organizers"
-                className="bg-[#202024] hover:bg-[#2a2a30] text-[#c4c7c8] hover:text-white border border-[#27272A] font-['Epilogue'] text-xs font-bold px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 shadow"
+                className="bg-slate-100 dark:bg-[#202024] hover:bg-slate-200 dark:hover:bg-[#2a2a30] text-slate-800 dark:text-[#c4c7c8] hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#27272A] font-['Epilogue'] text-xs font-bold px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 shadow-sm"
               >
                 <span>Approvals</span>
                 {pendingOrganizersCount > 0 && (
@@ -96,7 +98,7 @@ export default async function AdminPage() {
             )}
             <Link
               href="/admin/arenas/new"
-              className="bg-white text-[#2f3131] hover:bg-[#c6c6c7] font-['Epilogue'] text-xs font-bold px-4 py-2 rounded-full transition-all flex items-center gap-1 shadow"
+              className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-[#2f3131] dark:hover:bg-[#c6c6c7] font-['Epilogue'] text-xs font-bold px-4 py-2 rounded-full transition-all flex items-center gap-1 shadow-sm dark:shadow"
             >
               <span>+ Create Arena</span>
             </Link>
@@ -119,7 +121,7 @@ export default async function AdminPage() {
               {isSuperAdmin && (
                 <Link
                   href="/admin/organizers"
-                  className="md:hidden bg-[#202024] hover:bg-[#2a2a30] text-[#c4c7c8] hover:text-white border border-[#27272A] font-['Epilogue'] text-xs font-bold px-3.5 py-2.5 rounded-full transition-all flex items-center gap-1.5 shadow"
+                  className="md:hidden bg-slate-100 dark:bg-[#202024] hover:bg-slate-200 dark:hover:bg-[#2a2a30] text-slate-800 dark:text-[#c4c7c8] hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#27272A] font-['Epilogue'] text-xs font-bold px-3.5 py-2.5 rounded-full transition-all flex items-center gap-1.5 shadow-sm"
                 >
                   <span>Approvals</span>
                   {pendingOrganizersCount > 0 && (
@@ -131,7 +133,7 @@ export default async function AdminPage() {
               )}
               <Link
                 href="/admin/arenas/new"
-                className="bg-white text-[#2f3131] font-['Epilogue'] text-sm font-bold px-6 py-2.5 sm:py-3 rounded-full flex items-center justify-center gap-2 hover:bg-[#c6c6c7] transition-colors shadow-lg"
+                className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-[#2f3131] font-['Epilogue'] text-sm font-bold px-6 py-2.5 sm:py-3 rounded-full flex items-center justify-center gap-2 dark:hover:bg-[#c6c6c7] transition-colors shadow-md dark:shadow-lg"
               >
                 <span className="material-symbols-outlined text-[18px]">add</span>
                 New Arena

@@ -154,7 +154,15 @@ export function SiteSidebar() {
         </nav>
 
         {/* Profile & Auth at Bottom */}
-        <div className="mt-auto border-t border-[#27272A] pt-4 space-y-2">
+        <div className="mt-auto border-t border-[#27272A] pt-3 space-y-2">
+          {/* Theme Mode Toggle (Available on every sidebar page) */}
+          <div className={cx('flex items-center pb-2 border-b border-[#27272A]/40', collapsed ? 'justify-center px-0' : 'justify-between px-3')}>
+            <span className={cx('text-[11px] font-["Epilogue"] font-semibold text-[#8e9192]', collapsed ? 'hidden' : 'block')}>
+              Theme
+            </span>
+            <SwitchButton size="sm" showLabel={false} />
+          </div>
+
           {session ? (
             <div className="flex flex-col gap-1.5">
               <Link

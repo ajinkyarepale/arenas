@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth';
 
 import { AppShell } from '@/components/app-shell';
 import { SiteSidebar } from '@/components/site-sidebar';
+import { SwitchButton } from '@/components/ui';
 import { authOptions, isOrganizer } from '@/lib/auth';
 import { getTraderAnalytics } from '@/lib/analytics';
 import { formatDateTime, formatPercent, formatPoints, formatSignedPoints } from '@/lib/format';
@@ -41,6 +42,7 @@ export default async function DashboardPage() {
             </span>
           </div>
           <div className="flex items-center gap-4 ml-auto font-['Epilogue'] text-xs">
+            <SwitchButton size="sm" showLabel={false} />
             <span className="text-[#c4c7c8]">{session.user.email}</span>
             <Link
               href="/signout"

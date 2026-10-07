@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-import { ErrorNote, Spinner } from '@/components/ui';
+import { ErrorNote, Spinner, SwitchButton } from '@/components/ui';
 
 interface OrganizerRequestItem {
   id: string;
@@ -128,16 +128,17 @@ export default function AdminOrganizersPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <SwitchButton size="sm" showLabel={false} />
             <Link
               href="/admin"
-              className="px-4 py-2 rounded-full border border-[#3f3f46] text-[#e4e4e7] font-['Epilogue'] text-xs font-bold hover:bg-[#27272A] transition-all flex items-center gap-1.5"
+              className="px-4 py-2 rounded-full border border-slate-300 dark:border-[#3f3f46] text-slate-800 dark:text-[#e4e4e7] font-['Epilogue'] text-xs font-bold bg-white dark:bg-transparent hover:bg-slate-100 dark:hover:bg-[#27272A] transition-all flex items-center gap-1.5 shadow-sm"
             >
               <span>←</span>
               <span>Back to Arenas</span>
             </Link>
             <Link
               href="/admin/arenas/new"
-              className="px-5 py-2 rounded-full bg-white text-black font-['Epilogue'] text-xs font-bold hover:bg-[#e4e4e7] transition-all shadow-md"
+              className="px-5 py-2 rounded-full bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-black font-['Epilogue'] text-xs font-bold dark:hover:bg-[#e4e4e7] transition-all shadow-md"
             >
               + Create Tournament
             </Link>

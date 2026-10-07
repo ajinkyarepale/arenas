@@ -6,6 +6,7 @@ import { ArenaControl } from '@/components/admin/arena-control';
 import { AppShell } from '@/components/app-shell';
 import { RoundTimeline, SplitBar } from '@/components/charts';
 import { SiteSidebar } from '@/components/site-sidebar';
+import { SwitchButton } from '@/components/ui';
 import { getArenaAnalytics } from '@/lib/analytics';
 import { auth, isOrganizer } from '@/lib/auth';
 import { formatPoints, formatProbability } from '@/lib/format';
@@ -84,6 +85,7 @@ export default async function ManageArenaPage({ params }: { params: { id: string
 
           <div className="flex items-center gap-4 ml-auto font-['Epilogue'] text-xs">
             <span className="text-[#c4c7c8]">{session.user.email}</span>
+            <SwitchButton size="sm" showLabel={false} />
             <Link
               href="/signout"
               className="text-white hover:underline font-bold transition-colors"
@@ -99,7 +101,10 @@ export default async function ManageArenaPage({ params }: { params: { id: string
             <span className="material-symbols-outlined text-base">arrow_back</span>
             <span>Back to Arenas</span>
           </Link>
-          <span className="text-[11px] font-mono text-[#22C55E] font-bold">{arena.code}</span>
+          <div className="flex items-center gap-3">
+            <SwitchButton size="sm" showLabel={false} />
+            <span className="text-[11px] font-mono text-[#22C55E] font-bold">{arena.code}</span>
+          </div>
         </div>
 
         {/* Content Container */}

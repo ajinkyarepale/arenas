@@ -119,14 +119,14 @@ export function AdminArenaList({
             key={arena.id}
             className={`border rounded-xl p-5 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center transition-colors backdrop-blur-md ${
               isArchived
-                ? 'bg-[rgba(15,15,15,0.5)] border-[#1e1e1e] opacity-60'
-                : 'bg-[rgba(20,20,20,0.7)] border-[#27272A] hover:border-[#444748]'
+                ? 'bg-slate-100/80 border-slate-200 dark:bg-[rgba(15,15,15,0.5)] dark:border-[#1e1e1e] opacity-75'
+                : 'bg-white dark:bg-[rgba(20,20,20,0.7)] border-slate-200 dark:border-[#27272A] hover:border-slate-300 dark:hover:border-[#444748] shadow-sm dark:shadow-none'
             }`}
           >
             <div className="flex flex-col gap-2 w-full md:w-auto">
               <div className="flex items-center gap-3 flex-wrap">
                 {isArchived ? (
-                  <span className="bg-[#1a1a1a] text-[#6b7280] border border-[#374151]/40 px-2 py-0.5 rounded-full font-['Epilogue'] text-[10px] font-bold tracking-widest flex items-center gap-1.5">
+                  <span className="bg-slate-200/80 dark:bg-[#1a1a1a] text-slate-600 dark:text-[#6b7280] border border-slate-300/80 dark:border-[#374151]/40 px-2 py-0.5 rounded-full font-['Epilogue'] text-[10px] font-bold tracking-widest flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[12px]">inventory_2</span>
                     ARCHIVED
                   </span>

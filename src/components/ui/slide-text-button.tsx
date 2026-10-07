@@ -50,10 +50,16 @@ export function SlideTextButton({
         {...props}
       >
         <span className="relative flex flex-col items-center justify-center transition-transform duration-300 ease-in-out group-hover:-translate-y-full">
-          <span className="flex items-center justify-center gap-2 opacity-100 transition-opacity duration-300 group-hover:opacity-0 whitespace-nowrap">
+          <span className={cn(
+            "flex items-center justify-center gap-2 opacity-100 transition-opacity duration-300 group-hover:opacity-0 whitespace-nowrap",
+            variant === 'default' ? '!text-white dark:!text-black' : variant === 'emerald' ? 'text-white dark:text-black' : 'text-slate-800 dark:text-[#e5e2e1]'
+          )}>
             <span>{text}</span>
           </span>
-          <span className="absolute top-full flex items-center justify-center gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100 whitespace-nowrap">
+          <span className={cn(
+            "absolute top-full flex items-center justify-center gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100 whitespace-nowrap",
+            variant === 'default' ? '!text-white dark:!text-black' : variant === 'emerald' ? 'text-white dark:text-black' : 'text-slate-800 dark:text-[#e5e2e1]'
+          )}>
             <span>{slideText}</span>
           </span>
         </span>

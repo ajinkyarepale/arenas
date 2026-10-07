@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { AppShell } from '@/components/app-shell';
 import { SiteSidebar } from '@/components/site-sidebar';
+import { SwitchButton } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { formatPoints } from '@/lib/format';
 import { prisma } from '@/lib/prisma';
@@ -76,6 +77,7 @@ export default async function ArenaResultsPage({
           </div>
 
           <div className="flex items-center gap-3">
+            <SwitchButton size="sm" showLabel={false} />
             <Link
               href={`/arenas/${arena.code}/screen`}
               target="_blank"
@@ -96,7 +98,10 @@ export default async function ArenaResultsPage({
             <span className="material-symbols-outlined text-base">arrow_back</span>
             <span>Back to Arena</span>
           </Link>
-          <span className="text-[11px] font-mono text-[#22C55E] font-bold">{arena.code}</span>
+          <div className="flex items-center gap-3">
+            <SwitchButton size="sm" showLabel={false} />
+            <span className="text-[11px] font-mono text-[#22C55E] font-bold">{arena.code}</span>
+          </div>
         </div>
 
         {/* Results Container */}
