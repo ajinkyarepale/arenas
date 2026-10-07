@@ -135,38 +135,6 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack, hideHea
               </h1>
             </div>
           </div>
-
-          {/* View Switcher Tabs */}
-          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#141417] border border-[#27272A] shrink-0">
-            <button
-              type="button"
-              onClick={() => onSelectView?.('live')}
-              className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white hover:bg-[#1f1f23] transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[14px] text-[#22C55E]">bolt</span>
-              <span className="hidden sm:inline">Live Arena</span>
-              <span className="sm:hidden text-[10px]">Live</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onSelectView?.('screen')}
-              className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white hover:bg-[#1f1f23] transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[14px] text-[#38BDF8]">tv</span>
-              <span className="hidden sm:inline">Big Screen</span>
-              <span className="sm:hidden text-[10px]">Screen</span>
-            </button>
-
-            <button
-              type="button"
-              className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-['Epilogue'] font-bold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
-            >
-              <span className="material-symbols-outlined text-[14px]">analytics</span>
-              <span className="hidden sm:inline">Analysis</span>
-              <span className="sm:hidden text-[10px]">Audit</span>
-            </button>
-          </div>
         </header>
       )}
 
@@ -197,137 +165,121 @@ export function TournamentAnalysis({ initialArena, onSelectView, onBack, hideHea
 
         {data && !loading && (
           <>
-            {/* Streamlined Tournament Overview Card (Arena Creation Style) */}
-            <section className="bg-[rgba(20,20,20,0.85)] border border-[#27272A] backdrop-blur-2xl rounded-2xl p-5 sm:p-6 shadow-2xl transition-all">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#27272A] pb-4 mb-4">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-['Epilogue'] font-bold uppercase tracking-wider bg-[#201f1f] text-[#c4c7c8] border border-[#27272A]">
-                      {data.arena.marketCategory === 'CRYPTO_PRICE' ? 'Live Crypto Oracle' : 'Campus Prediction'}
+            {/* Header matching Admin Dashboard */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div>
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-['Epilogue'] font-bold uppercase tracking-wider bg-[#201f1f] text-[#c4c7c8] border border-[#27272A]">
+                    {data.arena.marketCategory === 'CRYPTO_PRICE' ? 'Live Crypto Oracle' : 'Campus Prediction'}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#38BDF8]/10 border border-[#38BDF8]/20 font-['Epilogue'] text-[10px] font-bold text-[#38BDF8]">
+                    {data.arena.asset}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[10px] text-[#8e9192]">
+                    b={data.arena.liquidityParamB}
+                  </span>
+                  {isLive && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#22C55E]/15 border border-[#22C55E]/30 font-['Epilogue'] text-[10px] font-bold text-[#22C55E]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
+                      LIVE TELEMETRY
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-[#38BDF8]/10 border border-[#38BDF8]/25 font-mono text-[10px] font-bold text-[#38BDF8]">
-                      {data.arena.asset}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-mono text-[10px] text-[#71717a]">
-                      b={data.arena.liquidityParamB}
-                    </span>
-                    {isLive && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#22C55E]/15 border border-[#22C55E]/30 font-mono text-[10px] font-bold text-[#22C55E]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
-                        LIVE TELEMETRY
-                      </span>
-                    )}
-                  </div>
-                  <h2 className="font-['Geist'] text-xl sm:text-2xl font-bold text-white tracking-tight">
-                    {data.arena.name}
-                  </h2>
+                  )}
                 </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => toggleAll(true)}
-                    className="px-3 py-1.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-xs font-['Epilogue'] font-bold text-white transition-all active:scale-95 cursor-pointer shadow-sm"
-                  >
-                    Expand All
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => toggleAll(false)}
-                    className="px-3 py-1.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-xs font-['Epilogue'] font-medium text-[#a1a1aa] hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
-                  >
-                    Collapse
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void fetchAnalysis(true)}
-                    disabled={refreshing}
-                    className="p-1.5 rounded-xl bg-[#18181c] hover:bg-[#222228] border border-[#27272A] text-[#22C55E] transition-all active:scale-95 cursor-pointer shadow-sm disabled:opacity-50"
-                    title="Refresh analysis data"
-                  >
-                    <span className={cx("material-symbols-outlined text-[18px]", refreshing && "animate-spin")}>refresh</span>
-                  </button>
-                </div>
+                <h1 className="font-['Geist'] text-3xl md:text-4xl font-bold text-white tracking-tight">
+                  {data.arena.name}
+                </h1>
               </div>
 
-              {/* Arena Creation Style Metric Tiles */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                <div className="p-3.5 bg-[#18181c] hover:bg-[#202028] rounded-xl border border-[#27272A] hover:border-[#38BDF8]/40 transition-all duration-200 flex flex-col justify-center hover:-translate-y-0.5 shadow-sm">
-                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
-                    TOTAL VOLUME
-                  </span>
-                  <span className="font-mono text-base font-black text-white mt-1">
-                    {formatPoints(data.summary.totalVolume, 0)} arcs
-                  </span>
-                </div>
-
-                <div className="p-3.5 bg-[#18181c] hover:bg-[#202028] rounded-xl border border-[#27272A] hover:border-[#38BDF8]/40 transition-all duration-200 flex flex-col justify-center hover:-translate-y-0.5 shadow-sm">
-                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
-                    TRADES
-                  </span>
-                  <span className="font-mono text-base font-black text-white mt-1">
-                    {data.summary.totalTrades}
-                  </span>
-                </div>
-
-                <div className="p-3.5 bg-[#18181c] hover:bg-[#202028] rounded-xl border border-[#27272A] hover:border-[#38BDF8]/40 transition-all duration-200 flex flex-col justify-center hover:-translate-y-0.5 shadow-sm">
-                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
-                    ROUNDS
-                  </span>
-                  <span className="font-mono text-base font-black text-white mt-1">
-                    {data.summary.resolvedRounds} / {data.summary.totalRounds}
-                  </span>
-                </div>
-
-                <div className="p-3.5 bg-[#18181c] hover:bg-[#202028] rounded-xl border border-[#27272A] hover:border-[#38BDF8]/40 transition-all duration-200 flex flex-col justify-center hover:-translate-y-0.5 shadow-sm">
-                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
-                    ACCURACY
-                  </span>
-                  <span className="font-mono text-base font-black text-[#22C55E] mt-1">
-                    {data.summary.accuracyRate != null
-                      ? `${(data.summary.accuracyRate * 100).toFixed(0)}%`
-                      : '—'}
-                    <span className="text-[10px] text-[#71717a] ml-1 font-normal font-sans">
-                      ({data.summary.correctPredictions}/{data.summary.resolvedRounds})
-                    </span>
-                  </span>
-                </div>
-
-                <div className="p-3.5 bg-[#18181c] hover:bg-[#202028] rounded-xl border border-[#27272A] hover:border-[#38BDF8]/40 transition-all duration-200 flex flex-col justify-center hover:-translate-y-0.5 shadow-sm">
-                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
-                    BRIER SCORE
-                  </span>
-                  <span className="font-mono text-base font-black text-[#38BDF8] mt-1">
-                    {data.summary.averageBrierScore != null
-                      ? data.summary.averageBrierScore.toFixed(3)
-                      : '—'}
-                  </span>
-                </div>
-
-                <div className="p-3.5 bg-[#18181c] hover:bg-[#202028] rounded-xl border border-[#27272A] hover:border-[#38BDF8]/40 transition-all duration-200 flex flex-col justify-center hover:-translate-y-0.5 shadow-sm">
-                  <span className="text-[10px] text-[#71717A] uppercase font-['Epilogue'] font-bold tracking-wider block">
-                    TOTAL PAYOUTS
-                  </span>
-                  <span className="font-mono text-base font-black text-[#F59E0B] mt-1">
-                    {formatPoints(data.summary.totalPayouts, 0)} arcs
-                  </span>
-                </div>
+              <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => toggleAll(true)}
+                  className="bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] font-['Epilogue'] text-xs font-bold text-[#c4c7c8] hover:text-white px-4 py-2 rounded-full transition-all active:scale-95 shadow-sm"
+                >
+                  Expand All
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleAll(false)}
+                  className="bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] font-['Epilogue'] text-xs font-bold text-[#c4c7c8] hover:text-white px-4 py-2 rounded-full transition-all active:scale-95 shadow-sm"
+                >
+                  Collapse
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void fetchAnalysis(true)}
+                  disabled={refreshing}
+                  className="bg-[#201f1f] hover:bg-[#2a2a2a] border border-[#27272A] font-['Epilogue'] text-xs font-bold text-[#22C55E] p-2.5 rounded-full transition-all active:scale-95 shadow-sm disabled:opacity-50"
+                  title="Refresh analysis data"
+                >
+                  <span className={cx("material-symbols-outlined text-[18px]", refreshing && "animate-spin")}>refresh</span>
+                </button>
               </div>
-            </section>
+            </div>
+
+            {/* Metrics Row matching Admin Dashboard */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-2xl p-5 backdrop-blur-md hover:border-[#38BDF8]/40 transition-all">
+                <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">Total Volume</p>
+                <p className="font-['Epilogue'] text-2xl lg:text-3xl font-bold text-white flex items-baseline gap-1">
+                  {formatPoints(data.summary.totalVolume, 0)}
+                  <span className="text-xs text-[#8e9192] font-normal font-sans">arcs</span>
+                </p>
+              </div>
+
+              <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-2xl p-5 backdrop-blur-md hover:border-[#38BDF8]/40 transition-all">
+                <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">Trades</p>
+                <p className="font-['Epilogue'] text-2xl lg:text-3xl font-bold text-white">
+                  {data.summary.totalTrades}
+                </p>
+              </div>
+
+              <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-2xl p-5 backdrop-blur-md hover:border-[#38BDF8]/40 transition-all">
+                <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">Rounds</p>
+                <p className="font-['Epilogue'] text-2xl lg:text-3xl font-bold text-white">
+                  {data.summary.resolvedRounds} / {data.summary.totalRounds}
+                </p>
+              </div>
+
+              <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-2xl p-5 backdrop-blur-md hover:border-[#22C55E]/40 transition-all">
+                <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">Accuracy</p>
+                <p className="font-['Epilogue'] text-2xl lg:text-3xl font-bold text-[#22C55E] flex items-baseline gap-1">
+                  {data.summary.accuracyRate != null ? `${(data.summary.accuracyRate * 100).toFixed(0)}%` : '—'}
+                  <span className="text-xs text-[#8e9192] font-normal font-sans">
+                    ({data.summary.correctPredictions}/{data.summary.resolvedRounds})
+                  </span>
+                </p>
+              </div>
+
+              <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-2xl p-5 backdrop-blur-md hover:border-[#38BDF8]/40 transition-all">
+                <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">Brier Score</p>
+                <p className="font-['Epilogue'] text-2xl lg:text-3xl font-bold text-[#38BDF8]">
+                  {data.summary.averageBrierScore != null ? data.summary.averageBrierScore.toFixed(3) : '—'}
+                </p>
+              </div>
+
+              <div className="bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-2xl p-5 backdrop-blur-md hover:border-[#F59E0B]/40 transition-all">
+                <p className="font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] uppercase mb-2">Total Payouts</p>
+                <p className="font-['Epilogue'] text-2xl lg:text-3xl font-bold text-[#F59E0B] flex items-baseline gap-1">
+                  {formatPoints(data.summary.totalPayouts, 0)}
+                  <span className="text-xs text-[#8e9192] font-normal font-sans">arcs</span>
+                </p>
+              </div>
+            </div>
 
             {/* Round-by-Round Analysis Cards */}
-            <section className="flex flex-col gap-2.5">
+            <section className="flex flex-col gap-3">
               <div className="flex items-center justify-between px-1">
-                <h3 className="font-['Epilogue'] text-[11px] font-bold uppercase tracking-wider text-[#a1a1aa]">
+                <h3 className="font-['Epilogue'] text-xs font-bold uppercase tracking-wider text-[#c4c7c8]">
                   ROUNDS ({data.rounds.length})
                 </h3>
-                <span className="text-[11px] font-mono text-[#71717a]">
+                <span className="text-xs font-['Epilogue'] text-[#8e9192]">
                   Click to inspect round telemetry & trades
                 </span>
               </div>
 
               {data.rounds.length === 0 ? (
-                <div className="p-6 text-center bg-[#101014] border border-[#27272A] rounded-xl text-[#a1a1aa] font-['Epilogue'] text-xs">
+                <div className="p-8 text-center bg-[rgba(20,20,20,0.7)] border border-[#27272A] rounded-2xl text-[#c4c7c8] font-['Geist'] text-sm backdrop-blur-md">
                   No rounds scheduled or recorded yet for this tournament.
                 </div>
               ) : (
@@ -367,11 +319,11 @@ function RoundAnalysisCard({
   return (
     <article
       className={cx(
-        'rounded-xl border transition-all duration-200 overflow-hidden',
+        'rounded-2xl border transition-all duration-200 overflow-hidden backdrop-blur-md',
         isLive && 'ring-1 ring-[#22C55E]/25 shadow-[0_0_15px_-3px_rgba(34,197,94,0.15)]',
         isExpanded
-          ? 'bg-[#101014] border-[#3f3f46]'
-          : 'bg-[#0e0e11] border-[#27272A] hover:border-[#38383e] hover:-translate-y-0.5',
+          ? 'bg-[#18181b] border-[#38BDF8]/40 shadow-lg'
+          : 'bg-[rgba(20,20,20,0.7)] border-[#27272A] hover:bg-[#201f1f] hover:border-[#38BDF8]/40',
       )}
     >
       {/* Clickable Header Strip */}
@@ -380,13 +332,13 @@ function RoundAnalysisCard({
         tabIndex={0}
         onClick={onToggle}
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onToggle()}
-        className="p-3 sm:px-4 sm:py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-2.5 cursor-pointer select-none"
+        className="p-3.5 sm:px-5 sm:py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 cursor-pointer select-none"
       >
         {/* Left: Round Badge & Question */}
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-3 min-w-0">
           <div
             className={cx(
-              'shrink-0 h-7 w-7 rounded-lg flex items-center justify-center font-mono font-bold text-xs border',
+              "shrink-0 h-8 w-8 rounded-xl flex items-center justify-center font-['Epilogue'] font-bold text-xs border",
               isResolved
                 ? outcomeYes
                   ? 'bg-[#22C55E]/15 border-[#22C55E]/40 text-[#22C55E]'
@@ -395,27 +347,27 @@ function RoundAnalysisCard({
                     : 'bg-[#eab308]/15 border-[#eab308]/40 text-[#eab308]'
                 : isLive
                   ? 'bg-[#38BDF8]/15 border-[#38BDF8]/40 text-[#38BDF8] animate-pulse'
-                  : 'bg-[#18181b] border-[#27272A] text-[#71717a]',
+                  : 'bg-[#201f1f] border-[#27272A] text-[#8e9192]',
             )}
           >
             R{round.roundNumber}
           </div>
 
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
-              <span className="font-['Epilogue'] text-[11px] font-bold uppercase tracking-wider text-white">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <span className="font-['Epilogue'] text-xs font-bold uppercase tracking-wider text-white">
                 Round {round.roundNumber}
               </span>
 
               {/* Status Badge */}
               <span
                 className={cx(
-                  "px-1.5 py-0.2 rounded text-[9px] font-['Epilogue'] font-bold uppercase tracking-wider border",
+                  "px-2 py-0.5 rounded-full text-[10px] font-['Epilogue'] font-bold uppercase tracking-wider border",
                   isResolved
-                    ? 'bg-[#1c1c20] text-[#a1a1aa] border-[#27272A]'
+                    ? 'bg-[#201f1f] text-[#c4c7c8] border-[#27272A]'
                     : isLive
                       ? 'bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/30 animate-pulse'
-                      : 'bg-[#18181b] text-[#71717a] border-[#27272A]',
+                      : 'bg-[#201f1f] text-[#8e9192] border-[#27272A]',
                 )}
               >
                 {round.status}
@@ -425,7 +377,7 @@ function RoundAnalysisCard({
               {isResolved && (
                 <span
                   className={cx(
-                    "px-2 py-0.2 rounded text-[9px] font-['Epilogue'] font-bold uppercase tracking-wider border flex items-center gap-1",
+                    "px-2.5 py-0.5 rounded-full text-[10px] font-['Epilogue'] font-bold uppercase tracking-wider border flex items-center gap-1.5",
                     outcomeYes
                       ? 'bg-[#22C55E]/20 text-[#22C55E] border-[#22C55E]/50'
                       : outcomeNo
@@ -433,28 +385,28 @@ function RoundAnalysisCard({
                         : 'bg-[#eab308]/20 text-[#eab308] border-[#eab308]/50',
                   )}
                 >
-                  <span className="w-1 h-1 rounded-full bg-current" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
                   {outcomeYes ? 'YES WON' : outcomeNo ? 'NO WON' : 'VOIDED'}
                 </span>
               )}
             </div>
 
-            <h4 className="font-['Geist'] text-xs sm:text-sm font-semibold text-white truncate max-w-lg">
+            <h4 className="font-['Geist'] text-sm sm:text-base font-bold text-white tracking-tight truncate max-w-xl">
               {round.question}
             </h4>
           </div>
         </div>
 
         {/* Right: Key Summary Snapshot Pills */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0 text-xs font-mono">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0 text-xs">
           {/* Strike vs Close */}
           {round.openPrice != null && (
-            <div className="flex items-center gap-1 bg-[#141418] border border-[#27272A] px-2 py-0.5 rounded-md text-[11px]">
-              <span className="text-[#a1a1aa] text-[9px] uppercase font-['Epilogue']">Strike</span>
+            <div className="flex items-center gap-1.5 bg-[#201f1f] border border-[#27272A] px-3 py-1 rounded-full text-xs font-['Epilogue']">
+              <span className="text-[#8e9192] text-[10px] uppercase font-bold">Strike</span>
               <span className="font-bold text-white">{formatPrice(round.openPrice)}</span>
               {round.closePrice != null && (
                 <>
-                  <span className="text-[#71717a]">→</span>
+                  <span className="text-[#8e9192]">→</span>
                   <span
                     className={cx(
                       'font-bold',
@@ -469,23 +421,23 @@ function RoundAnalysisCard({
           )}
 
           {/* Final Probability */}
-          <div className="flex items-center gap-1 bg-[#141418] border border-[#27272A] px-2 py-0.5 rounded-md text-[11px]">
-            <span className="text-[#a1a1aa] text-[9px] uppercase font-['Epilogue']">Odds</span>
+          <div className="flex items-center gap-1.5 bg-[#201f1f] border border-[#27272A] px-3 py-1 rounded-full text-xs font-['Epilogue']">
+            <span className="text-[#8e9192] text-[10px] uppercase font-bold">Odds</span>
             <span className="font-bold text-[#22C55E]">
               {formatProbability(round.finalProbability, 1)} YES
             </span>
           </div>
 
           {/* Volume */}
-          <div className="flex items-center gap-1 bg-[#141418] border border-[#27272A] px-2 py-0.5 rounded-md text-[11px]">
-            <span className="text-[#a1a1aa] text-[9px] uppercase font-['Epilogue']">Vol</span>
+          <div className="flex items-center gap-1.5 bg-[#201f1f] border border-[#27272A] px-3 py-1 rounded-full text-xs font-['Epilogue']">
+            <span className="text-[#8e9192] text-[10px] uppercase font-bold">Vol</span>
             <span className="font-bold text-white">{formatPoints(round.totalVolume, 0)} arcs</span>
           </div>
 
           {/* Chevron */}
           <span
             className={cx(
-              'material-symbols-outlined text-[18px] text-[#a1a1aa] transition-transform duration-150',
+              'material-symbols-outlined text-[20px] text-[#c4c7c8] transition-transform duration-150',
               isExpanded && 'rotate-180 text-white',
             )}
           >
@@ -496,30 +448,30 @@ function RoundAnalysisCard({
 
       {/* Expanded Analysis Section */}
       {isExpanded && (
-        <div className="border-t border-[#27272A] p-3 sm:p-4 bg-[#0c0c0f] flex flex-col gap-3.5 animate-fadeIn">
+        <div className="border-t border-[#27272A] p-4 sm:p-5 bg-[#141416]/90 flex flex-col gap-4 animate-in fade-in-50 duration-200">
           {/* 4-Card Analysis KPI Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* 1. Asset & Strike Movement */}
-            <div className="bg-[#121216] border border-[#27272A] rounded-lg p-2.5 flex flex-col justify-between">
+            <div className="bg-[#18181b] border border-[#27272A] rounded-xl p-3.5 flex flex-col justify-between">
               <div>
-                <span className="font-['Epilogue'] text-[9px] font-bold text-[#a1a1aa] uppercase tracking-wider block">
+                <span className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8] uppercase tracking-wider block">
                   ASSET MOVEMENT
                 </span>
-                <div className="mt-1 flex items-baseline justify-between font-mono">
-                  <span className="text-[11px] text-[#a1a1aa]">Strike:</span>
-                  <span className="text-xs font-bold text-white">{formatPrice(round.openPrice)}</span>
+                <div className="mt-2 flex items-baseline justify-between font-['Epilogue']">
+                  <span className="text-xs text-[#8e9192]">Strike:</span>
+                  <span className="text-sm font-bold text-white">{formatPrice(round.openPrice)}</span>
                 </div>
-                <div className="mt-0.5 flex items-baseline justify-between font-mono">
-                  <span className="text-[11px] text-[#a1a1aa]">Close:</span>
-                  <span className="text-xs font-bold text-white">{formatPrice(round.closePrice)}</span>
+                <div className="mt-1 flex items-baseline justify-between font-['Epilogue']">
+                  <span className="text-xs text-[#8e9192]">Close:</span>
+                  <span className="text-sm font-bold text-white">{formatPrice(round.closePrice)}</span>
                 </div>
               </div>
 
-              <div className="mt-2 pt-1.5 border-t border-[#27272A] flex items-center justify-between">
-                <span className="font-['Epilogue'] text-[9px] font-semibold text-[#a1a1aa]">DELTA:</span>
+              <div className="mt-3 pt-2 border-t border-[#27272A] flex items-center justify-between">
+                <span className="font-['Epilogue'] text-[10px] font-bold text-[#8e9192]">DELTA:</span>
                 <span
                   className={cx(
-                    'font-mono text-[11px] font-bold',
+                    "font-['Epilogue'] text-xs font-bold",
                     round.priceDelta != null && round.priceDelta >= 0
                       ? 'text-[#22C55E]'
                       : 'text-[#EF4444]',
@@ -533,32 +485,32 @@ function RoundAnalysisCard({
             </div>
 
             {/* 2. Opening vs Final Probability */}
-            <div className="bg-[#121216] border border-[#27272A] rounded-lg p-2.5 flex flex-col justify-between">
+            <div className="bg-[#18181b] border border-[#27272A] rounded-xl p-3.5 flex flex-col justify-between">
               <div>
-                <span className="font-['Epilogue'] text-[9px] font-bold text-[#a1a1aa] uppercase tracking-wider block">
+                <span className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8] uppercase tracking-wider block">
                   PROBABILITY SHIFT
                 </span>
-                <div className="mt-1 flex items-baseline justify-between font-mono">
-                  <span className="text-[11px] text-[#a1a1aa]">Open:</span>
-                  <span className="text-xs font-bold text-white">50.0%</span>
+                <div className="mt-2 flex items-baseline justify-between font-['Epilogue']">
+                  <span className="text-xs text-[#8e9192]">Open:</span>
+                  <span className="text-sm font-bold text-white">50.0%</span>
                 </div>
-                <div className="mt-0.5 flex items-baseline justify-between font-mono">
-                  <span className="text-[11px] text-[#a1a1aa]">Close:</span>
-                  <span className="text-xs font-bold text-[#22C55E]">
+                <div className="mt-1 flex items-baseline justify-between font-['Epilogue']">
+                  <span className="text-xs text-[#8e9192]">Close:</span>
+                  <span className="text-sm font-bold text-[#22C55E]">
                     {formatProbability(round.finalProbability, 1)} YES
                   </span>
                 </div>
               </div>
 
               {/* Dual Probability Bar */}
-              <div className="mt-2 pt-1.5 border-t border-[#27272A]">
-                <div className="h-2 w-full rounded-full bg-[#EF4444]/30 overflow-hidden flex border border-[#27272A]">
+              <div className="mt-3 pt-2 border-t border-[#27272A]">
+                <div className="h-2 w-full rounded-full bg-[#EF4444]/25 overflow-hidden flex border border-[#27272A]">
                   <div
                     className="h-full bg-[#22C55E] transition-all"
                     style={{ width: `${Math.min(98, Math.max(2, round.finalProbability * 100))}%` }}
                   />
                 </div>
-                <div className="flex justify-between text-[9px] font-mono text-[#a1a1aa] mt-0.5">
+                <div className="flex justify-between text-[10px] font-['Epilogue'] font-medium text-[#8e9192] mt-1">
                   <span>{(round.finalProbability * 100).toFixed(0)}% YES</span>
                   <span>{((1 - round.finalProbability) * 100).toFixed(0)}% NO</span>
                 </div>
@@ -566,43 +518,43 @@ function RoundAnalysisCard({
             </div>
 
             {/* 3. Trading Volume & Activity */}
-            <div className="bg-[#121216] border border-[#27272A] rounded-lg p-2.5 flex flex-col justify-between">
+            <div className="bg-[#18181b] border border-[#27272A] rounded-xl p-3.5 flex flex-col justify-between">
               <div>
-                <span className="font-['Epilogue'] text-[9px] font-bold text-[#a1a1aa] uppercase tracking-wider block">
+                <span className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8] uppercase tracking-wider block">
                   TRADING ACTIVITY
                 </span>
-                <div className="mt-1 flex items-baseline justify-between font-mono">
-                  <span className="text-[11px] text-[#a1a1aa]">Traded:</span>
-                  <span className="text-xs font-bold text-white">
+                <div className="mt-2 flex items-baseline justify-between font-['Epilogue']">
+                  <span className="text-xs text-[#8e9192]">Traded:</span>
+                  <span className="text-sm font-bold text-white">
                     {formatPoints(round.totalVolume, 0)} arcs
                   </span>
                 </div>
-                <div className="mt-0.5 flex items-baseline justify-between font-mono">
-                  <span className="text-[11px] text-[#a1a1aa]">Trades:</span>
-                  <span className="text-xs font-bold text-white">{round.tradesCount}</span>
+                <div className="mt-1 flex items-baseline justify-between font-['Epilogue']">
+                  <span className="text-xs text-[#8e9192]">Trades:</span>
+                  <span className="text-sm font-bold text-white">{round.tradesCount}</span>
                 </div>
               </div>
 
-              <div className="mt-2 pt-1.5 border-t border-[#27272A] flex items-center justify-between text-[10px] font-mono">
+              <div className="mt-3 pt-2 border-t border-[#27272A] flex items-center justify-between text-xs font-['Epilogue'] font-bold">
                 <span className="text-[#22C55E]">Y: {formatPoints(round.yesVolume, 0)}</span>
-                <span className="text-[#71717a]">|</span>
+                <span className="text-[#8e9192]">|</span>
                 <span className="text-[#EF4444]">N: {formatPoints(round.noVolume, 0)}</span>
               </div>
             </div>
 
             {/* 4. Accuracy & Calibration Verdict */}
-            <div className="bg-[#121216] border border-[#27272A] rounded-lg p-2.5 flex flex-col justify-between">
+            <div className="bg-[#18181b] border border-[#27272A] rounded-xl p-3.5 flex flex-col justify-between">
               <div>
-                <span className="font-['Epilogue'] text-[9px] font-bold text-[#a1a1aa] uppercase tracking-wider block">
+                <span className="font-['Epilogue'] text-[10px] font-bold text-[#c4c7c8] uppercase tracking-wider block">
                   CALIBRATION
                 </span>
-                <div className="mt-1 font-['Epilogue'] text-[11px] font-bold text-white leading-tight truncate">
+                <div className="mt-2 font-['Geist'] text-xs font-semibold text-white leading-tight line-clamp-2">
                   {round.calibration.verdict}
                 </div>
               </div>
 
-              <div className="mt-2 pt-1.5 border-t border-[#27272A] flex items-center justify-between font-mono text-[11px]">
-                <span className="text-[#a1a1aa] text-[9px] font-['Epilogue']">Brier:</span>
+              <div className="mt-3 pt-2 border-t border-[#27272A] flex items-center justify-between font-['Epilogue'] text-xs">
+                <span className="text-[#8e9192] text-[10px] uppercase font-bold">Brier:</span>
                 <span className="font-bold text-[#38BDF8]">
                   {round.calibration.brierScore != null ? round.calibration.brierScore : '—'}
                 </span>
@@ -611,13 +563,13 @@ function RoundAnalysisCard({
           </div>
 
           {/* Historical Probability Movement Chart */}
-          <div className="bg-[#121216] border border-[#27272A] rounded-lg p-3 flex flex-col gap-1.5">
+          <div className="bg-[#18181b] border border-[#27272A] rounded-xl p-4 flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="font-['Epilogue'] text-[11px] font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[15px] text-[#22C55E]">timeline</span>
+              <span className="font-['Epilogue'] text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px] text-[#22C55E]">timeline</span>
                 YES / NO PROBABILITY TIMELINE
               </span>
-              <span className="font-mono text-[11px] text-[#a1a1aa]">
+              <span className="font-['Epilogue'] text-xs text-[#8e9192]">
                 {round.probabilityTimeline.length} points
               </span>
             </div>
@@ -626,53 +578,53 @@ function RoundAnalysisCard({
           </div>
 
           {/* Participant Performance & Payouts */}
-          <div className="bg-[#121216] border border-[#27272A] rounded-lg p-3 flex flex-col gap-2">
-            <div className="flex items-center justify-between border-b border-[#27272A]/80 pb-2">
-              <span className="font-['Epilogue'] text-[11px] font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[15px] text-[#F59E0B]">military_tech</span>
+          <div className="bg-[#18181b] border border-[#27272A] rounded-xl p-4 flex flex-col gap-3">
+            <div className="flex items-center justify-between border-b border-[#27272A] pb-3">
+              <span className="font-['Epilogue'] text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px] text-[#F59E0B]">military_tech</span>
                 ROUND PARTICIPANTS & PAYOUTS
               </span>
-              <div className="flex items-center gap-2.5 text-[11px] font-mono">
-                <span className="text-[#a1a1aa]">
-                  Traders: <strong className="text-white">{round.uniqueParticipants}</strong>
+              <div className="flex items-center gap-3 text-xs font-['Epilogue']">
+                <span className="text-[#8e9192]">
+                  Traders: <strong className="text-white font-bold">{round.uniqueParticipants}</strong>
                 </span>
-                <span className="text-[#a1a1aa]">
-                  Payout: <strong className="text-[#22C55E]">{formatPoints(round.totalPayout, 0)} arcs</strong>
+                <span className="text-[#8e9192]">
+                  Payout: <strong className="text-[#22C55E] font-bold">{formatPoints(round.totalPayout, 0)} arcs</strong>
                 </span>
               </div>
             </div>
 
             {round.topPerformers.length === 0 ? (
-              <div className="py-2.5 text-center text-xs text-[#a1a1aa] font-mono">
+              <div className="py-4 text-center text-xs text-[#8e9192] font-['Geist']">
                 No participant predictions recorded for this round.
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs font-mono">
+                <table className="w-full text-left text-xs font-['Epilogue']">
                   <thead>
-                    <tr className="border-b border-[#27272A] text-[#a1a1aa] font-['Epilogue'] uppercase text-[9px]">
-                      <th className="py-1.5 px-2">Participant</th>
-                      <th className="py-1.5 px-2">Shares</th>
-                      <th className="py-1.5 px-2">Cost</th>
-                      <th className="py-1.5 px-2">Payout</th>
-                      <th className="py-1.5 px-2 text-right">PnL</th>
+                    <tr className="border-b border-[#27272A] text-[#c4c7c8] font-bold uppercase text-[10px]">
+                      <th className="py-2 px-2.5">Participant</th>
+                      <th className="py-2 px-2.5">Shares</th>
+                      <th className="py-2 px-2.5">Cost</th>
+                      <th className="py-2 px-2.5">Payout</th>
+                      <th className="py-2 px-2.5 text-right">PnL</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#27272A]/50">
+                  <tbody className="divide-y divide-[#27272A]/60">
                     {round.topPerformers.map((performer, idx) => (
-                      <tr key={performer.userId} className="hover:bg-[#18181e] transition-colors">
-                        <td className="py-1.5 px-2 flex items-center gap-1.5">
-                          <span className="text-[#71717a] font-bold w-3 text-center text-[11px]">#{idx + 1}</span>
-                          <span className="font-['Geist'] font-medium text-white truncate max-w-[150px] text-xs">
+                      <tr key={performer.userId} className="hover:bg-[#201f1f] transition-colors">
+                        <td className="py-2 px-2.5 flex items-center gap-2">
+                          <span className="text-[#8e9192] font-bold w-4 text-center text-xs">#{idx + 1}</span>
+                          <span className="font-['Geist'] font-semibold text-white truncate max-w-[160px] text-xs">
                             {performer.name}
                           </span>
                           {performer.isBot && (
-                            <span className="px-1 py-0.2 rounded bg-[#27272A] text-[8px] text-[#a1a1aa] font-['Epilogue']">
+                            <span className="px-1.5 py-0.2 rounded bg-[#201f1f] text-[9px] text-[#8e9192] border border-[#27272A]">
                               BOT
                             </span>
                           )}
                         </td>
-                        <td className="py-1.5 px-2 text-[11px]">
+                        <td className="py-2 px-2.5 text-xs">
                           {performer.sharesYes > 0 && (
                             <span className="text-[#22C55E] font-bold mr-1.5">
                               {performer.sharesYes.toFixed(1)} Y
@@ -684,20 +636,20 @@ function RoundAnalysisCard({
                             </span>
                           )}
                         </td>
-                        <td className="py-1.5 px-2 text-white text-[11px]">
+                        <td className="py-2 px-2.5 text-white text-xs font-bold">
                           {formatPoints(performer.cost, 0)} arcs
                         </td>
-                        <td className="py-1.5 px-2 text-[#F59E0B] font-bold text-[11px]">
+                        <td className="py-2 px-2.5 text-[#F59E0B] font-bold text-xs">
                           {formatPoints(performer.payout, 0)} arcs
                         </td>
                         <td
                           className={cx(
-                            'py-1.5 px-2 text-right font-bold text-[11px]',
+                            'py-2 px-2.5 text-right font-bold text-xs',
                             performer.pnl > 0
                               ? 'text-[#22C55E]'
                               : performer.pnl < 0
                                 ? 'text-[#EF4444]'
-                                : 'text-[#a1a1aa]',
+                                : 'text-[#8e9192]',
                           )}
                         >
                           {performer.pnl > 0 ? `+${formatPoints(performer.pnl, 0)}` : formatPoints(performer.pnl, 0)} arcs
@@ -723,7 +675,7 @@ function ProbabilityHistoryChart({
 }) {
   if (!timeline || timeline.length === 0) {
     return (
-      <div className="h-24 flex items-center justify-center text-xs text-[#71717a] font-mono">
+      <div className="h-24 flex items-center justify-center text-xs text-[#8e9192] font-['Geist']">
         No trades in this round yet
       </div>
     );
@@ -774,16 +726,16 @@ function ProbabilityHistoryChart({
           y1={baselineY}
           x2={width - padding}
           y2={baselineY}
-          stroke="#3f3f46"
+          stroke="#27272A"
           strokeDasharray="3 3"
           strokeWidth="1"
         />
         <text
           x={width - padding + 4}
           y={baselineY + 3}
-          fill="#71717a"
+          fill="#8e9192"
           fontSize="9"
-          fontFamily="monospace"
+          fontFamily="Epilogue, sans-serif"
         >
           50%
         </text>
@@ -809,7 +761,7 @@ function ProbabilityHistoryChart({
             cy={pt.y}
             r={idx === points.length - 1 ? 3 : 2}
             fill={pt.side === 'YES' ? '#22C55E' : pt.side === 'NO' ? '#EF4444' : '#ffffff'}
-            stroke="#121216"
+            stroke="#18181b"
             strokeWidth="1"
           />
         ))}
