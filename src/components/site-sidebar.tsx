@@ -48,7 +48,7 @@ export function SiteSidebar() {
   return (
     <>
       {/* Mobile Top Navigation Header Bar */}
-      <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[rgba(19,19,19,0.95)] border-b border-[#27272A] backdrop-blur-xl z-40 flex items-center justify-between px-4">
+      <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#000000]/95 border-b border-[#27272A] backdrop-blur-xl z-40 flex items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <span className="font-['Geist'] text-xl font-bold text-white tracking-tight">Arenas</span>
           <span className="text-[10px] font-['Epilogue'] font-bold text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 px-2 py-0.5 rounded-full uppercase">
@@ -81,7 +81,7 @@ export function SiteSidebar() {
 
       {/* Main Sidebar Drawer (Responsive for Mobile & Desktop) */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 h-full bg-[#141414] md:bg-[rgba(20,20,20,0.85)] border-r border-[#27272A] backdrop-blur-xl flex flex-col py-6 z-50 transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 bottom-0 left-0 h-full bg-[#000000] md:bg-[#000000]/95 border-r border-[#27272A] backdrop-blur-xl flex flex-col py-6 z-50 transition-all duration-300 ease-in-out ${
           mobileOpen
             ? 'translate-x-0 w-72 shadow-2xl px-4'
             : '-translate-x-full md:translate-x-0'

@@ -90,7 +90,7 @@ export function BigScreen({
   const joinUrl = origin ? `${origin}/arenas/${info.code}` : `/arenas/${info.code}`;
 
   return (
-    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#131313] text-[#e5e2e1] font-['Geist'] p-3 sm:p-4 antialiased select-none">
+    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#000000] text-[#e5e2e1] font-['Geist'] p-3 sm:p-4 antialiased select-none">
       {/* Streamlined Compact Broadcast Header */}
       <header className="flex items-center justify-between gap-3 border-b border-[#27272A] pb-2.5 mb-2 shrink-0">
         {/* Left: Tournament Identity & Round */}
@@ -549,7 +549,7 @@ function BigScreenProbabilityGraph({
 
   if (points.length < 2) {
     return (
-      <div className="h-full w-full flex flex-col items-center justify-center gap-2 bg-[#131313] text-[#8e9192] font-['Epilogue'] text-xs">
+      <div className="h-full w-full flex flex-col items-center justify-center gap-2 bg-[#000000] text-[#8e9192] font-['Epilogue'] text-xs">
         <span className="material-symbols-outlined text-2xl text-[#22C55E] animate-pulse">
           query_stats
         </span>
@@ -578,7 +578,7 @@ function BigScreenProbabilityGraph({
   const currentNo = 1 - currentYes;
 
   return (
-    <div className="relative h-full w-full flex flex-col justify-between p-4 bg-[#131313] overflow-hidden select-none">
+    <div className="relative h-full w-full flex flex-col justify-between p-4 bg-[#000000] overflow-hidden select-none">
       {/* Top Legend Badges */}
       <div className="flex items-center justify-between z-10 font-['Epilogue'] text-xs">
         <div className="flex items-center gap-2 bg-[#201f1f]/80 px-3 py-1 rounded-full border border-[#27272A] backdrop-blur-sm">
@@ -932,7 +932,7 @@ function IdleOverlay({
     const joinUrl = origin ? `${origin}/arenas/${code}` : `/arenas/${code}`;
 
     return (
-      <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-[#131313]/90 backdrop-blur-md p-6 font-['Geist']">
+      <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-[#000000]/90 backdrop-blur-md p-6 font-['Geist']">
         <div className="text-center flex flex-col items-center max-w-2xl">
           <div className="flex flex-col sm:flex-row items-center gap-8 rounded-2xl bg-[rgba(20,20,20,0.9)] border border-[#27272A] p-8 text-white shadow-2xl backdrop-blur-xl">
             <div className="text-left flex flex-col justify-center">

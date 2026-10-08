@@ -2,9 +2,9 @@ import { Skeleton } from '@/components/ui';
 
 export default function ArenaLoading() {
   return (
-    <div className="min-h-screen bg-[#131313] text-[#e5e2e1] font-['Geist'] flex flex-col antialiased">
+    <div className="min-h-screen bg-[#000000] text-[#e5e2e1] font-['Geist'] flex flex-col antialiased">
       {/* Top Arena Header Bar */}
-      <header className="h-16 px-4 md:px-6 border-b border-[#27272A] bg-[rgba(20,20,20,0.85)] backdrop-blur-xl flex items-center justify-between sticky top-0 z-40">
+      <header className="h-16 px-4 md:px-6 border-b border-[#27272A] bg-[#000000]/80 backdrop-blur-xl flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-3">
           <Skeleton className="w-8 h-8 rounded-lg" />
           <div className="flex items-center gap-2">

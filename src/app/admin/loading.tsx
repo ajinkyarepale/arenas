@@ -2,9 +2,9 @@ import { Skeleton } from '@/components/ui';
 
 export default function AdminLoading() {
   return (
-    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
+    <div className="bg-[#000000] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
       {/* Sidebar Silhouette */}
-      <aside className="hidden md:flex flex-col w-64 fixed inset-y-0 z-40 bg-[#141414] border-r border-[#27272A] p-4 justify-between">
+      <aside className="hidden md:flex flex-col w-64 fixed inset-y-0 z-40 bg-[#000000] border-r border-[#27272A] p-4 justify-between">
         <div className="space-y-6">
           <div className="flex items-center gap-3 px-2 py-1">
             <Skeleton className="w-8 h-8 rounded-lg" />
@@ -24,7 +24,7 @@ export default function AdminLoading() {
       {/* Main Content Area */}
       <div className="flex-1 md:ml-64 flex flex-col min-h-screen pt-16 md:pt-0">
         {/* Top Navbar */}
-        <header className="hidden md:flex bg-[rgba(20,20,20,0.7)] top-0 sticky border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
+        <header className="hidden md:flex bg-[#000000]/80 top-0 sticky border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
           <Skeleton className="h-4 w-36" />
           <div className="flex items-center gap-3">
             <Skeleton className="h-8 w-28 rounded-full" />

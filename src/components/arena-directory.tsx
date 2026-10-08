@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 import { ArenaShareModal } from '@/components/arena/arena-share-modal';
+import { ArenaStatusModal } from '@/components/arena/arena-status-modal';
 import { formatDateTime, formatDuration, formatPoints } from '@/lib/format';
 
 export interface DirectoryArena {
@@ -13,6 +15,7 @@ export interface DirectoryArena {
   name: string;
   description: string | null;
   host: string;
+  organizerId?: string;
   marketCategory?: 'CRYPTO_PRICE' | 'CAMPUS_EVENT' | 'CUSTOM_TRIVIA';
   question?: string | null;
   resolutionCriteria?: string | null;
@@ -53,11 +56,19 @@ const FILTERS: Array<{ value: Filter; label: string }> = [
 
 export function ArenaDirectory({ showJoinActions }: { showJoinActions?: boolean } = {}) {
   const router = useRouter();
+  const { data: session } = useSession();
+  const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
+  const isOrganizer =
+    session?.user?.role === 'ORGANIZER' ||
+    session?.user?.role === 'ADMIN' ||
+    isSuperAdmin;
+
   const [arenas, setArenas] = useState<DirectoryArena[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [shareArena, setShareArena] = useState<{ code: string; name: string } | null>(null);
+  const [statusArena, setStatusArena] = useState<DirectoryArena | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -193,50 +204,96 @@ export function ArenaDirectory({ showJoinActions }: { showJoinActions?: boolean 
             return (
               <div
                 key={arena.id}
-                className={`border border-[#27272A] rounded-xl p-5 flex flex-col gap-4 transition-colors group ${
+                onClick={() => {
+                  if (isOrganizer) {
+                    setStatusArena(arena);
+                  } else {
+                    router.push(
+                      arena.status === 'ENDED'
+                        ? `/arenas/${arena.code}/results`
+                        : `/arenas/${arena.code}`,
+                    );
+                  }
+                }}
+                className={`border border-[#27272A] rounded-xl p-5 flex flex-col gap-4 transition-all duration-200 group cursor-pointer hover:shadow-xl hover:shadow-black/50 ${
                   arena.status === 'ENDED'
-                    ? 'bg-[#1c1b1b] opacity-90'
-                    : 'bg-[rgba(20,20,20,0.7)] backdrop-blur-xl hover:border-[#444748]'
+                    ? 'bg-[#1c1b1b] opacity-90 hover:border-[#52525b] hover:opacity-100'
+                    : 'bg-[rgba(20,20,20,0.7)] backdrop-blur-xl hover:border-[#52525b] hover:bg-[rgba(26,26,29,0.9)]'
                 }`}
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    {arena.status === 'LIVE' ? (
-                      <span className="px-2 py-0.5 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 font-['Epilogue'] text-[11px] font-bold text-[#22C55E] flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" /> LIVE
-                      </span>
-                    ) : arena.status === 'LOBBY' ? (
-                      <span className="px-2 py-0.5 rounded-full bg-[#EAB308]/10 border border-[#EAB308]/20 font-['Epilogue'] text-[11px] font-bold text-[#EAB308]">
-                        UPCOMING
-                      </span>
-                    ) : isResolved ? (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setStatusArena(arena);
+                      }}
+                      className="group/badge inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 focus:outline-none"
+                      title="Click to change or manage arena status"
+                    >
+                      {arena.status === 'LIVE' ? (
+                        <span className="px-2 py-0.5 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 font-['Epilogue'] text-[11px] font-bold text-[#22C55E] flex items-center gap-1 group-hover/badge:border-[#22C55E]/60 shadow-sm">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" /> LIVE
+                        </span>
+                      ) : arena.status === 'LOBBY' ? (
+                        <span className="px-2 py-0.5 rounded-full bg-[#EAB308]/10 border border-[#EAB308]/20 font-['Epilogue'] text-[11px] font-bold text-[#EAB308] group-hover/badge:border-[#EAB308]/60 shadow-sm">
+                          UPCOMING
+                        </span>
+                      ) : arena.status === 'PAUSED' ? (
+                        <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 font-['Epilogue'] text-[11px] font-bold text-amber-400 group-hover/badge:border-amber-500/60 shadow-sm">
+                          PAUSED
+                        </span>
+                      ) : isResolved ? (
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full border font-['Epilogue'] text-[11px] font-bold shadow-sm ${
+                            arena.resolvedOutcome === 'YES'
+                              ? 'bg-[#22C55E]/15 border-[#22C55E]/30 text-[#22C55E]'
+                              : arena.resolvedOutcome === 'NO'
+                                ? 'bg-[#ef4444]/15 border-[#ef4444]/30 text-[#ef4444]'
+                                : 'bg-[#EAB308]/15 border-[#EAB308]/30 text-[#EAB308]'
+                          }`}
+                        >
+                          Resolved — {arena.resolvedOutcome}
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] group-hover/badge:border-[#52525b] shadow-sm">
+                          Finished — awaiting resolution
+                        </span>
+                      )}
                       <span
-                        className={`px-2.5 py-0.5 rounded-full border font-['Epilogue'] text-[11px] font-bold ${
-                          arena.resolvedOutcome === 'YES'
-                            ? 'bg-[#22C55E]/15 border-[#22C55E]/30 text-[#22C55E]'
-                            : arena.resolvedOutcome === 'NO'
-                              ? 'bg-[#ef4444]/15 border-[#ef4444]/30 text-[#ef4444]'
-                              : 'bg-[#EAB308]/15 border-[#EAB308]/30 text-[#EAB308]'
-                        }`}
+                        className="p-0.5 rounded text-[#a1a1aa] group-hover/badge:text-white group-hover/badge:bg-[#27272A] transition-colors"
+                        title="Click to change status"
                       >
-                        Resolved — {arena.resolvedOutcome}
+                        <span className="material-symbols-outlined text-[13px] block">tune</span>
                       </span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8]">
-                        Finished — awaiting resolution
-                      </span>
-                    )}
+                    </button>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setShareArena({ code: arena.code, name: arena.name })}
-                      className="p-1 rounded bg-[#201f1f] hover:bg-[#27272A] border border-[#27272A] text-[#c4c7c8] hover:text-white transition-colors text-xs flex items-center gap-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setStatusArena(arena);
+                      }}
+                      className="px-2 py-0.5 rounded bg-[#201f1f] hover:bg-[#27272A] border border-[#27272A] hover:border-[#3f3f46] text-[#c4c7c8] hover:text-white transition-colors text-[10px] font-['Epilogue'] font-bold flex items-center gap-1 shadow-sm"
+                      title="Change Status"
+                    >
+                      <span className="material-symbols-outlined text-[13px] text-[#22C55E]">tune</span>
+                      <span className="hidden sm:inline">Status</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShareArena({ code: arena.code, name: arena.name });
+                      }}
+                      className="p-1 rounded bg-[#201f1f] hover:bg-[#27272A] border border-[#27272A] text-[#c4c7c8] hover:text-white transition-colors text-xs flex items-center gap-1 shadow-sm"
                       title="Share Arena & QR Code"
                     >
                       <span className="material-symbols-outlined text-[14px]">qr_code_2</span>
                     </button>
-                    <span className="px-2 py-0.5 rounded bg-[#201f1f] border border-[#27272A] font-mono text-xs font-semibold text-white">
+                    <span className="px-2 py-0.5 rounded bg-[#201f1f] border border-[#27272A] font-mono text-xs font-semibold text-white shadow-sm">
                       {arena.code}
                     </span>
                   </div>
@@ -346,6 +403,7 @@ export function ArenaDirectory({ showJoinActions }: { showJoinActions?: boolean 
                       ? `/arenas/${arena.code}/results`
                       : `/arenas/${arena.code}`
                   }
+                  onClick={(e) => e.stopPropagation()}
                   className={`mt-auto w-full py-2 rounded-full font-['Epilogue'] text-xs text-center font-medium transition-colors ${
                     arena.status === 'ENDED'
                       ? 'border border-[#27272A] text-white hover:bg-[#201f1f]'
@@ -367,6 +425,43 @@ export function ArenaDirectory({ showJoinActions }: { showJoinActions?: boolean 
           name={shareArena.name}
           isOpen={true}
           onClose={() => setShareArena(null)}
+        />
+      )}
+
+      {/* Status Modal */}
+      {statusArena && (
+        <ArenaStatusModal
+          arena={statusArena}
+          isOpen={true}
+          isSuperAdmin={isSuperAdmin}
+          onClose={() => setStatusArena(null)}
+          onStatusChange={(newStatus, resolvedOutcome) => {
+            setArenas((prev) =>
+              prev
+                ? prev.map((a) =>
+                    a.id === statusArena.id
+                      ? {
+                          ...a,
+                          status: newStatus,
+                          resolvedOutcome:
+                            resolvedOutcome !== undefined ? resolvedOutcome : a.resolvedOutcome,
+                          resolvedAt: resolvedOutcome ? new Date().toISOString() : a.resolvedAt,
+                        }
+                      : a,
+                  )
+                : prev,
+            );
+            setStatusArena((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    status: newStatus,
+                    resolvedOutcome:
+                      resolvedOutcome !== undefined ? resolvedOutcome : prev.resolvedOutcome,
+                  }
+                : null,
+            );
+          }}
         />
       )}
     </div>

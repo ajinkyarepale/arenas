@@ -2,9 +2,9 @@ import { Skeleton } from '@/components/ui';
 
 export default function DashboardLoading() {
   return (
-    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
+    <div className="bg-[#000000] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
       {/* Sidebar Silhouette */}
-      <aside className="hidden md:flex flex-col w-64 fixed inset-y-0 z-40 bg-[#141414] border-r border-[#27272A] p-4 justify-between">
+      <aside className="hidden md:flex flex-col w-64 fixed inset-y-0 z-40 bg-[#000000] border-r border-[#27272A] p-4 justify-between">
         <div className="space-y-6">
           <div className="flex items-center gap-3 px-2 py-1">
             <Skeleton className="w-8 h-8 rounded-lg" />
@@ -24,7 +24,7 @@ export default function DashboardLoading() {
       {/* Main Content Area */}
       <main className="flex-1 md:ml-64 flex flex-col min-h-screen relative pt-16 md:pt-0">
         {/* Top Navbar */}
-        <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-30">
+        <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[#000000]/80 border-b border-[#27272A] backdrop-blur-xl z-30">
           <Skeleton className="h-4 w-48" />
           <div className="flex items-center gap-4 ml-auto">
             <Skeleton className="h-4 w-32" />

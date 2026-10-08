@@ -59,6 +59,7 @@ export async function GET(request: Request) {
       resolvedOutcome: true,
       resolvedAt: true,
       createdAt: true,
+      organizerId: true,
       organizer: { select: { name: true } },
       _count: { select: { participants: true, trades: true } },
       rounds: {
@@ -117,6 +118,7 @@ export async function GET(request: Request) {
       name: event.name,
       description: event.description,
       host: event.hostName ?? event.organizer.name,
+      organizerId: event.organizerId,
       marketCategory: event.marketCategory,
       question: latestRound?.question || event.question || null,
       resolutionCriteria: event.resolutionCriteria || null,

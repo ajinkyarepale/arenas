@@ -225,7 +225,7 @@ export default function LandingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-[#131313]/90 backdrop-blur-xl w-full border-t border-[#27272A] flex flex-col sm:flex-row justify-between items-center py-6 px-6 gap-4">
+      <footer className="bg-[#000000]/90 backdrop-blur-xl w-full border-t border-[#27272A] flex flex-col sm:flex-row justify-between items-center py-6 px-6 gap-4">
         <span className="font-['Epilogue'] text-xs text-[#c4c7c8]">
           © 2026 Arenas Platform. All rights reserved.
         </span>

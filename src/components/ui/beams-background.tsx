@@ -196,7 +196,7 @@ export function BeamsBackground({
   }, [intensity]);
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-[#f8fafc] dark:bg-[#131313]">
+    <div className="relative w-full min-h-screen overflow-hidden bg-[#f8fafc] dark:bg-[#000000]">
       {/* Ambient beams canvas with mobile-safe GPU-accelerated blur */}
       <canvas
         className="pointer-events-none fixed inset-0 z-0 opacity-15 dark:opacity-70 blur-[18px] md:blur-[28px] transform-gpu will-change-transform"

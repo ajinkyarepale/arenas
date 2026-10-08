@@ -176,7 +176,123 @@ export async function POST(
       }
     }
 
-    switch (parsed.data.action) {
+    const action = parsed.data.action ?? (parsed.data.status ? 'set-status' : undefined);
+
+    switch (action) {
+      case 'set-status': {
+        const target = parsed.data.status;
+        if (!target) return apiError('Status is required for set-status action.', 400);
+
+        if (target === 'LIVE') {
+          if (arena.status === 'LIVE') return NextResponse.json({ arena });
+          if (arena.status === 'ENDED') return apiError('This arena has already finished.', 409);
+          const started = await startEvent(arena.id);
+          void createAuditLog({
+            actorId: user.id,
+            action: 'ARENA_STATUS_CHANGED',
+            resourceType: 'EVENT',
+            resourceId: arena.id,
+            previousData: { status: arena.status },
+            newData: { status: 'LIVE' },
+            metadata: { code: arena.code, name: arena.name, action: 'start' },
+          });
+          return NextResponse.json({
+            arena: { id: started.id, status: started.status, currentRound: started.currentRound },
+          });
+        }
+
+        if (target === 'PAUSED') {
+          if (arena.status === 'LIVE') {
+            await pauseEvent(arena.id);
+          }
+          const updated = await prisma.event.update({
+            where: { id: arena.id },
+            data: { status: 'PAUSED' },
+            select: { id: true, status: true, currentRound: true },
+          });
+          void createAuditLog({
+            actorId: user.id,
+            action: 'ARENA_STATUS_CHANGED',
+            resourceType: 'EVENT',
+            resourceId: arena.id,
+            previousData: { status: arena.status },
+            newData: { status: 'PAUSED' },
+            metadata: { code: arena.code, name: arena.name, action: 'pause' },
+          });
+          return NextResponse.json({ arena: updated });
+        }
+
+        if (target === 'LOBBY') {
+          if (arena.status === 'LIVE') {
+            await pauseEvent(arena.id);
+          }
+          const updated = await prisma.event.update({
+            where: { id: arena.id },
+            data: { status: 'LOBBY' },
+            select: { id: true, status: true, currentRound: true },
+          });
+          void createAuditLog({
+            actorId: user.id,
+            action: 'ARENA_STATUS_CHANGED',
+            resourceType: 'EVENT',
+            resourceId: arena.id,
+            previousData: { status: arena.status },
+            newData: { status: 'LOBBY' },
+            metadata: { code: arena.code, name: arena.name, action: 'lobby' },
+          });
+          return NextResponse.json({ arena: updated });
+        }
+
+        if (target === 'ENDED') {
+          if (arena.status === 'ENDED') return NextResponse.json({ arena });
+          const ended = await endEvent(arena.id);
+          void createAuditLog({
+            actorId: user.id,
+            action: 'ARENA_STATUS_CHANGED',
+            resourceType: 'EVENT',
+            resourceId: arena.id,
+            previousData: { status: arena.status },
+            newData: { status: 'ENDED' },
+            metadata: { code: arena.code, name: arena.name, action: 'end' },
+          });
+          return NextResponse.json({
+            arena: { id: ended.id, status: ended.status, currentRound: ended.currentRound },
+          });
+        }
+
+        if (target === 'ARCHIVED') {
+          if (user.role !== 'SUPERADMIN') {
+            return forbidden('Only a superadmin can archive arenas.');
+          }
+          const archived = await prisma.event.update({
+            where: { id: arena.id },
+            data: { status: 'ARCHIVED' },
+            select: { id: true, status: true, currentRound: true },
+          });
+          void createAuditLog({
+            actorId: user.id,
+            action: 'ARENA_STATUS_CHANGED',
+            resourceType: 'EVENT',
+            resourceId: arena.id,
+            previousData: { status: arena.status },
+            newData: { status: 'ARCHIVED' },
+            metadata: { code: arena.code, name: arena.name, action: 'archive' },
+          });
+          return NextResponse.json({ arena: archived });
+        }
+
+        if (target === 'DRAFT') {
+          const updated = await prisma.event.update({
+            where: { id: arena.id },
+            data: { status: 'DRAFT' },
+            select: { id: true, status: true, currentRound: true },
+          });
+          return NextResponse.json({ arena: updated });
+        }
+
+        return apiError('Unsupported target status.', 400);
+      }
+
       case 'update-rules': {
         return NextResponse.json({ arena });
       }

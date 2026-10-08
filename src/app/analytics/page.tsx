@@ -102,38 +102,38 @@ export default function AnalyticsOverviewPage() {
   // If a tournament is selected for deep-dive, show the rich tournament analytics view inside standard App layout
   if (selectedArena) {
     return (
-      <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
+      <div className="bg-[#000000] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
         {/* Sidebar Navigation */}
         <SiteSidebar />
 
         {/* Main Content Area */}
         <AppShell>
           {/* Top return banner */}
-          <header className="sticky top-0 z-30 bg-[rgba(20,20,20,0.85)] border-b border-[#27272A] px-4 sm:px-6 h-16 flex items-center justify-between backdrop-blur-xl">
+          <header className="sticky top-0 z-30 bg-zinc-950/80 border-b border-zinc-800/80 px-4 sm:px-6 h-14 flex items-center justify-between backdrop-blur-xl">
             <div className="flex items-center gap-3 min-w-0">
               <button
                 onClick={() => setSelectedArena(null)}
-                className="flex items-center gap-1.5 text-xs font-['Epilogue'] font-bold text-[#c4c7c8] hover:text-white bg-[#201f1f] hover:bg-[#27272A] px-3.5 py-1.5 rounded-full border border-[#27272A] active:scale-95 transition-all shadow-sm shrink-0"
+                className="flex items-center gap-2 text-xs font-medium text-zinc-300 hover:text-white bg-zinc-900/90 hover:bg-zinc-800 px-3 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 active:scale-95 transition-all shadow-sm shrink-0 font-sans"
               >
                 <span className="material-symbols-outlined text-sm">arrow_back</span>
                 <span>Back to Overview</span>
               </button>
-              <div className="h-4 w-px bg-[#27272A] hidden sm:block" />
-              <span className="font-['Epilogue'] text-xs font-bold text-white tracking-wider uppercase truncate hidden sm:inline">
+              <div className="h-4 w-px bg-zinc-800 hidden sm:block" />
+              <span className="font-sans text-sm font-semibold text-zinc-100 tracking-tight truncate hidden sm:inline">
                 {selectedArena.name}
               </span>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0">
-              <span className="font-mono text-xs text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 px-2.5 py-1 rounded-full font-bold">
+            <div className="flex items-center gap-2.5 shrink-0">
+              <span className="font-mono text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md font-semibold tabular-nums">
                 {selectedArena.code}
               </span>
               <Link
                 href={`/arenas/${selectedArena.code}/screen`}
                 target="_blank"
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#201f1f] hover:bg-[#27272A] border border-[#27272A] text-xs font-['Epilogue'] font-bold text-[#c4c7c8] hover:text-white transition-all active:scale-95"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-xs font-medium text-zinc-300 hover:text-white transition-all font-sans active:scale-95"
               >
-                <span className="material-symbols-outlined text-[15px] text-[#38BDF8]">desktop_windows</span>
+                <span className="material-symbols-outlined text-[15px] text-sky-400">desktop_windows</span>
                 <span>Big Screen ↗</span>
               </Link>
               <SwitchButton size="sm" showLabel={false} />
@@ -160,14 +160,14 @@ export default function AnalyticsOverviewPage() {
   }
 
   return (
-    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
+    <div className="bg-[#000000] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
       {/* Sidebar Navigation */}
       <SiteSidebar />
 
       {/* Main Content Area */}
       <AppShell>
         {/* Top Header */}
-        <header className="hidden md:flex bg-[rgba(20,20,20,0.7)] top-0 sticky border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
+        <header className="hidden md:flex bg-[#000000]/80 top-0 sticky border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
           <div>
             <span className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] tracking-wider uppercase">
               GLOBAL ANALYTICS

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#131313',
+  themeColor: '#000000',
   colorScheme: 'dark',
   width: 'device-width',
   initialScale: 1,
@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700;800&family=Geist:wght@300;400;500;600;700;800;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Inter:wght@300..900&family=JetBrains+Mono:wght@400..700&display=swap"
           rel="stylesheet"
         />
         <link
@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="bg-[#f8fafc] text-slate-900 dark:bg-[#131313] dark:text-[#e5e2e1] min-h-screen font-sans antialiased selection:bg-zinc-800 selection:text-white transition-colors duration-200">
+      <body className="bg-[#f8fafc] text-slate-900 dark:bg-[#000000] dark:text-[#e5e2e1] min-h-screen font-sans antialiased selection:bg-zinc-800 selection:text-white transition-colors duration-200">
         <Providers>{children}</Providers>
       </body>
     </html>

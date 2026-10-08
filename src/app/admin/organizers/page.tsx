@@ -109,7 +109,7 @@ export default function AdminOrganizersPage() {
     : [];
 
   return (
-    <div className="min-h-screen bg-[#131313] text-[#e5e2e1] font-['Geist'] px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#000000] text-[#e5e2e1] font-['Geist'] px-4 py-8 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto flex flex-col gap-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#27272A] pb-5">

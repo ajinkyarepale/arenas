@@ -13,14 +13,14 @@ export const metadata: Metadata = {
 
 export default function MarketsPage() {
   return (
-    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
+    <div className="bg-[#000000] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
       {/* SideNavBar (Responsive Drawer) */}
       <SiteSidebar />
 
       {/* Main Content Wrapper */}
       <AppShell>
         {/* Desktop TopNavBar */}
-        <header className="hidden md:flex top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
+        <header className="hidden md:flex top-0 sticky bg-[#000000]/80 border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
           <div className="flex items-center gap-2">
             <span className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] tracking-wider uppercase">
               MARKETS DIRECTORY
@@ -49,7 +49,7 @@ export default function MarketsPage() {
           <ArenaDirectory />
         </AppContent>
 
-        <footer className="bg-[#131313] w-full border-t border-[#27272A] flex flex-col sm:flex-row justify-between items-center py-6 px-6 md:px-12 gap-4 mt-auto">
+        <footer className="bg-[#000000] w-full border-t border-[#27272A] flex flex-col sm:flex-row justify-between items-center py-6 px-6 md:px-12 gap-4 mt-auto">
           <span className="font-['Epilogue'] text-xs text-[#c4c7c8] text-center sm:text-left">
             © 2024 Arenas Markets. All rights reserved.
           </span>

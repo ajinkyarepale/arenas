@@ -12,14 +12,14 @@ export const metadata: Metadata = {
 
 export default function InfoPage() {
   return (
-    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
+    <div className="bg-[#000000] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
       {/* SideNavBar */}
       <SiteSidebar />
 
       {/* Main Content Wrapper */}
       <AppShell>
         {/* Desktop TopNavBar */}
-        <header className="hidden md:flex bg-[rgba(20,20,20,0.7)] top-0 sticky border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
+        <header className="hidden md:flex bg-[#000000]/80 top-0 sticky border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
           <div>
             <span className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] tracking-wider uppercase">
               ABOUT ARENAS
@@ -62,7 +62,7 @@ export default function InfoPage() {
           </div>
         </main>
 
-        <footer className="bg-[#131313] w-full border-t border-[#27272A] flex flex-col sm:flex-row justify-between items-center py-6 px-12 gap-4 mt-auto">
+        <footer className="bg-[#000000] w-full border-t border-[#27272A] flex flex-col sm:flex-row justify-between items-center py-6 px-12 gap-4 mt-auto">
           <span className="font-['Epilogue'] text-xs text-[#c4c7c8]">
             © 2024 Arenas Markets. All rights reserved.
           </span>

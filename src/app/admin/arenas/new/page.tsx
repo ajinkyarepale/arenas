@@ -18,14 +18,14 @@ export default async function NewArenaPage() {
   if (!isOrganizer(session.user.role)) redirect('/dashboard?error=organizer-only');
 
   return (
-    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
+    <div className="bg-[#000000] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
       {/* SideNavBar */}
       <SiteSidebar />
 
       {/* Main Content Wrapper */}
       <AppShell>
         {/* Desktop TopNavBar */}
-        <header className="hidden md:flex bg-[rgba(20,20,20,0.7)] top-0 sticky border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
+        <header className="hidden md:flex bg-[#000000]/80 top-0 sticky border-b border-[#27272A] backdrop-blur-xl justify-between items-center h-16 px-6 z-30">
           <div className="flex items-center gap-3">
             <Link href="/admin" className="flex items-center gap-1.5 text-[#c4c7c8] hover:text-white font-['Epilogue'] text-xs font-bold transition-colors">
               <span className="material-symbols-outlined text-base">arrow_back</span>

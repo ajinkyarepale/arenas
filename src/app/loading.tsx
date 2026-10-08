@@ -2,9 +2,9 @@ import { Skeleton } from '@/components/ui';
 
 export default function RootLoading() {
   return (
-    <div className="min-h-screen bg-[#131313] text-[#e5e2e1] font-['Geist'] flex flex-col">
+    <div className="min-h-screen bg-[#000000] text-[#e5e2e1] font-['Geist'] flex flex-col">
       {/* Top Navigation Skeleton */}
-      <header className="h-16 px-6 border-b border-[#27272A] bg-[rgba(20,20,20,0.7)] backdrop-blur-xl flex items-center justify-between sticky top-0 z-30">
+      <header className="h-16 px-6 border-b border-[#27272A] bg-[#000000]/80 backdrop-blur-xl flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-3">
           <Skeleton className="w-8 h-8 rounded-lg" />
           <Skeleton className="h-5 w-24" />

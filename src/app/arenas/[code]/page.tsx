@@ -71,14 +71,14 @@ export default async function ArenaJoinPage({ params }: { params: { code: string
   }
 
   return (
-    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
+    <div className="bg-[#000000] text-[#e5e2e1] font-['Geist'] min-h-screen flex">
       {/* SideNavBar */}
       <SiteSidebar />
 
       {/* Main Content Area */}
       <AppShell className="relative">
         {/* Desktop TopNavBar */}
-        <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-30">
+        <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[#000000]/80 border-b border-[#27272A] backdrop-blur-xl z-30">
           <div>
             <span className="font-['Epilogue'] text-xs font-bold text-[#c4c7c8] tracking-wider uppercase">
               JOIN TOURNAMENT
@@ -133,7 +133,7 @@ export default async function ArenaJoinPage({ params }: { params: { code: string
         </div>
 
         {/* Footer */}
-        <footer className="w-full mt-auto flex justify-between items-center py-6 px-12 border-t border-[#27272A] bg-[#131313] text-[#c4c7c8] text-xs">
+        <footer className="w-full mt-auto flex justify-between items-center py-6 px-12 border-t border-[#27272A] bg-[#000000] text-[#c4c7c8] text-xs">
           <p>© 2024 Arenas Markets. All rights reserved.</p>
           <div className="flex gap-6 font-['Epilogue'] text-[11px]">
             <Link href="/guide" className="hover:text-white underline">Legal</Link>

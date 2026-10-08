@@ -4,9 +4,9 @@
 
 @layer base {
   :root {
-    --font-sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-display: 'Chakra Petch', 'Barlow', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    --font-sans: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --font-display: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
     /* Safe-area insets, defaulted to 0 on devices without a notch. */
     --safe-top: env(safe-area-inset-top, 0px);
@@ -21,7 +21,7 @@
   }
 
   html.dark {
-    background-color: #04060d;
+    background-color: #000000;
     color-scheme: dark;
   }
 
@@ -54,7 +54,7 @@
   }
 
   html.dark body {
-    @apply bg-ink-950 text-fg;
+    @apply bg-black text-fg;
   }
 
   html:not(.dark) body {
@@ -63,17 +63,21 @@
   }
 
   /**
-   * Atmosphere. Low-opacity radial glows break the flat black and give depth.
+   * Atmosphere. Clean deep black with no colored halos in dark mode.
    */
   html.dark body::before {
+    display: none;
+  }
+
+  html:not(.dark) body::before {
     content: '';
     position: fixed;
     inset: 0;
     z-index: -1;
     pointer-events: none;
     background:
-      radial-gradient(60rem 40rem at 82% 12%, rgba(61, 155, 255, 0.1), transparent 62%),
-      radial-gradient(48rem 36rem at 12% 82%, rgba(0, 232, 150, 0.055), transparent 62%);
+      radial-gradient(60rem 40rem at 82% 12%, rgba(61, 155, 255, 0.08), transparent 62%),
+      radial-gradient(48rem 36rem at 12% 82%, rgba(0, 232, 150, 0.06), transparent 62%);
   }
 
   html:not(.dark) body::before {
@@ -99,6 +103,7 @@
   }
 
   /* Primary elevated surfaces (cards, sidebars, modals, headers) */
+  html:not(.dark) .bg-\[\#000000\],
   html:not(.dark) .bg-\[\#131313\],
   html:not(.dark) .bg-\[\#141414\],
   html:not(.dark) .bg-\[\#18181B\],

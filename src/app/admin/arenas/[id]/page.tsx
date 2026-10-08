@@ -61,14 +61,14 @@ export default async function ManageArenaPage({ params }: { params: { id: string
   const market = await getArenaAnalytics(arena.id);
 
   return (
-    <div className="bg-[#131313] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
+    <div className="bg-[#000000] text-[#e5e2e1] font-['Geist'] min-h-screen flex antialiased">
       {/* SideNavBar */}
       <SiteSidebar />
 
       {/* Main Content Area */}
       <AppShell className="relative">
         {/* Desktop TopNavBar */}
-        <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[rgba(20,20,20,0.7)] border-b border-[#27272A] backdrop-blur-xl z-30">
+        <header className="hidden md:flex justify-between items-center h-16 px-6 top-0 sticky bg-[#000000]/80 border-b border-[#27272A] backdrop-blur-xl z-30">
           <div className="flex items-center gap-3">
             <Link
               href="/admin"

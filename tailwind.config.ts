@@ -15,7 +15,7 @@ const config: Config = {
     extend: {
       colors: {
         ink: {
-          950: '#04060d', // the infinite canvas
+          950: '#000000', // the infinite canvas
           900: '#0b0e16', // surface-container-lowest
           850: '#10131b', // surface
           800: '#191b24', // surface-container-low
