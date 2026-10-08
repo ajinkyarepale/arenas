@@ -89,7 +89,7 @@ export function SiteSidebar() {
         } ${collapsed ? 'md:w-16 md:px-2' : 'md:w-64 md:px-4'}`}
       >
         {/* Brand Header */}
-        <div className={cx("flex items-center mb-6", collapsed ? "flex-col gap-3 px-0 items-center" : "justify-between px-2")}>
+        <div className={cx("flex items-center mb-6", collapsed ? "justify-center px-0" : "justify-between px-2")}>
           {collapsed ? (
             <Link
               href="/"
@@ -102,18 +102,16 @@ export function SiteSidebar() {
             <Link
               href="/"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2.5"
+              className="flex flex-col gap-0.5 min-w-0"
             >
-              <BrandLogo variant="mark" size={30} theme="white" />
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <h1 className="font-['Geist'] text-xl font-bold text-white tracking-tight">Arenas</h1>
-                  <span className="text-[10px] font-['Epilogue'] font-bold text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 px-1.5 py-0.5 rounded uppercase">
-                    v1.0
-                  </span>
-                </div>
-                <p className="font-['Geist'] text-[11px] text-[#c4c7c8]">Campus Prediction Market</p>
+              <div className="flex items-center gap-2">
+                <BrandLogo variant="mark" size={24} theme="white" />
+                <h1 className="font-['Geist'] text-2xl font-bold text-white tracking-tight">Arenas</h1>
+                <span className="text-[10px] font-['Epilogue'] font-bold text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 px-1.5 py-0.5 rounded uppercase">
+                  v1.0
+                </span>
               </div>
+              <p className="font-['Geist'] text-xs text-[#c4c7c8] whitespace-nowrap">Campus Prediction Market</p>
             </Link>
           )}
 
