@@ -221,79 +221,51 @@ export function ArenaDirectory({ showJoinActions }: { showJoinActions?: boolean 
                     : 'bg-[rgba(20,20,20,0.7)] backdrop-blur-xl hover:border-[#52525b] hover:bg-[rgba(26,26,29,0.9)]'
                 }`}
               >
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setStatusArena(arena);
-                      }}
-                      className="group/badge inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 focus:outline-none"
-                      title="Click to change or manage arena status"
-                    >
-                      {arena.status === 'LIVE' ? (
-                        <span className="px-2 py-0.5 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 font-['Epilogue'] text-[11px] font-bold text-[#22C55E] flex items-center gap-1 group-hover/badge:border-[#22C55E]/60 shadow-sm">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" /> LIVE
-                        </span>
-                      ) : arena.status === 'LOBBY' ? (
-                        <span className="px-2 py-0.5 rounded-full bg-[#EAB308]/10 border border-[#EAB308]/20 font-['Epilogue'] text-[11px] font-bold text-[#EAB308] group-hover/badge:border-[#EAB308]/60 shadow-sm">
-                          UPCOMING
-                        </span>
-                      ) : arena.status === 'PAUSED' ? (
-                        <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 font-['Epilogue'] text-[11px] font-bold text-amber-400 group-hover/badge:border-amber-500/60 shadow-sm">
-                          PAUSED
-                        </span>
-                      ) : isResolved ? (
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full border font-['Epilogue'] text-[11px] font-bold shadow-sm ${
-                            arena.resolvedOutcome === 'YES'
-                              ? 'bg-[#22C55E]/15 border-[#22C55E]/30 text-[#22C55E]'
-                              : arena.resolvedOutcome === 'NO'
-                                ? 'bg-[#ef4444]/15 border-[#ef4444]/30 text-[#ef4444]'
-                                : 'bg-[#EAB308]/15 border-[#EAB308]/30 text-[#EAB308]'
-                          }`}
-                        >
-                          Resolved — {arena.resolvedOutcome}
-                        </span>
-                      ) : (
-                        <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] group-hover/badge:border-[#52525b] shadow-sm">
-                          Finished — awaiting resolution
-                        </span>
-                      )}
-                      <span
-                        className="p-0.5 rounded text-[#a1a1aa] group-hover/badge:text-white group-hover/badge:bg-[#27272A] transition-colors"
-                        title="Click to change status"
-                      >
-                        <span className="material-symbols-outlined text-[13px] block">tune</span>
+                <div className="flex justify-between items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {arena.status === 'LIVE' ? (
+                      <span className="px-2 py-0.5 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 font-['Epilogue'] text-[11px] font-bold text-[#22C55E] flex items-center gap-1 whitespace-nowrap shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" /> LIVE
                       </span>
-                    </button>
+                    ) : arena.status === 'LOBBY' ? (
+                      <span className="px-2 py-0.5 rounded-full bg-[#EAB308]/10 border border-[#EAB308]/20 font-['Epilogue'] text-[11px] font-bold text-[#EAB308] whitespace-nowrap shrink-0">
+                        UPCOMING
+                      </span>
+                    ) : arena.status === 'PAUSED' ? (
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 font-['Epilogue'] text-[11px] font-bold text-amber-400 whitespace-nowrap shrink-0">
+                        PAUSED
+                      </span>
+                    ) : isResolved ? (
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full border font-['Epilogue'] text-[11px] font-bold whitespace-nowrap shrink-0 ${
+                          arena.resolvedOutcome === 'YES'
+                            ? 'bg-[#22C55E]/15 border-[#22C55E]/30 text-[#22C55E]'
+                            : arena.resolvedOutcome === 'NO'
+                              ? 'bg-[#ef4444]/15 border-[#ef4444]/30 text-[#ef4444]'
+                              : 'bg-[#EAB308]/15 border-[#EAB308]/30 text-[#EAB308]'
+                        }`}
+                      >
+                        Resolved — {arena.resolvedOutcome}
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full bg-[#201f1f] border border-[#27272A] font-['Epilogue'] text-[11px] font-bold text-[#c4c7c8] whitespace-nowrap shrink-0">
+                        Finished — awaiting resolution
+                      </span>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setStatusArena(arena);
-                      }}
-                      className="px-2 py-0.5 rounded bg-[#201f1f] hover:bg-[#27272A] border border-[#27272A] hover:border-[#3f3f46] text-[#c4c7c8] hover:text-white transition-colors text-[10px] font-['Epilogue'] font-bold flex items-center gap-1 shadow-sm"
-                      title="Change Status"
-                    >
-                      <span className="material-symbols-outlined text-[13px] text-[#22C55E]">tune</span>
-                      <span className="hidden sm:inline">Status</span>
-                    </button>
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setShareArena({ code: arena.code, name: arena.name });
                       }}
-                      className="p-1 rounded bg-[#201f1f] hover:bg-[#27272A] border border-[#27272A] text-[#c4c7c8] hover:text-white transition-colors text-xs flex items-center gap-1 shadow-sm"
+                      className="p-1 rounded bg-[#201f1f] hover:bg-[#27272A] border border-[#27272A] text-[#c4c7c8] hover:text-white transition-colors text-xs flex items-center gap-1 shrink-0"
                       title="Share Arena & QR Code"
                     >
                       <span className="material-symbols-outlined text-[14px]">qr_code_2</span>
                     </button>
-                    <span className="px-2 py-0.5 rounded bg-[#201f1f] border border-[#27272A] font-mono text-xs font-semibold text-white shadow-sm">
+                    <span className="px-2 py-0.5 rounded bg-[#201f1f] border border-[#27272A] font-mono text-xs font-semibold text-white whitespace-nowrap shrink-0">
                       {arena.code}
                     </span>
                   </div>
