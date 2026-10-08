@@ -11,7 +11,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export const metadata: Metadata = {
-  title: 'Organizer Dashboard — Arenas',
+  title: 'Organizer Dashboard',
   description: 'Manage your prediction market tournaments and monitor live engagement.',
 };
 export const dynamic = 'force-dynamic';

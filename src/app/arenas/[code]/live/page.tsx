@@ -15,9 +15,9 @@ export async function generateMetadata({
   params: { code: string };
 }): Promise<Metadata> {
   const parsed = joinCodeSchema.safeParse(params.code);
-  if (!parsed.success) return { title: 'Arena · Arenas' };
+  if (!parsed.success) return { title: 'Live Arena' };
   const arena = await findArenaByCode(parsed.data);
-  if (!arena) return { title: 'Arena Not Found · Arenas' };
+  if (!arena) return { title: 'Arena Not Found' };
 
   const description =
     arena.description ||

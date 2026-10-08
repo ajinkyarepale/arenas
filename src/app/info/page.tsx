@@ -6,7 +6,7 @@ import { SiteNavAuth } from '@/components/site-nav-auth';
 import { SiteSidebar } from '@/components/site-sidebar';
 
 export const metadata: Metadata = {
-  title: 'About — Arenas',
+  title: 'About',
   description: 'Learn about Arenas, the campus prediction market engine.',
 };
 

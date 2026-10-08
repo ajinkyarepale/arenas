@@ -9,7 +9,7 @@ import { auth } from '@/lib/auth';
 import { formatPoints } from '@/lib/format';
 import { prisma } from '@/lib/prisma';
 
-export const metadata: Metadata = { title: 'Results · Arenas' };
+export const metadata: Metadata = { title: 'Tournament Results' };
 export const dynamic = 'force-dynamic';
 
 export default async function ArenaResultsPage({

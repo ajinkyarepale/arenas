@@ -20,16 +20,16 @@ export async function generateMetadata({
   params: { code: string };
 }): Promise<Metadata> {
   const parsed = joinCodeSchema.safeParse(params.code);
-  if (!parsed.success) return { title: 'Arena · Arenas' };
+  if (!parsed.success) return { title: 'Arena' };
   const arena = await findArenaByCode(parsed.data);
-  if (!arena) return { title: 'Arena Not Found · Arenas' };
+  if (!arena) return { title: 'Arena Not Found' };
 
   const description =
     arena.description ||
     `Join ${arena.name} (${arena.code}) — Live binary prediction market for ${arena.asset}. Predict YES or NO in real-time.`;
 
   return {
-    title: `${arena.name} (${arena.code}) · Arenas`,
+    title: `${arena.name} (${arena.code})`,
     description,
     openGraph: {
       title: `${arena.name} | Binary Prediction Market`,

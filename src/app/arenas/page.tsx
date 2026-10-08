@@ -5,7 +5,7 @@ import { ArenaDirectory } from '@/components/arena-directory';
 import { SiteNavAuth } from '@/components/site-nav-auth';
 import { SiteSidebar } from '@/components/site-sidebar';
 
-export const metadata: Metadata = { title: 'Arenas' };
+export const metadata: Metadata = { title: 'Live Tournaments' };
 export const dynamic = 'force-dynamic';
 
 export default function ArenasPage() {

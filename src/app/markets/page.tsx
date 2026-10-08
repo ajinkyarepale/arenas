@@ -7,7 +7,7 @@ import { SiteNavAuth } from '@/components/site-nav-auth';
 import { SiteSidebar } from '@/components/site-sidebar';
 
 export const metadata: Metadata = {
-  title: 'Arena Catalog — Arenas',
+  title: 'Markets',
   description: 'Explore live, upcoming, and finished prediction market arenas across colleges.',
 };
 

@@ -9,7 +9,7 @@ import { SiteSidebar } from '@/components/site-sidebar';
 import { SwitchButton } from '@/components/ui';
 import { authOptions, isOrganizer } from '@/lib/auth';
 
-export const metadata: Metadata = { title: 'Create Arena — Arenas' };
+export const metadata: Metadata = { title: 'Create Arena' };
 export const dynamic = 'force-dynamic';
 
 export default async function NewArenaPage() {

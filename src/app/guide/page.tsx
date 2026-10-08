@@ -6,7 +6,7 @@ import { SiteNavAuth } from '@/components/site-nav-auth';
 import { SiteSidebar } from '@/components/site-sidebar';
 
 export const metadata: Metadata = {
-  title: 'Guide & Technical Docs — Arenas',
+  title: 'Platform Guide',
   description: 'Technical overview of LMSR pricing, live 5-minute candle resolution, and market rules.',
 };
 
