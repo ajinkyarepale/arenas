@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { SiteNavAuth } from '@/components/site-nav-auth';
+import { BrandLogo } from '@/components/ui';
 
 export function LandingNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -34,8 +35,11 @@ export function LandingNavbar() {
       <nav className="bg-white/70 dark:bg-transparent backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] sticky top-0 z-40 px-4 sm:px-6">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-6">
-            <Link href="/" className="font-['Geist'] text-2xl font-black text-slate-900 dark:text-white transition-colors">
-              Arenas
+            <Link href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-90">
+              <BrandLogo variant="mark" size={28} priority theme="adaptive" />
+              <span className="font-['Geist'] text-2xl font-black text-slate-900 dark:text-white transition-colors tracking-tight">
+                Arenas
+              </span>
             </Link>
 
             {/* Desktop Navigation Links — Only visible AFTER signing in */}
@@ -93,8 +97,9 @@ export function LandingNavbar() {
               <Link
                 href="/"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2.5"
               >
+                <BrandLogo variant="mark" size={26} theme="white" />
                 <span className="font-['Geist'] text-2xl font-bold text-white tracking-tight">Arenas</span>
                 <span className="text-[10px] font-['Epilogue'] font-bold text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 px-1.5 py-0.5 rounded uppercase">
                   Market

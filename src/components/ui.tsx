@@ -192,4 +192,5 @@ export * from './ui/slide-text-button';
 export * from './ui/switch-button';
 export * from './ui/kokonut-loader';
 export * from './ui/skeleton';
+export * from './ui/brand-logo';
 

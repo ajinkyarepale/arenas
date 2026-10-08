@@ -12,6 +12,7 @@ import { TournamentAnalysis } from '@/components/arena/tournament-analysis';
 import { TradePanel } from '@/components/arena/trade-panel';
 import { AppShell } from '@/components/app-shell';
 import { SiteSidebar } from '@/components/site-sidebar';
+import { BrandLogo } from '@/components/ui';
 import { useArena, useCountdown } from '@/hooks/use-arena';
 import type { ArenaPublicInfo } from '@/lib/engine/snapshot';
 import type { PositionSummary } from '@/lib/engine/trading';
@@ -213,10 +214,11 @@ export function LiveArena({
           <div className="flex items-center gap-4">
             <Link
               href="/arenas"
-              className="flex items-center gap-1.5 group text-[#c4c7c8] hover:text-white transition-colors"
+              className="flex items-center gap-2 group text-[#c4c7c8] hover:text-white transition-colors"
               title="Return to Arenas Catalog"
             >
               <span className="material-symbols-outlined text-lg transition-transform group-hover:-translate-x-0.5">arrow_back</span>
+              <BrandLogo variant="mark" size={20} theme="white" />
               <span className="font-['Geist'] text-lg font-bold text-white">Arenas</span>
             </Link>
             <div className="hidden sm:flex gap-2">
@@ -307,8 +309,9 @@ export function LiveArena({
           <div className="md:hidden flex flex-col gap-2.5 bg-[#141414] border border-[#27272A] rounded-xl p-3 font-['Epilogue'] text-xs">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Link href="/arenas" className="flex items-center text-[#c4c7c8] hover:text-white mr-1" title="Back to Arenas">
+                <Link href="/arenas" className="flex items-center gap-1.5 text-[#c4c7c8] hover:text-white mr-1" title="Back to Arenas">
                   <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+                  <BrandLogo variant="mark" size={16} theme="white" />
                 </Link>
                 <span className="font-mono font-bold text-[#22C55E]">{info.code}</span>
                 <span className="text-[#8e9192]">·</span>

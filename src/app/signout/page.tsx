@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { useState } from 'react';
 
-import { BeamsBackground, Spinner, SwitchButton } from '@/components/ui';
+import { BeamsBackground, Spinner, SwitchButton, BrandLogo } from '@/components/ui';
 
 export default function SignOutPage() {
   const router = useRouter();
@@ -38,9 +38,10 @@ export default function SignOutPage() {
       <header className="w-full flex items-center justify-between p-6 z-20">
         <Link
           href="/"
-          className="font-['Geist'] text-xl font-black text-white hover:text-[#22C55E] transition-colors flex items-center gap-2"
+          className="font-['Geist'] text-xl font-black text-white hover:text-[#22C55E] transition-colors flex items-center gap-2.5"
         >
           <span>←</span>
+          <BrandLogo variant="mark" size={22} theme="white" />
           <span>Arenas</span>
         </Link>
         <SwitchButton size="default" />
@@ -50,10 +51,11 @@ export default function SignOutPage() {
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 my-auto">
         <div className="relative z-10 w-full max-w-md">
           {/* Brand Header */}
-          <div className="text-center mb-8">
-            <Link href="/" className="inline-block group">
-              <h1 className="font-['Geist'] text-4xl text-white font-bold tracking-tight group-hover:opacity-90 transition-opacity">
-                Arena
+          <div className="flex flex-col items-center text-center mb-8">
+            <Link href="/" className="inline-flex flex-col items-center group">
+              <BrandLogo variant="mark" size={52} theme="white" className="mb-3 group-hover:scale-105 transition-transform" />
+              <h1 className="font-['Geist'] text-3xl text-white font-bold tracking-tight">
+                Arenas
               </h1>
               <p className="font-['Geist'] text-xs uppercase tracking-widest text-[#c4c7c8] mt-1 font-semibold">
                 Live Prediction Platform

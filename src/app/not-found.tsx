@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { AppShell } from '@/components/app-shell';
 import { SiteSidebar } from '@/components/site-sidebar';
+import { BrandLogo } from '@/components/ui';
 
 export default function NotFound() {
   return (
@@ -9,7 +10,10 @@ export default function NotFound() {
 
       <AppShell className="relative">
         <header className="flex justify-between items-center h-16 px-6 top-0 sticky bg-[#000000]/80 border-b border-[#27272A] backdrop-blur-xl z-40">
-          <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
+          <Link href="/" className="flex items-center gap-2.5">
+            <BrandLogo variant="mark" size={26} theme="white" />
+            <span className="font-['Geist'] text-2xl font-black text-white">Arenas</span>
+          </Link>
         </header>
 
         <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-12">

@@ -12,6 +12,17 @@ export const metadata: Metadata = {
   description:
     'Arenas runs live Yes/No prediction market tournaments for college FinTech events.',
   applicationName: 'Arenas',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icons/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 };
 
 export const viewport: Viewport = {

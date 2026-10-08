@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 
-import { BeamsBackground, ErrorNote, Spinner, SwitchButton } from '@/components/ui';
+import { BeamsBackground, ErrorNote, Spinner, SwitchButton, BrandLogo } from '@/components/ui';
 
 interface HostStatus {
   role: string;
@@ -184,9 +184,10 @@ export default function HostPage() {
         <header className="relative z-30 flex items-center justify-between p-6 bg-black/40 backdrop-blur-md border-b border-[#27272A]/50">
           <Link
             href="/"
-            className="font-['Geist'] text-xl font-black text-white hover:text-[#22C55E] transition-colors flex items-center gap-2"
+            className="font-['Geist'] text-xl font-black text-white hover:text-[#22C55E] transition-colors flex items-center gap-2.5"
           >
             <span>←</span>
+            <BrandLogo variant="mark" size={22} theme="white" />
             <span>Arenas</span>
           </Link>
           <div className="flex items-center gap-4">
@@ -312,9 +313,10 @@ export default function HostPage() {
       <header className="max-w-4xl mx-auto w-full flex items-center justify-between pb-8">
         <Link
           href="/"
-          className="font-['Geist'] text-xl font-black text-white hover:text-[#22C55E] transition-colors flex items-center gap-2"
+          className="font-['Geist'] text-xl font-black text-white hover:text-[#22C55E] transition-colors flex items-center gap-2.5"
         >
           <span>←</span>
+          <BrandLogo variant="mark" size={22} theme="white" />
           <span>Arenas</span>
         </Link>
         <div className="flex items-center gap-3">

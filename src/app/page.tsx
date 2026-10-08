@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { LandingNavbar } from '@/components/landing-navbar';
 import { LiveArenasTicker } from '@/components/live-arenas-ticker';
-import { BeamsBackground, SlideTextButton, SwitchButton } from '@/components/ui';
+import { BeamsBackground, SlideTextButton, SwitchButton, BrandLogo } from '@/components/ui';
 
 export const metadata: Metadata = {
   title: 'Arenas - Campus Prediction Market',
@@ -226,9 +226,12 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="bg-[#000000]/90 backdrop-blur-xl w-full border-t border-[#27272A] flex flex-col sm:flex-row justify-between items-center py-6 px-6 gap-4">
-        <span className="font-['Epilogue'] text-xs text-[#c4c7c8]">
-          © 2026 Arenas Platform. All rights reserved.
-        </span>
+        <div className="flex items-center gap-2.5">
+          <BrandLogo variant="mark" size={18} theme="white" />
+          <span className="font-['Epilogue'] text-xs text-[#c4c7c8]">
+            © 2026 Arenas Platform. All rights reserved.
+          </span>
+        </div>
         <div className="flex items-center gap-6 text-xs text-[#c4c7c8]">
           <Link href="/markets" className="hover:text-white transition-colors">Explore</Link>
           <Link href="/host" className="hover:text-white transition-colors">Host</Link>

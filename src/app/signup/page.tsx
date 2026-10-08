@@ -6,7 +6,7 @@ import { Suspense } from 'react';
 
 import { SignUpForm } from '@/components/auth-forms';
 import { authOptions } from '@/lib/auth';
-import { BeamsBackground, SwitchButton } from '@/components/ui';
+import { BeamsBackground, SwitchButton, BrandLogo } from '@/components/ui';
 
 export const metadata: Metadata = { title: 'Create an account · Arena' };
 export const dynamic = 'force-dynamic';
@@ -27,9 +27,10 @@ export default async function SignUpPage({
       <header className="w-full flex items-center justify-between p-6 z-20">
         <Link
           href="/"
-          className="font-['Geist'] text-xl font-black text-white hover:text-[#22C55E] transition-colors flex items-center gap-2"
+          className="font-['Geist'] text-xl font-black text-white hover:text-[#22C55E] transition-colors flex items-center gap-2.5"
         >
           <span>←</span>
+          <BrandLogo variant="mark" size={22} theme="white" />
           <span>Arenas</span>
         </Link>
         <SwitchButton size="default" />
@@ -39,9 +40,10 @@ export default async function SignUpPage({
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 my-auto">
         <div className="relative z-10 w-full max-w-md">
           {/* Brand Header */}
-          <div className="text-center mb-8">
-            <h1 className="font-['Geist'] text-4xl text-white font-bold tracking-tight">Arena</h1>
-            <p className="font-['Geist'] text-base text-[#c4c7c8] mt-2">Prediction Market</p>
+          <div className="flex flex-col items-center text-center mb-8">
+            <BrandLogo variant="mark" size={52} theme="white" className="mb-3" />
+            <h1 className="font-['Geist'] text-3xl text-white font-bold tracking-tight">Arenas</h1>
+            <p className="font-['Geist'] text-sm text-[#c4c7c8] mt-1">Campus Prediction Market</p>
           </div>
 
           {/* Auth Card Container */}
